@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 1 of 11 (Contracts & Testing Spine)
-Plan: 2 of 7 in current phase
+Plan: 4 of 7 in current phase
 Status: Executing
-Last activity: 2026-02-19 -- Completed 01-02 (ECSON Schema)
+Last activity: 2026-02-19 -- Completed 01-04 (Canonical IR)
 
-Progress: [██░░░░░░░░] 2/7 plans in phase
+Progress: [█████░░░░░] 4/7 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
+- Total plans completed: 4
 - Average duration: 4.5 min
-- Total execution time: 0.15 hours
+- Total execution time: 0.30 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01 | 2 | 9 min | 4.5 min |
+| 01 | 4 | 18 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4 min), 01-02 (5 min)
+- Last 5 plans: 01-01 (4 min), 01-02 (5 min), 01-03 (4 min), 01-04 (5 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -54,6 +54,11 @@ Recent decisions affecting current work:
 - [01-02]: Rotation stored as Quaternion (x,y,z,w) not Euler angles
 - [01-02]: Entity components stored as array to support multiple instances of same type
 - [01-02]: Prefixed IDs (ast_, wir_) for readability and type disambiguation
+- [01-04]: IR schemas use no defaults -- all fields required/explicit (unlike ECSON which has .default())
+- [01-04]: CanonicalComponent uses z.strictObject to prevent editor sugar fields
+- [01-04]: IR asset uri/data are nullable (not optional) for explicitness
+- [01-04]: BFS topological sort for nodes array ensures parents before children
+- [01-04]: Game settings flattened to Record<string, unknown> in IR for engine-agnostic representation
 
 ### Pending Todos
 
@@ -66,5 +71,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 01-02-PLAN.md (ECSON Schema)
+Stopped at: Completed 01-04-PLAN.md (Canonical IR)
 Resume file: None
