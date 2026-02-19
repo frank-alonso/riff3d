@@ -1,7 +1,7 @@
 # Requirements: Riff3D
 
 **Defined:** 2026-02-19
-**Core Value:** All meaningful edits flow through a deterministic operation pipeline (IQL → PatchOps → ECSON → Canonical IR → Adapters), ensuring portability, reproducibility, and safe AI-driven manipulation.
+**Core Value:** All meaningful edits flow through a deterministic operation pipeline (IQL -> PatchOps -> ECSON -> Canonical IR -> Adapters), ensuring portability, reproducibility, and safe AI-driven manipulation.
 
 ## v1 Requirements
 
@@ -14,7 +14,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **CORE-03**: ECSON schema defined with schema version, stable IDs for entities/assets/components, editor sugar that compiles down
 - [ ] **CORE-04**: ECSON forward migrations implemented with versioning scaffold
 - [ ] **CORE-05**: Canonical IR spec defined — minimal, normalized, explicit, round-trip safe for portable subset
-- [ ] **CORE-06**: Canonical IR compiler (ECSON → Canonical IR) implemented
+- [ ] **CORE-06**: Canonical IR compiler (ECSON -> Canonical IR) implemented
 - [ ] **CORE-07**: Portable subset v0 defined and implemented (scene graph, transforms, parenting, mesh refs, baseline PBR materials, lights, cameras, basic animation, events/triggers)
 - [ ] **CORE-08**: Engine tuning/escape hatch schema defined (per-engine sections that never override portable semantics)
 - [ ] **CORE-09**: Operation IDs + Entity IDs are globally unique and stable across sessions
@@ -23,8 +23,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Testing & Conformance
 
 - [ ] **TEST-01**: 5-10 golden fixture projects created covering transforms+parenting, materials+lights, simple animation, events/triggers, character stub, timeline stub
-- [ ] **TEST-02**: Round-trip tests passing (ECSON → Canonical IR → ECSON for portable subset)
-- [ ] **TEST-03**: PatchOps replay determinism tests (ECSON0 + ops → ECSON1 matches snapshot; replay twice yields identical output)
+- [ ] **TEST-02**: Round-trip tests passing (ECSON -> Canonical IR -> ECSON for portable subset)
+- [ ] **TEST-03**: PatchOps replay determinism tests (ECSON0 + ops -> ECSON1 matches snapshot; replay twice yields identical output)
 - [ ] **TEST-04**: Adapter conformance tests per runtime target (fixtures render/behave within tolerance)
 - [ ] **TEST-05**: Performance budgets defined and enforced (load time, memory ceiling, FPS baseline for web runtime)
 
@@ -39,7 +39,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **EDIT-07**: Grid/snap system with configurable grid size and rotation snap
 - [ ] **EDIT-08**: Save and auto-save (ECSON to persistent storage, auto-save on interval + significant changes)
 - [ ] **EDIT-09**: Asset library/object palette with curated starter assets (primitives, props, materials, characters)
-- [ ] **EDIT-10**: Play-test from editor (editor → runtime transition without page reload)
+- [ ] **EDIT-10**: Play-test from editor (editor -> runtime transition without page reload)
 
 ### Rendering & Scene
 
@@ -75,7 +75,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **GAME-07**: Template: Physics Toy (portable physics behavior + explicit engine tuning)
 - [ ] **GAME-08**: Template: Cinematic Clip (camera cuts, transform keyframes, events)
 - [ ] **GAME-09**: Character entity model (skeleton refs, rig metadata)
-- [ ] **GAME-10**: Timeline v0 (tracks, clips, events — minimal)
+- [ ] **GAME-10**: Timeline v0 (tracks, clips, events -- minimal)
 
 ### Party/Multiplayer Platform
 
@@ -94,15 +94,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Portability & Openness
 
-- [ ] **PORT-01**: Game ejection — export Canonical IR as standalone web project (Vite + runtime)
-- [ ] **PORT-02**: Portable subset round-trips across ECSON ↔ Canonical IR consistently
+- [ ] **PORT-01**: Game ejection -- export Canonical IR as standalone web project (Vite + runtime)
+- [ ] **PORT-02**: Portable subset round-trips across ECSON <-> Canonical IR consistently
 - [ ] **PORT-03**: Tuning sections per engine target that degrade gracefully when unsupported
 
 ### VR & Asymmetric Play
 
 - [ ] **VR-01**: WebXR integration for VR headset play (Quest, etc.) in web runtime
 - [ ] **VR-02**: VR player controls (teleport/smooth locomotion, grab interactions, hand tracking)
-- [ ] **VR-03**: Asymmetric VR support — VR and flat-screen players in the same game session
+- [ ] **VR-03**: Asymmetric VR support -- VR and flat-screen players in the same game session
 - [ ] **VR-04**: VR-aware game templates (at least one template supports VR + flat-screen asymmetric play)
 - [ ] **VR-05**: VR comfort settings (snap turn, vignette, seated mode)
 
@@ -150,9 +150,9 @@ Deferred to future releases. Tracked but not in current roadmap.
 
 - **PLAT-01**: Native mobile app (web wrapper / PWA with native shell)
 - **PLAT-02**: Native desktop app (Electron or Tauri wrapper)
-- **PLAT-03**: Unity engine adapter (Canonical IR → Unity project)
-- **PLAT-04**: Godot engine adapter (Canonical IR → Godot project)
-- **PLAT-05**: Unreal engine adapter (Canonical IR → Unreal project)
+- **PLAT-03**: Unity engine adapter (Canonical IR -> Unity project)
+- **PLAT-04**: Godot engine adapter (Canonical IR -> Godot project)
+- **PLAT-05**: Unreal engine adapter (Canonical IR -> Unreal project)
 - **PLAT-06**: Custom R3F renderer adapter
 
 ### Extensibility
@@ -189,7 +189,7 @@ Explicitly excluded. Documented to prevent scope creep.
 |---------|--------|
 | Full asset creation tools (modeling, texturing, sculpting) | Competing with Blender/Maya is not viable. GLB import + curated library covers the need. |
 | Blockchain/NFT integration | No user demand, regulatory risk, reputational risk. |
-| Cross-platform account linking (PSN, Xbox, Steam) | Premature — requires platform partnerships and legal agreements. |
+| Cross-platform account linking (PSN, Xbox, Steam) | Premature -- requires platform partnerships and legal agreements. |
 | Full engine parity across all adapters simultaneously | Adapters expand incrementally. Portable subset is the contract, not feature parity. |
 
 ## Traceability
@@ -198,13 +198,81 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| CORE-01 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-02 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-03 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-04 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-05 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-06 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-07 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-08 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-09 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-10 | Phase 1: Contracts & Testing Spine | Pending |
+| TEST-01 | Phase 1: Contracts & Testing Spine | Pending |
+| TEST-02 | Phase 1: Contracts & Testing Spine | Pending |
+| TEST-03 | Phase 1: Contracts & Testing Spine | Pending |
+| TEST-04 | Phase 4: Dual Adapter Validation | Pending |
+| TEST-05 | Phase 1: Contracts & Testing Spine | Pending |
+| EDIT-01 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-02 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-03 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-04 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-05 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-06 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-07 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-08 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-09 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-10 | Phase 2: Closed-Loop Editor | Pending |
+| RNDR-01 | Phase 2: Closed-Loop Editor | Pending |
+| RNDR-02 | Phase 2: Closed-Loop Editor | Pending |
+| RNDR-03 | Phase 2: Closed-Loop Editor | Pending |
+| RNDR-04 | Phase 2: Closed-Loop Editor | Pending |
+| RNDR-05 | Phase 2: Closed-Loop Editor | Pending |
+| ADPT-01 | Phase 2: Closed-Loop Editor | Pending |
+| ADPT-02 | Phase 4: Dual Adapter Validation | Pending |
+| ADPT-03 | Phase 4: Dual Adapter Validation | Pending |
+| ADPT-04 | Phase 4: Dual Adapter Validation | Pending |
+| COLLAB-01 | Phase 5: Collaboration | Pending |
+| COLLAB-02 | Phase 5: Collaboration | Pending |
+| COLLAB-03 | Phase 5: Collaboration | Pending |
+| COLLAB-04 | Phase 5: Collaboration | Pending |
+| COLLAB-05 | Phase 5: Collaboration | Pending |
+| GAME-01 | Phase 7: Game Runtime & Behaviors | Pending |
+| GAME-02 | Phase 7: Game Runtime & Behaviors | Pending |
+| GAME-03 | Phase 7: Game Runtime & Behaviors | Pending |
+| GAME-04 | Phase 7: Game Runtime & Behaviors | Pending |
+| GAME-05 | Phase 8: Templates, Party System & Ejection | Pending |
+| GAME-06 | Phase 8: Templates, Party System & Ejection | Pending |
+| GAME-07 | Phase 8: Templates, Party System & Ejection | Pending |
+| GAME-08 | Phase 8: Templates, Party System & Ejection | Pending |
+| GAME-09 | Phase 7: Game Runtime & Behaviors | Pending |
+| GAME-10 | Phase 7: Game Runtime & Behaviors | Pending |
+| PARTY-01 | Phase 8: Templates, Party System & Ejection | Pending |
+| PARTY-02 | Phase 8: Templates, Party System & Ejection | Pending |
+| PARTY-03 | Phase 8: Templates, Party System & Ejection | Pending |
+| PARTY-04 | Phase 8: Templates, Party System & Ejection | Pending |
+| PARTY-05 | Phase 8: Templates, Party System & Ejection | Pending |
+| AI-01 | Phase 9: AI Authoring | Pending |
+| AI-02 | Phase 9: AI Authoring | Pending |
+| AI-03 | Phase 9: AI Authoring | Pending |
+| AI-04 | Phase 9: AI Authoring | Pending |
+| PORT-01 | Phase 8: Templates, Party System & Ejection | Pending |
+| PORT-02 | Phase 1: Contracts & Testing Spine | Pending |
+| PORT-03 | Phase 4: Dual Adapter Validation | Pending |
+| VR-01 | Phase 10: VR & Asymmetric Play | Pending |
+| VR-02 | Phase 10: VR & Asymmetric Play | Pending |
+| VR-03 | Phase 10: VR & Asymmetric Play | Pending |
+| VR-04 | Phase 10: VR & Asymmetric Play | Pending |
+| VR-05 | Phase 10: VR & Asymmetric Play | Pending |
+| PROJ-01 | Phase 2: Closed-Loop Editor | Pending |
+| PROJ-02 | Phase 2: Closed-Loop Editor | Pending |
+| PROJ-03 | Phase 2: Closed-Loop Editor | Pending |
 
 **Coverage:**
-- v1 requirements: 68 total
-- Mapped to phases: 0
-- Unmapped: 68 (pending roadmap)
+- v1 requirements: 69 total
+- Mapped to phases: 69
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-19*
-*Last updated: 2026-02-19 after initial definition*
+*Last updated: 2026-02-19 after roadmap creation*
