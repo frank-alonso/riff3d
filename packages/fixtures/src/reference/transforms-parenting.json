@@ -1,0 +1,141 @@
+{
+  "id": "txpar_0001000000",
+  "name": "Transforms & Parenting",
+  "schemaVersion": 1,
+  "entities": {
+    "txpar_0002000000": {
+      "id": "txpar_0002000000",
+      "name": "Root",
+      "parentId": null,
+      "children": ["txpar_0003000000", "txpar_0006000000"],
+      "components": [],
+      "tags": [],
+      "transform": {
+        "position": { "x": 0, "y": 0, "z": 0 },
+        "rotation": { "x": 0, "y": 0, "z": 0, "w": 1 },
+        "scale": { "x": 1, "y": 1, "z": 1 }
+      },
+      "visible": true,
+      "locked": false
+    },
+    "txpar_0003000000": {
+      "id": "txpar_0003000000",
+      "name": "Parent A",
+      "parentId": "txpar_0002000000",
+      "children": ["txpar_0004000000", "txpar_0005000000"],
+      "components": [],
+      "tags": [],
+      "transform": {
+        "position": { "x": 5, "y": 0, "z": 0 },
+        "rotation": { "x": 0, "y": 0, "z": 0, "w": 1 },
+        "scale": { "x": 1, "y": 1, "z": 1 }
+      },
+      "visible": true,
+      "locked": false
+    },
+    "txpar_0004000000": {
+      "id": "txpar_0004000000",
+      "name": "Child A1",
+      "parentId": "txpar_0003000000",
+      "children": [],
+      "components": [
+        {
+          "type": "MeshRenderer",
+          "properties": {
+            "meshType": "box",
+            "castShadows": true,
+            "receiveShadows": true
+          }
+        }
+      ],
+      "tags": [],
+      "transform": {
+        "position": { "x": 0, "y": 0, "z": 0 },
+        "rotation": { "x": 0, "y": 0.3826834, "z": 0, "w": 0.9238795 },
+        "scale": { "x": 1, "y": 1, "z": 1 }
+      },
+      "visible": true,
+      "locked": false
+    },
+    "txpar_0005000000": {
+      "id": "txpar_0005000000",
+      "name": "Child A2",
+      "parentId": "txpar_0003000000",
+      "children": [],
+      "components": [
+        {
+          "type": "MeshRenderer",
+          "properties": {
+            "meshType": "sphere",
+            "castShadows": true,
+            "receiveShadows": true
+          }
+        }
+      ],
+      "tags": [],
+      "transform": {
+        "position": { "x": 0, "y": 2, "z": 0 },
+        "rotation": { "x": 0, "y": 0, "z": 0, "w": 1 },
+        "scale": { "x": 1.5, "y": 0.5, "z": 2 }
+      },
+      "visible": true,
+      "locked": false
+    },
+    "txpar_0006000000": {
+      "id": "txpar_0006000000",
+      "name": "Parent B",
+      "parentId": "txpar_0002000000",
+      "children": ["txpar_0007000000"],
+      "components": [],
+      "tags": [],
+      "transform": {
+        "position": { "x": -3, "y": 1, "z": 2 },
+        "rotation": { "x": 0.7071068, "y": 0, "z": 0, "w": 0.7071068 },
+        "scale": { "x": 2, "y": 2, "z": 2 }
+      },
+      "visible": true,
+      "locked": false
+    },
+    "txpar_0007000000": {
+      "id": "txpar_0007000000",
+      "name": "Child B1",
+      "parentId": "txpar_0006000000",
+      "children": [],
+      "components": [
+        {
+          "type": "MeshRenderer",
+          "properties": {
+            "meshType": "cylinder",
+            "castShadows": true,
+            "receiveShadows": true
+          }
+        }
+      ],
+      "tags": [],
+      "transform": {
+        "position": { "x": 0, "y": 0, "z": 3 },
+        "rotation": { "x": 0, "y": 0, "z": 0, "w": 1 },
+        "scale": { "x": 1, "y": 1, "z": 1 }
+      },
+      "visible": true,
+      "locked": false
+    }
+  },
+  "rootEntityId": "txpar_0002000000",
+  "assets": {},
+  "wiring": [],
+  "environment": {
+    "skybox": { "type": "color" },
+    "fog": {
+      "enabled": false,
+      "type": "linear",
+      "color": "#cccccc",
+      "near": 10,
+      "far": 100,
+      "density": 0.01
+    },
+    "ambientLight": { "color": "#ffffff", "intensity": 0.5 },
+    "gravity": { "x": 0, "y": -9.81, "z": 0 }
+  },
+  "metadata": {}
+}
