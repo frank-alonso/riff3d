@@ -12,3 +12,7 @@ export {
   isPortableComponent,
   isPortableProperty,
 } from "./portable-subset.js";
+
+// Compiler and decompiler
+export { compile } from "./compiler.js";
+export { decompile } from "./decompiler.js";
