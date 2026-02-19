@@ -113,6 +113,9 @@ importers:
       '@fast-check/vitest':
         specifier: 'catalog:'
         version: 0.2.4(vitest@4.0.18(@types/node@20.19.33)(jiti@2.6.1)(lightningcss@1.31.1))
+      '@types/node':
+        specifier: ^20.19.33
+        version: 20.19.33
       fast-check:
         specifier: 'catalog:'
         version: 4.5.3

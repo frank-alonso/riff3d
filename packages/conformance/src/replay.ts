@@ -2,7 +2,6 @@ import {
   type SceneDocument,
   type Entity,
   type AssetEntry,
-  type EventWire,
   SceneDocumentSchema,
   CURRENT_SCHEMA_VERSION,
 } from "@riff3d/ecson";

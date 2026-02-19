@@ -32,7 +32,7 @@ export function buildAdversarialFixture(): SceneDocument {
   const level1 = scene.addEntity("Level-1-Wide");
 
   const level2a = level1.addChild("Level-2a");
-  const level2b = level1.addChild("Level-2b-Empty"); // empty entity
+  level1.addChild("Level-2b-Empty"); // empty entity
   const level2c = level1.addChild("Level-2c");
 
   const level3a = level2a.addChild("Level-3a");
@@ -55,15 +55,15 @@ export function buildAdversarialFixture(): SceneDocument {
     .addComponent("MeshRenderer", { meshType: "box" });
 
   // --- 3 entities sharing same material ---
-  const shared1 = level3c.addChild("SharedMat-Entity-1")
+  level3c.addChild("SharedMat-Entity-1")
     .addComponent("Material", { materialAssetId: sharedMatId })
     .addComponent("MeshRenderer", { meshType: "box", materialAssetId: sharedMatId });
 
-  const shared2 = level3c.addChild("SharedMat-Entity-2")
+  level3c.addChild("SharedMat-Entity-2")
     .addComponent("Material", { materialAssetId: sharedMatId })
     .addComponent("MeshRenderer", { meshType: "sphere", materialAssetId: sharedMatId });
 
-  const shared3 = level2c.addChild("SharedMat-Entity-3")
+  level2c.addChild("SharedMat-Entity-3")
     .addComponent("Material", { materialAssetId: sharedMatId })
     .addComponent("MeshRenderer", { meshType: "cylinder", materialAssetId: sharedMatId });
 
@@ -80,8 +80,7 @@ export function buildAdversarialFixture(): SceneDocument {
   // --- Empty entities at root level ---
   scene.addEntity("Empty-Root-Level");
 
-  // Another empty nested inside hierarchy
-  level2b; // already created above as empty
+  // level2b was already created above as empty (no extra statement needed)
 
   // --- Entity with maximum component count ---
   scene
