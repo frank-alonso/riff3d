@@ -31,7 +31,7 @@ Every delivery phase follows this sequence. A phase is not complete until all st
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Contracts & Testing Spine** - Define all specs (PatchOps, ECSON, Canonical IR), build golden fixtures (including adversarial), prove round-trip determinism, CI pipeline, fast-check property tests, conformance harness, Rapier evaluation spike
+- [x] **Phase 1: Contracts & Testing Spine** - Define all specs (PatchOps, ECSON, Canonical IR), build golden fixtures (including adversarial), prove round-trip determinism, CI pipeline, fast-check property tests, conformance harness, Rapier evaluation spike
 - [ ] **Phase 2: Closed-Loop Editor** - Minimal editor shell with PlayCanvas adapter proving the full pipeline end-to-end
 - [ ] **Phase 3: Review Gate: Foundation** - Validate contracts and closed-loop before building on them
 - [ ] **Phase 4: Dual Adapter Validation** - Babylon.js adapter proves Canonical IR is truly engine-agnostic
@@ -64,13 +64,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   12. Rapier.js evaluation spike is completed with findings documented (determinism, bundle size, feature coverage)
 
 Plans:
-- [ ] 01-01: Monorepo scaffold, CI pipeline, and package structure
-- [ ] 01-02: ECSON schema, Zod validators, versioning, and migration infrastructure
-- [ ] 01-03: PatchOps spec, engine, inverse generation, origin policy, and format versioning
-- [ ] 01-04: Canonical IR spec, compiler, and portable subset v0
-- [ ] 01-05: Component registry (15+ types) with typed schemas, editor hints, and glTF extension allowlist
-- [ ] 01-06: Golden fixtures (5 clean + 1 adversarial), conformance harness, fast-check property tests, and Rapier evaluation spike
-- [ ] 01-07: Phase 1 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
+- [x] 01-01: Monorepo scaffold, CI pipeline, and package structure
+- [x] 01-02: ECSON schema, Zod validators, versioning, and migration infrastructure
+- [x] 01-03: PatchOps spec, engine, inverse generation, origin policy, and format versioning
+- [x] 01-04: Canonical IR spec, compiler, and portable subset v0
+- [x] 01-05: Component registry (15+ types) with typed schemas, editor hints, and glTF extension allowlist
+- [x] 01-06: Golden fixtures (5 clean + 1 adversarial), conformance harness, fast-check property tests, and Rapier evaluation spike
+- [x] 01-07: Phase 1 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
 
 ### Phase 2: Closed-Loop Editor
 **Goal**: A user can open the editor, see a 3D scene rendered by PlayCanvas, make edits via gizmos and panels, undo/redo changes, and play-test the scene -- the entire pipeline works end-to-end
@@ -336,7 +336,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Contracts & Testing Spine | 4/7 | In Progress | - |
+| 1. Contracts & Testing Spine | 7/7 | Complete | 2026-02-19 |
 | 2. Closed-Loop Editor | 0/8 | Not started | - |
 | 3. Review Gate: Foundation | 0/1 | Not started | - |
 | 4. Dual Adapter Validation | 0/4 | Not started | - |
@@ -350,4 +350,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-19 — integrated Phase Review Protocol (Codex auditor at every phase gate)*
+*Last updated: 2026-02-19 — Phase 1 complete (PASS_WITH_CONDITIONS)*
