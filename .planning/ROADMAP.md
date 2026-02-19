@@ -13,6 +13,16 @@ Every delivery phase follows the **Phase Review Protocol** (see `.planning/PHASE
 
 Review Gate phases (3, 6, 11) run an expanded-scope version that also assesses cross-phase integration, cumulative debt, and architecture drift. If Codex is unavailable, reviews are deferred with a `DEFERRED_REVIEW` status and must be completed before the next Review Gate. All review artifacts live in `.planning/reviews/phase-<N>/`.
 
+### Phase Execution Checklist
+
+Every delivery phase follows this sequence. A phase is not complete until all steps are done:
+
+1. [ ] **Plan** — Research and create all plan files (XX-01 through XX-NN)
+2. [ ] **Pre-execution review** — Publish `PHASE_<N>_PLAN_SUMMARY.md`, run `codex-review.sh plan-review <N>`, write response
+3. [ ] **Execute** — Execute all plans in order (mid-phase checkpoint recommended for phases with 5+ plans)
+4. [ ] **Post-execution review** — Publish `PHASE_<N>_EVIDENCE.md`, run full Codex review loop (evidence → review → response → final review → decision)
+5. [ ] **Gate pass** — Phase marked complete only after `PASS` or `PASS_WITH_CONDITIONS`
+
 ## Phases
 
 **Phase Numbering:**

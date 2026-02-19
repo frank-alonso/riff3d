@@ -54,6 +54,10 @@ Recent decisions affecting current work:
 - [01-02]: Rotation stored as Quaternion (x,y,z,w) not Euler angles
 - [01-02]: Entity components stored as array to support multiple instances of same type
 - [01-02]: Prefixed IDs (ast_, wir_) for readability and type disambiguation
+- [01-03]: z.union for top-level PatchOpSchema (BatchOp's z.lazy incompatible with z.discriminatedUnion)
+- [01-03]: DeleteEntity inverse produces BatchOp when entity had components for full state restoration
+- [01-03]: JSON clone instead of structuredClone (ES2022 tsconfig lacks structuredClone)
+- [01-03]: Circular reparent detection walks ancestor chain from newParentId upward
 - [01-04]: IR schemas use no defaults -- all fields required/explicit (unlike ECSON which has .default())
 - [01-04]: CanonicalComponent uses z.strictObject to prevent editor sugar fields
 - [01-04]: IR asset uri/data are nullable (not optional) for explicitness
@@ -75,5 +79,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 01-05-PLAN.md (Component Registry)
+Stopped at: Completed 01-03-PLAN.md (PatchOps System) -- re-execution
 Resume file: None

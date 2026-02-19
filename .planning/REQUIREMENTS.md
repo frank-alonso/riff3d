@@ -9,8 +9,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Contracts & Core Architecture
 
-- [ ] **CORE-01**: PatchOps spec fully defined — deterministic, serializable, ordered, scoped to stable IDs, validatable, invertible
-- [ ] **CORE-02**: Minimum PatchOps set implemented (CreateEntity, DeleteEntity, SetProperty, AddChild, RemoveChild, Reparent, AddComponent, RemoveComponent, SetComponentProperty, AddAsset, RemoveAsset, ReplaceAssetRef, AddKeyframe, RemoveKeyframe, SetKeyframeValue, BatchOp)
+- [x] **CORE-01**: PatchOps spec fully defined — deterministic, serializable, ordered, scoped to stable IDs, validatable, invertible
+- [x] **CORE-02**: Minimum PatchOps set implemented (CreateEntity, DeleteEntity, SetProperty, AddChild, RemoveChild, Reparent, AddComponent, RemoveComponent, SetComponentProperty, AddAsset, RemoveAsset, ReplaceAssetRef, AddKeyframe, RemoveKeyframe, SetKeyframeValue, BatchOp)
 - [x] **CORE-03**: ECSON schema defined with schema version, stable IDs for entities/assets/components, editor sugar that compiles down
 - [x] **CORE-04**: ECSON forward migrations implemented with versioning scaffold
 - [x] **CORE-05**: Canonical IR spec defined — minimal, normalized, explicit, round-trip safe for portable subset
@@ -198,8 +198,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CORE-01 | Phase 1: Contracts & Testing Spine | Pending |
-| CORE-02 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-01 | Phase 1: Contracts & Testing Spine | Complete |
+| CORE-02 | Phase 1: Contracts & Testing Spine | Complete |
 | CORE-03 | Phase 1: Contracts & Testing Spine | Complete |
 | CORE-04 | Phase 1: Contracts & Testing Spine | Complete |
 | CORE-05 | Phase 1: Contracts & Testing Spine | Complete |
