@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 1 of 11 (Contracts & Testing Spine)
-Plan: 1 of 7 in current phase
+Plan: 2 of 7 in current phase
 Status: Executing
-Last activity: 2026-02-19 -- Completed 01-01 (Monorepo Scaffold)
+Last activity: 2026-02-19 -- Completed 01-02 (ECSON Schema)
 
-Progress: [█░░░░░░░░░] 1/7 plans in phase
+Progress: [██░░░░░░░░] 2/7 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 4 min
-- Total execution time: 0.07 hours
+- Total plans completed: 2
+- Average duration: 4.5 min
+- Total execution time: 0.15 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01 | 1 | 4 min | 4 min |
+| 01 | 2 | 9 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4 min)
-- Trend: baseline
+- Last 5 plans: 01-01 (4 min), 01-02 (5 min)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -50,6 +50,10 @@ Recent decisions affecting current work:
 - [01-01]: ESLint flat config with typescript-eslint (not deprecated .eslintrc)
 - [01-01]: Editor uses `eslint .` directly since Next.js 16 removed `next lint` subcommand
 - [01-01]: Source-based exports (./src/index.ts) for internal packages during development
+- [01-02]: Engine tuning as z.record() for maximum flexibility (arbitrary per-engine properties)
+- [01-02]: Rotation stored as Quaternion (x,y,z,w) not Euler angles
+- [01-02]: Entity components stored as array to support multiple instances of same type
+- [01-02]: Prefixed IDs (ast_, wir_) for readability and type disambiguation
 
 ### Pending Todos
 
@@ -62,5 +66,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 01-01-PLAN.md (Monorepo Scaffold)
+Stopped at: Completed 01-02-PLAN.md (ECSON Schema)
 Resume file: None
