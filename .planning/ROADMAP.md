@@ -336,7 +336,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Contracts & Testing Spine | 7/7 | Complete | 2026-02-19 |
+| 1. Contracts & Testing Spine | 7/7 | Complete    | 2026-02-19 |
 | 2. Closed-Loop Editor | 0/8 | Not started | - |
 | 3. Review Gate: Foundation | 0/1 | Not started | - |
 | 4. Dual Adapter Validation | 0/4 | Not started | - |
