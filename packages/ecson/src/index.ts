@@ -16,3 +16,20 @@ export { migrateDocument, type Migration } from "./migrations/migrate.js";
 
 // Helper utilities
 export { createEmptyDocument, createEntity } from "./helpers.js";
+
+// Component registry
+export {
+  registerComponent,
+  getComponentDef,
+  validateComponentProperties,
+  listComponents,
+  listComponentsByCategory,
+  componentRegistry,
+} from "./registry/index.js";
+
+export type {
+  ComponentDefinition,
+  EditorHint,
+  ComponentEvent,
+  ComponentAction,
+} from "./registry/index.js";
