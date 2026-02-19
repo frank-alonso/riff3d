@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 1 of 11 (Contracts & Testing Spine)
-Plan: 4 of 7 in current phase
+Plan: 5 of 7 in current phase
 Status: Executing
-Last activity: 2026-02-19 -- Completed 01-04 (Canonical IR)
+Last activity: 2026-02-19 -- Completed 01-05 (Component Registry)
 
-Progress: [█████░░░░░] 4/7 plans in phase
+Progress: [███████░░░] 5/7 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 4.5 min
-- Total execution time: 0.30 hours
+- Total plans completed: 5
+- Average duration: 5.0 min
+- Total execution time: 0.42 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01 | 4 | 18 min | 4.5 min |
+| 01 | 5 | 25 min | 5.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4 min), 01-02 (5 min), 01-03 (4 min), 01-04 (5 min)
+- Last 5 plans: 01-01 (4 min), 01-02 (5 min), 01-03 (4 min), 01-04 (5 min), 01-05 (7 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -59,6 +59,10 @@ Recent decisions affecting current work:
 - [01-04]: IR asset uri/data are nullable (not optional) for explicitness
 - [01-04]: BFS topological sort for nodes array ensures parents before children
 - [01-04]: Game settings flattened to Record<string, unknown> in IR for engine-agnostic representation
+- [01-05]: Editor hints as typed editorHints record on ComponentDefinition (Zod 3.25 lacks .meta())
+- [01-05]: Registry backing store in _store.ts to avoid circular ES module initialization
+- [01-05]: glTF allowlist v0: 3 portable (core, lights_punctual, materials_unlit), 2 non-portable
+- [01-05]: KillZone damage defaults to Infinity for instant kill behavior
 
 ### Pending Todos
 
@@ -71,5 +75,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 01-04-PLAN.md (Canonical IR)
+Stopped at: Completed 01-05-PLAN.md (Component Registry)
 Resume file: None

@@ -18,7 +18,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CORE-07**: Portable subset v0 defined and implemented (scene graph, transforms, parenting, mesh refs, baseline PBR materials, lights, cameras, basic animation, events/triggers)
 - [x] **CORE-08**: Engine tuning/escape hatch schema defined (per-engine sections that never override portable semantics)
 - [x] **CORE-09**: Operation IDs + Entity IDs are globally unique and stable across sessions
-- [ ] **CORE-10**: Component registry with schema-driven property definitions, types, defaults, and editor hints
+- [x] **CORE-10**: Component registry with schema-driven property definitions, types, defaults, and editor hints
 
 ### Testing & Conformance
 
@@ -207,7 +207,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CORE-07 | Phase 1: Contracts & Testing Spine | Complete |
 | CORE-08 | Phase 1: Contracts & Testing Spine | Complete |
 | CORE-09 | Phase 1: Contracts & Testing Spine | Complete |
-| CORE-10 | Phase 1: Contracts & Testing Spine | Pending |
+| CORE-10 | Phase 1: Contracts & Testing Spine | Complete |
 | TEST-01 | Phase 1: Contracts & Testing Spine | Pending |
 | TEST-02 | Phase 1: Contracts & Testing Spine | Pending |
 | TEST-03 | Phase 1: Contracts & Testing Spine | Pending |
