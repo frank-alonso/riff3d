@@ -2,7 +2,16 @@
 
 ## Overview
 
-Riff3D is built contracts-first: specs before implementations, primary adapter before secondary, collaboration before game features, game features before templates. Every phase delivers a verifiable capability, and review gates at critical boundaries ensure the foundation is solid before building on it. The 69 v1 requirements map across 8 delivery phases and 3 review phases, progressing from pure TypeScript contracts through a closed-loop editor, dual adapter validation, real-time collaboration, game runtime, templates with party system, AI authoring, and finally VR support. Beyond v1, the roadmap outlines v2+ milestones for marketplace, native apps, engine adapters, visual scripting, and advanced features.
+Riff3D is built contracts-first: specs before implementations, primary adapter before secondary, collaboration before game features, game features before templates. Every phase delivers a verifiable capability, and review gates at critical boundaries ensure the foundation is solid before building on it. The 69 v1 requirements map across 8 delivery phases and 3 review phases, progressing from pure TypeScript contracts (with CI, property-based tests, conformance harness, and a Rapier physics evaluation spike from day one) through a closed-loop editor, dual adapter validation, real-time collaboration, game runtime, templates with party system, and AI authoring. VR support (Phase 10) is labeled as v1.1 expansion -- it ships after v1 core launch. Phase 8 completion represents a shippable product; Phase 9 (AI) is a core differentiator included if ready. Beyond v1, the roadmap outlines v2+ milestones for marketplace, native apps, engine adapters, visual scripting, and advanced features.
+
+## Phase Review Protocol
+
+Every delivery phase follows the **Phase Review Protocol** (see `.planning/PHASE_REVIEW_PROTOCOL.md`) with two review points:
+
+1. **Pre-execution (advisory):** After planning is complete, Claude publishes a plan summary and Codex reviews for feasibility, completeness, and architecture alignment. This is advisory — not blocking — but Claude incorporates feedback before proceeding to execution.
+2. **Post-execution (gate decision):** After all plans are executed, Claude produces an evidence packet and Codex performs a full technical audit. The review loop is: Evidence → Codex Review → Claude Response → Codex Final Review → Gate Decision (`PASS`, `PASS_WITH_CONDITIONS`, or `FAIL`).
+
+Review Gate phases (3, 6, 11) run an expanded-scope version that also assesses cross-phase integration, cumulative debt, and architecture drift. If Codex is unavailable, reviews are deferred with a `DEFERRED_REVIEW` status and must be completed before the next Review Gate. All review artifacts live in `.planning/reviews/phase-<N>/`.
 
 ## Phases
 
@@ -12,7 +21,7 @@ Riff3D is built contracts-first: specs before implementations, primary adapter b
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Contracts & Testing Spine** - Define all specs (PatchOps, ECSON, Canonical IR), build golden fixtures, prove round-trip determinism
+- [ ] **Phase 1: Contracts & Testing Spine** - Define all specs (PatchOps, ECSON, Canonical IR), build golden fixtures (including adversarial), prove round-trip determinism, CI pipeline, fast-check property tests, conformance harness, Rapier evaluation spike
 - [ ] **Phase 2: Closed-Loop Editor** - Minimal editor shell with PlayCanvas adapter proving the full pipeline end-to-end
 - [ ] **Phase 3: Review Gate: Foundation** - Validate contracts and closed-loop before building on them
 - [ ] **Phase 4: Dual Adapter Validation** - Babylon.js adapter proves Canonical IR is truly engine-agnostic
@@ -21,13 +30,13 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 7: Game Runtime & Behaviors** - Physics, character controller, behavior components, game state machine, event wiring
 - [ ] **Phase 8: Templates, Party System & Ejection** - Four game templates, party/playlist system, game ejection to standalone projects
 - [ ] **Phase 9: AI Authoring** - IQL intent language, MCP server, scene compression, safety rules
-- [ ] **Phase 10: VR & Asymmetric Play** - WebXR integration, VR controls, asymmetric VR+flat-screen sessions
+- [ ] **Phase 10: VR & Asymmetric Play (v1.1 Expansion)** - WebXR integration, VR controls, asymmetric VR+flat-screen sessions
 - [ ] **Phase 11: Review Gate: v1 Complete** - Full integration review, performance validation, golden path end-to-end
 
 ## Phase Details
 
 ### Phase 1: Contracts & Testing Spine
-**Goal**: All core contracts (PatchOps, ECSON, Canonical IR) are specified, implemented, and proven via golden fixtures with deterministic round-trip tests -- no browser needed
+**Goal**: All core contracts (PatchOps, ECSON, Canonical IR) are specified, implemented, and proven via golden fixtures with deterministic round-trip tests -- no browser needed. Includes conformance harness, CI pipeline, property-based tests, and a Rapier physics evaluation spike.
 **Depends on**: Nothing (first phase)
 **Requirements**: CORE-01, CORE-02, CORE-03, CORE-04, CORE-05, CORE-06, CORE-07, CORE-08, CORE-09, CORE-10, TEST-01, TEST-02, TEST-03, TEST-05, PORT-02
 **Success Criteria** (what must be TRUE):
@@ -36,15 +45,22 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Every PatchOp type has a documented inverse, and applying an op then its inverse returns the document to its original state
   4. The component registry defines at least 15 component types with typed schemas, defaults, and editor hints -- and Zod validates all of them
   5. The monorepo package structure (ecson, patchops, canonical-ir, fixtures, conformance) is established with correct dependency boundaries enforced by Turborepo
-**Plans**: TBD
+  6. CI pipeline (GitHub Actions + Turborepo) runs test, lint, and typecheck on every push from day one
+  7. fast-check property tests verify PatchOps invariants (apply-inverse identity, replay determinism, batch equivalence, structural integrity)
+  8. PatchOps include origin categories (user/AI/system/replay) and a format version field
+  9. At least one adversarial golden fixture exercises deep hierarchies, reparent chains, shared materials, cross-entity event wires, and interleaved op logs
+  10. Conformance harness MVP with round-trip tests, replay determinism, and performance benchmark infrastructure is operational
+  11. glTF extension allowlist v0 is published with fixture coverage per extension
+  12. Rapier.js evaluation spike is completed with findings documented (determinism, bundle size, feature coverage)
 
 Plans:
-- [ ] 01-01: Monorepo scaffold and package structure
-- [ ] 01-02: ECSON schema, versioning, and migration infrastructure
-- [ ] 01-03: PatchOps spec, engine, and inverse generation
-- [ ] 01-04: Canonical IR spec and compiler
-- [ ] 01-05: Portable subset v0 and component registry
-- [ ] 01-06: Golden fixtures and round-trip/determinism tests
+- [ ] 01-01: Monorepo scaffold, CI pipeline, and package structure
+- [ ] 01-02: ECSON schema, Zod validators, versioning, and migration infrastructure
+- [ ] 01-03: PatchOps spec, engine, inverse generation, origin policy, and format versioning
+- [ ] 01-04: Canonical IR spec, compiler, and portable subset v0
+- [ ] 01-05: Component registry (15+ types) with typed schemas, editor hints, and glTF extension allowlist
+- [ ] 01-06: Golden fixtures (5 clean + 1 adversarial), conformance harness, fast-check property tests, and Rapier evaluation spike
+- [ ] 01-07: Phase 1 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
 
 ### Phase 2: Closed-Loop Editor
 **Goal**: A user can open the editor, see a 3D scene rendered by PlayCanvas, make edits via gizmos and panels, undo/redo changes, and play-test the scene -- the entire pipeline works end-to-end
@@ -66,20 +82,24 @@ Plans:
 - [ ] 02-05: Undo/redo, copy/paste, save/auto-save
 - [ ] 02-06: Asset library, GLB import, and environment settings
 - [ ] 02-07: Play-test mode (edit-to-runtime transition)
+- [ ] 02-08: Phase 2 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
 
 ### Phase 3: Review Gate: Foundation
-**Goal**: Validate that the contracts are sound and the closed-loop editor is stable before building collaboration and the second adapter on top of it
+**Goal**: Validate that the contracts are sound and the closed-loop editor is stable before building collaboration and the second adapter on top of it. This is an **expanded-scope review** (per Phase Review Protocol) that also assesses cross-phase integration across Phases 1-2, cumulative debt from any PASS_WITH_CONDITIONS decisions, architecture drift, and carry-forward reconciliation.
 **Depends on**: Phase 2
 **Requirements**: (none -- review phase)
+**Prerequisites**: All deferred reviews from Phases 1-2 must be completed before this gate proceeds.
 **Success Criteria** (what must be TRUE):
   1. All golden fixtures load, edit, save, compile, and render without errors in the editor
   2. PatchOps operation log accurately captures every edit made through the UI -- no hidden state mutations exist
   3. Round-trip tests pass at 100% for the portable subset (ECSON to Canonical IR to ECSON)
   4. Performance budgets (load time, memory, FPS) are met for all golden fixture projects running in the PlayCanvas adapter
+  5. All carry-forward actions from Phase 1-2 reviews are resolved or explicitly re-scheduled
+  6. No unaddressed architecture drift from original contract definitions
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: Foundation integration review and gap analysis
+- [ ] 03-01: Foundation integration review, cross-phase audit, and gap analysis
 
 ### Phase 4: Dual Adapter Validation
 **Goal**: The Babylon.js adapter proves the Canonical IR is truly engine-agnostic -- all golden fixtures render and behave within tolerance on both PlayCanvas and Babylon.js
@@ -96,11 +116,13 @@ Plans:
 - [ ] 04-01: Babylon.js adapter implementation
 - [ ] 04-02: Adapter incremental update system
 - [ ] 04-03: Conformance test suite and tolerance validation
+- [ ] 04-04: Phase 4 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
 
 ### Phase 5: Collaboration
 **Goal**: Two or more users can edit the same project simultaneously with real-time presence, conflict resolution, and independent undo stacks
 **Depends on**: Phase 4
 **Requirements**: COLLAB-01, COLLAB-02, COLLAB-03, COLLAB-04, COLLAB-05
+**Collaboration Backend**: Decided during Phase 5 planning (GSD discuss-phase). Leading candidate: Hocuspocus v3 (MIT, self-hosted, auth/persistence/scaling hooks, production-ready). Note: Hocuspocus v2+ uses multiplexed WebSockets incompatible with standard y-websocket providers -- choosing it is a commitment to its client library. Other evaluated options: Y-Sweet (Rust, S3 persistence), PartyKit/Cloudflare (edge-first), Liveblocks (managed SaaS). Vercel does not support persistent WebSockets -- collaboration server requires separate infrastructure.
 **Success Criteria** (what must be TRUE):
   1. Two users editing the same scene see each other's changes appear within 2 seconds, with colored cursors and name labels visible in both the 2D panels and 3D viewport
   2. When two users edit different properties of the same entity simultaneously, both edits are preserved (no silent overwrites)
@@ -114,19 +136,23 @@ Plans:
 - [ ] 05-02: Presence, cursors, and awareness
 - [ ] 05-03: Object locking and conflict resolution
 - [ ] 05-04: Embodied avatar editing
+- [ ] 05-05: Phase 5 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
 
 ### Phase 6: Review Gate: Core Platform
-**Goal**: Validate that collaboration, dual adapters, and the editor form a stable platform before adding the game layer on top
+**Goal**: Validate that collaboration, dual adapters, and the editor form a stable platform before adding the game layer on top. This is an **expanded-scope review** (per Phase Review Protocol) that also assesses cross-phase integration across Phases 4-5, cumulative debt from all prior PASS_WITH_CONDITIONS decisions, architecture drift, and carry-forward reconciliation.
 **Depends on**: Phase 5
 **Requirements**: (none -- review phase)
+**Prerequisites**: All deferred reviews from Phases 4-5 must be completed before this gate proceeds.
 **Success Criteria** (what must be TRUE):
   1. Two concurrent users can collaboratively build a scene from scratch, play-test it, and save -- with no data loss or corruption
   2. Adapter conformance passes at 90%+ for both PlayCanvas and Babylon.js across all golden fixtures
   3. The editor handles 100+ entities in a scene without dropping below FPS baseline during editing or collaboration
+  4. All carry-forward actions from Phase 4-5 reviews are resolved or explicitly re-scheduled
+  5. No unaddressed cumulative technical debt from PASS_WITH_CONDITIONS decisions across Phases 1-5
 **Plans**: TBD
 
 Plans:
-- [ ] 06-01: Core platform integration review and stress testing
+- [ ] 06-01: Core platform integration review, cross-phase audit, and stress testing
 
 ### Phase 7: Game Runtime & Behaviors
 **Goal**: Users can add game logic to scenes using pre-built behavior components, wire events, control characters, and play-test complete game loops -- all authored through verbs and the inspector
@@ -146,6 +172,7 @@ Plans:
 - [ ] 07-03: Verb-driven UX surface
 - [ ] 07-04: Game state machine and event wiring
 - [ ] 07-05: Character entity model and timeline v0
+- [ ] 07-06: Phase 7 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
 
 ### Phase 8: Templates, Party System & Ejection
 **Goal**: Users can start from polished templates, play games together in party/playlist sessions with cumulative scoring, and export games as standalone web projects
@@ -166,6 +193,9 @@ Plans:
 - [ ] 08-04: Party session and playlist system
 - [ ] 08-05: Cumulative scoring and between-game ceremony
 - [ ] 08-06: Game ejection to standalone Vite project
+- [ ] 08-07: Phase 8 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
+
+> **v1 Shippable Checkpoint:** Phase 8 completion represents a fully functional product (editor, dual adapters, collaboration, game runtime, templates, party system, ejection). This is the natural "ship v1" point. Phase 9 (AI Authoring) is a core differentiator and strong candidate for v1 inclusion -- pursue immediately and include if ready, but do not hard-gate launch on it.
 
 ### Phase 9: AI Authoring
 **Goal**: AI agents (via IQL and MCP) can safely create and modify 3D scenes, with intent-level commands that compile to validated PatchOps
@@ -182,9 +212,10 @@ Plans:
 - [ ] 09-01: IQL language spec and compiler
 - [ ] 09-02: MCP server implementation
 - [ ] 09-03: Scene compression and safety rules
+- [ ] 09-04: Phase 9 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
 
-### Phase 10: VR & Asymmetric Play
-**Goal**: Players can join games in VR headsets (WebXR) alongside flat-screen players, with full VR controls and comfort settings
+### Phase 10: VR & Asymmetric Play (v1.1 Expansion)
+**Goal**: Players can join games in VR headsets (WebXR) alongside flat-screen players, with full VR controls and comfort settings. This phase is labeled as v1.1 expansion -- it ships after v1 core launch, not as a launch gate.
 **Depends on**: Phase 9
 **Requirements**: VR-01, VR-02, VR-03, VR-04, VR-05
 **Success Criteria** (what must be TRUE):
@@ -200,20 +231,25 @@ Plans:
 - [ ] 10-02: VR controls (locomotion, grab, hand tracking)
 - [ ] 10-03: Asymmetric play and VR-aware template
 - [ ] 10-04: VR comfort settings
+- [ ] 10-05: Phase 10 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
 
 ### Phase 11: Review Gate: v1 Complete
-**Goal**: Full integration review ensuring the entire v1 surface works end-to-end, performance targets are met, and the platform is ready for users
+**Goal**: Full integration review ensuring the entire v1 surface works end-to-end, performance targets are met, and the platform is ready for users. This is the **final expanded-scope review** (per Phase Review Protocol) covering all phases, all cumulative debt, full architecture conformance, and launch readiness.
 **Depends on**: Phase 10
 **Requirements**: (none -- review phase)
+**Prerequisites**: All deferred reviews from all prior phases must be completed before this gate proceeds.
 **Success Criteria** (what must be TRUE):
   1. The golden path (Pick Template, Edit via Verbs/Tools, Play, Iterate, Save/Share) works without friction for all four templates
   2. All 69 v1 requirements are verified as implemented and passing their success criteria
   3. Performance budgets are met across all scenarios: editor with 100+ entities, collaboration with 4+ users, runtime at 60fps on target hardware, VR at 72fps on Quest
   4. A new user can sign up, create a game from a template, invite a friend, play together, and share a link -- all within 10 minutes
+  5. All carry-forward actions from all prior phase reviews are resolved — zero open items
+  6. No unaddressed PASS_WITH_CONDITIONS debt remaining across the entire project
+  7. Architecture conforms to original contract definitions or deviations are formally documented and approved
 **Plans**: TBD
 
 Plans:
-- [ ] 11-01: v1 integration review, performance audit, and launch readiness
+- [ ] 11-01: v1 integration review, full cross-phase audit, performance validation, and launch readiness
 
 ---
 
@@ -290,18 +326,18 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Contracts & Testing Spine | 0/6 | Not started | - |
-| 2. Closed-Loop Editor | 0/7 | Not started | - |
+| 1. Contracts & Testing Spine | 0/7 | Not started | - |
+| 2. Closed-Loop Editor | 0/8 | Not started | - |
 | 3. Review Gate: Foundation | 0/1 | Not started | - |
-| 4. Dual Adapter Validation | 0/3 | Not started | - |
-| 5. Collaboration | 0/4 | Not started | - |
+| 4. Dual Adapter Validation | 0/4 | Not started | - |
+| 5. Collaboration | 0/5 | Not started | - |
 | 6. Review Gate: Core Platform | 0/1 | Not started | - |
-| 7. Game Runtime & Behaviors | 0/5 | Not started | - |
-| 8. Templates, Party System & Ejection | 0/6 | Not started | - |
-| 9. AI Authoring | 0/3 | Not started | - |
-| 10. VR & Asymmetric Play | 0/4 | Not started | - |
+| 7. Game Runtime & Behaviors | 0/6 | Not started | - |
+| 8. Templates, Party System & Ejection | 0/7 | Not started | - |
+| 9. AI Authoring | 0/4 | Not started | - |
+| 10. VR & Asymmetric Play (v1.1 Expansion) | 0/5 | Not started | - |
 | 11. Review Gate: v1 Complete | 0/1 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-19*
+*Last updated: 2026-02-19 — integrated Phase Review Protocol (Codex auditor at every phase gate)*

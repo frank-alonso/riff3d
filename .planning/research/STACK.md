@@ -17,8 +17,8 @@
 | Next.js | 16.1.6 (installed) | App framework, routing, SSR for non-3D pages | Already installed in the project. App Router provides file-based routing, server components for editor chrome/lobby/profiles. Turbopack dev server for fast iteration. | HIGH |
 | React | 19.2.3 (installed) | UI layer for editor panels, inspector, hierarchy | Already installed. React 19 brings `use()`, improved Suspense (critical for async 3D asset loading), and server components. The editor is a React app; the 3D runtimes are NOT React-based (see adapters below). | HIGH |
 | TypeScript | ^5.9 (prototype verified) | Type safety | Non-negotiable for a multi-layer architecture (PatchOps, ECSON, Canonical IR, Adapters). Types are the contracts. Strict mode required. | HIGH |
-| PlayCanvas Engine | ~2.17 (local clone: 2.17.0-beta.0) | Web runtime adapter #1 | MIT licensed, full ECS architecture, native WebGPU support, built-in physics (Ammo.js), animation state graphs, script system with typed attributes. Its `Entity → Component → ComponentSystem` pattern maps directly to ECSON entities/components. PlayCanvas editor uses ShareDB (OT) for collaboration — proving the pattern works at scale. | HIGH |
-| Babylon.js | ~8.52 (@babylonjs/core 8.52.0 from local clone) | Web runtime adapter #2 | Apache 2.0 licensed, imperative scene graph (TransformNode/Mesh hierarchy), Behavior interface for attachable logic, Observable pattern for events, Havok physics. Its architecture is fundamentally different from PlayCanvas — which is exactly the point: if the Canonical IR works for both, it is truly engine-agnostic. | HIGH |
+| PlayCanvas Engine | ~2.16 (local clone: 2.16.1) | Web runtime adapter #1 | MIT licensed, full ECS architecture, native WebGPU support, built-in physics (Ammo.js), animation state graphs, script system with typed attributes. Its `Entity → Component → ComponentSystem` pattern maps directly to ECSON entities/components. PlayCanvas editor uses ShareDB (OT) for collaboration — proving the pattern works at scale. | HIGH |
+| Babylon.js | ~8.51 (@babylonjs/core 8.51.2 from local clone) | Web runtime adapter #2 | Apache 2.0 licensed, imperative scene graph (TransformNode/Mesh hierarchy), Behavior interface for attachable logic, Observable pattern for events, Havok physics. Its architecture is fundamentally different from PlayCanvas — which is exactly the point: if the Canonical IR works for both, it is truly engine-agnostic. | HIGH |
 | Zustand | ^5.0 (prototype verified 5.0.11) | Client state management for editor | Lightweight, works outside React render cycle via `getState()` (critical for editor operations that must not trigger re-renders). `subscribeWithSelector` for granular updates. Already proven in prototype. | HIGH |
 | Zod | ^4.3 (prototype verified 4.3.6) | Runtime schema validation | TypeScript-first with inference. Validates PatchOps, ECSON documents, component properties, and API inputs. Critical for the contract-first architecture — every boundary needs validation. | HIGH |
 | Tailwind CSS | ^4 (installed) | Utility-first CSS | v4 with CSS-first config. Zero-runtime CSS. Already installed. Fast iteration on editor UI panels. | HIGH |
@@ -236,8 +236,8 @@ Engine Adapters
 # next@16.1.6 react@19.2.3 react-dom@19.2.3
 
 # 3D engines (runtime adapters)
-pnpm add playcanvas@~2.17
-pnpm add @babylonjs/core@~8.52 @babylonjs/loaders@~8.52
+pnpm add playcanvas@~2.16
+pnpm add @babylonjs/core@~8.51 @babylonjs/loaders@~8.51
 
 # State management
 pnpm add zustand@^5.0 immer@^11.1
@@ -271,8 +271,8 @@ pnpm add -D typescript@^5.9 vitest@^4.0 @playwright/test@^1.58 turbo@^2 @types/r
 | Package A | Compatible With | Notes |
 |-----------|-----------------|-------|
 | next@16.1.6 | react@19.2.3 | Already installed and confirmed working |
-| playcanvas@~2.17 | (standalone, no React deps) | Engine runs in its own canvas. Zero React coupling. |
-| @babylonjs/core@~8.52 | @babylonjs/loaders@~8.52 | Keep Babylon packages at same version. Zero React coupling. |
+| playcanvas@~2.16 | (standalone, no React deps) | Engine runs in its own canvas. Zero React coupling. |
+| @babylonjs/core@~8.51 | @babylonjs/loaders@~8.51 | Keep Babylon packages at same version. Zero React coupling. |
 | yjs@^13.6 | y-websocket@^2.0, y-indexeddb@^9.0 | Provider versions must be compatible with Yjs major version |
 | zustand@^5.0 | react@^18 or react@^19 | v5 works with React 19 |
 | zod@^4.3 | (standalone, no React deps) | Works in both client and server |
@@ -385,9 +385,9 @@ The following prototype research documents informed this stack:
 ## Sources
 
 ### HIGH Confidence (verified from local files)
-- PlayCanvas engine v2.17.0-beta.0: `/home/frank/playcanvas-engine/package.json` — ECS architecture, Entity/Component/ComponentSystem pattern, SceneParser flat entity map
+- PlayCanvas engine v2.16.1: `/home/frank/playcanvas-engine/package.json` — ECS architecture, Entity/Component/ComponentSystem pattern, SceneParser flat entity map
 - PlayCanvas editor v2.14.2: `/home/frank/playcanvas-editor/package.json` — ShareDB-based OT collaboration (`src/editor-api/realtime/connection.ts`), Observer sync pattern
-- Babylon.js core v8.52.0: `/home/frank/babylonjs/packages/public/@babylonjs/core/package.json` — TransformNode/Mesh hierarchy, Behavior interface, Observable pattern, SceneSerializer
+- Babylon.js core v8.51.2: `/home/frank/babylonjs/packages/public/@babylonjs/core/package.json` — TransformNode/Mesh hierarchy, Behavior interface, Observable pattern, SceneSerializer
 - Next.js 16.1.6 + React 19.2.3: `/home/frank/riff3d/package.json` — installed and confirmed
 - Prototype research (all docs): `/home/frank/riff3d-prototype/.planning/rebuild-research/` — Universal Schema, Canonical IR, IQL, Spatial Validation, FOUNDATION
 

@@ -9,9 +9,15 @@
 
 Riff3D is a contract-first, operation-driven, web-native 3D game creation platform targeting two audiences simultaneously: casual creators who want party games fast, and professional developers who need portability and composability. The core architectural insight — confirmed by deep analysis of PlayCanvas engine source, Babylon.js source, and the failed v1 prototype — is that ALL editor mutations must flow through a deterministic PatchOps layer sitting above a structured ECSON document model. This is not an aesthetic choice: it is what enables undo/redo, real-time collaboration, AI authoring, deterministic replay, and multi-engine ejection from a single unified system. PlayCanvas and Spotify's collaborative tools both prove this pattern at production scale.
 
-The recommended approach is to build contracts first and resist the temptation to touch any editor UI until the ECSON schema, PatchOps engine, Canonical IR compiler, and golden fixture conformance tests are all proven in isolation. The monorepo structure (ecson → patchops → canonical-ir → adapters → editor) is the critical path. PlayCanvas (~2.17) is the primary runtime adapter target because its ECS maps naturally to the Canonical IR; Babylon.js (~8.52) is the validation adapter that proves engine-agnosticism. Yjs CRDTs replace the prototype's Colyseus-based locking for collaboration — they are offline-first and handle conflict resolution automatically.
+The recommended approach is to build contracts first and resist the temptation to touch any editor UI until the ECSON schema, PatchOps engine, Canonical IR compiler, and golden fixture conformance tests are all proven in isolation. The monorepo structure (ecson → patchops → canonical-ir → adapters → editor) is the critical path. PlayCanvas (~2.16) is the primary runtime adapter target because its ECS maps naturally to the Canonical IR; Babylon.js (~8.51) is the validation adapter that proves engine-agnosticism. Yjs CRDTs replace the prototype's Colyseus-based locking for collaboration — they are offline-first and handle conflict resolution automatically.
 
 The top risks are: (1) ECSON schema growing into a "universal format gravity well" that no single engine fully supports, (2) PatchOps lacking explicit conflict semantics before collaboration is layered on, and (3) the dual-adapter strategy producing two half-working adapters instead of one complete one. All three risks are avoidable by following FOUNDATION.md's 2-template rule for schema expansion, classifying every PatchOp's conflict category in Phase 0, and designating PlayCanvas as primary with Babylon.js as validation-only until conformance hits 90%.
+
+### Mini-Game Template Research Addendum
+
+For template-focused game design and AI-assistant authoring workflows, see:
+
+- `.planning/research/MINIGAME_TEMPLATES_AI_PLAYBOOK.md` — archetype schema v2, fun scoring rubric, telemetry contracts, template promotion gates, and AI generation workflow constraints.
 
 ---
 
@@ -19,14 +25,14 @@ The top risks are: (1) ECSON schema growing into a "universal format gravity wel
 
 ### Recommended Stack
 
-The stack is anchored by Next.js 16 + React 19 (already installed) for the editor shell, with PlayCanvas (~2.17) and Babylon.js (~8.52) as engine-native runtime adapters embedded in raw canvas elements — not React components. This React-editor / engine-viewport separation is proven by both PlayCanvas and Babylon.js editors themselves, and is a hard requirement for engine-agnostic rendering. Zustand (^5.0) bridges the React editor and the 3D viewport via a store that both subscribe to. Zod (^4.3) is both the validation layer and the schema definition language — Zod schemas ARE the ECSON spec.
+The stack is anchored by Next.js 16 + React 19 (already installed) for the editor shell, with PlayCanvas (~2.16) and Babylon.js (~8.51) as engine-native runtime adapters embedded in raw canvas elements — not React components. This React-editor / engine-viewport separation is proven by both PlayCanvas and Babylon.js editors themselves, and is a hard requirement for engine-agnostic rendering. Zustand (^5.0) bridges the React editor and the 3D viewport via a store that both subscribe to. Zod (^4.3) is both the validation layer and the schema definition language — Zod schemas ARE the ECSON spec.
 
 For collaboration, Yjs (^13.6) with y-websocket replaces the prototype's Colyseus approach. Yjs is offline-first, handles CRDT conflict resolution automatically, and maps cleanly to ECSON's flat entity map via Y.Map nested types. Supabase handles auth, project metadata (Postgres), and asset storage (GLB, textures). The monorepo runs on pnpm + Turborepo with the dependency order: ecson → patchops → canonical-ir → adapters → editor.
 
 **Core technologies:**
 - **Next.js 16 + React 19:** Editor shell, routing, server components for lobby/profiles — already installed
-- **PlayCanvas ~2.17:** Primary web runtime adapter — MIT licensed, ECS maps naturally to ECSON component model
-- **Babylon.js ~8.52:** Validation web runtime adapter — Apache 2.0, imperative model proves engine-agnosticism of the IR
+- **PlayCanvas ~2.16:** Primary web runtime adapter — MIT licensed, ECS maps naturally to ECSON component model
+- **Babylon.js ~8.51:** Validation web runtime adapter — Apache 2.0, imperative model proves engine-agnosticism of the IR
 - **Zustand ^5.0:** Editor state bridge between React panels and 3D viewport — works outside React render cycle
 - **Zod ^4.3:** ECSON schema definitions + runtime validation — single source of truth for all contracts
 - **Yjs ^13.6 + y-websocket:** CRDT-based collaboration — offline-first, replaces Colyseus locking
@@ -122,7 +128,7 @@ Based on the combined research, a 6-phase structure is recommended. Every phase 
 
 **Delivers:** Minimal Next.js editor shell (no game features), 3D viewport with PlayCanvas adapter rendering Canonical IR, transform gizmos (translate/rotate/scale), scene hierarchy panel, inspector panel with schema-driven forms, undo/redo via operation log, basic ECSON save/load, verb surface initial set (Add Box, Add Light, Move, Paint).
 
-**Uses from STACK.md:** Next.js + React + Tailwind + Radix UI for editor shell; PlayCanvas ~2.17 embedded in raw canvas; Zustand for state bridge; Immer for immutable mutations.
+**Uses from STACK.md:** Next.js + React + Tailwind + Radix UI for editor shell; PlayCanvas ~2.16 embedded in raw canvas; Zustand for state bridge; Immer for immutable mutations.
 
 **Implements:** Editor UI component + PlayCanvas Adapter. Exit criteria: load a golden fixture, apply a PatchOp, save, compile, render. Undo the op, verify scene matches original.
 
@@ -136,7 +142,7 @@ Based on the combined research, a 6-phase structure is recommended. Every phase 
 
 **Delivers:** Babylon.js adapter (~1000-1200 LoC) implementing the full EngineAdapter interface, adapter conformance tests for both PlayCanvas and Babylon.js with epsilon tolerance, all 5 golden fixtures rendering within tolerance bands on both adapters, runtime adapter switching in the editor.
 
-**Uses from STACK.md:** Babylon.js ~8.52 + @babylonjs/loaders; Vitest + Playwright for conformance.
+**Uses from STACK.md:** Babylon.js ~8.51 + @babylonjs/loaders; Vitest + Playwright for conformance.
 
 **Implements:** Babylon.js Adapter + expanded Conformance Harness. Exit criteria: all golden fixtures pass conformance on both adapters within defined tolerance bands.
 
