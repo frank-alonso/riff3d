@@ -22,11 +22,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Testing & Conformance
 
-- [ ] **TEST-01**: 5-10 golden fixture projects created covering transforms+parenting, materials+lights, simple animation, events/triggers, character stub, timeline stub
-- [ ] **TEST-02**: Round-trip tests passing (ECSON -> Canonical IR -> ECSON for portable subset)
-- [ ] **TEST-03**: PatchOps replay determinism tests (ECSON0 + ops -> ECSON1 matches snapshot; replay twice yields identical output)
+- [x] **TEST-01**: 5-10 golden fixture projects created covering transforms+parenting, materials+lights, simple animation, events/triggers, character stub, timeline stub
+- [x] **TEST-02**: Round-trip tests passing (ECSON -> Canonical IR -> ECSON for portable subset)
+- [x] **TEST-03**: PatchOps replay determinism tests (ECSON0 + ops -> ECSON1 matches snapshot; replay twice yields identical output)
 - [ ] **TEST-04**: Adapter conformance tests per runtime target (fixtures render/behave within tolerance)
-- [ ] **TEST-05**: Performance budgets defined and enforced (load time, memory ceiling, FPS baseline for web runtime)
+- [x] **TEST-05**: Performance budgets defined and enforced (load time, memory ceiling, FPS baseline for web runtime)
 
 ### Editor Core
 
@@ -208,11 +208,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CORE-08 | Phase 1: Contracts & Testing Spine | Complete |
 | CORE-09 | Phase 1: Contracts & Testing Spine | Complete |
 | CORE-10 | Phase 1: Contracts & Testing Spine | Complete |
-| TEST-01 | Phase 1: Contracts & Testing Spine | Pending |
-| TEST-02 | Phase 1: Contracts & Testing Spine | Pending |
-| TEST-03 | Phase 1: Contracts & Testing Spine | Pending |
+| TEST-01 | Phase 1: Contracts & Testing Spine | Complete |
+| TEST-02 | Phase 1: Contracts & Testing Spine | Complete |
+| TEST-03 | Phase 1: Contracts & Testing Spine | Complete |
 | TEST-04 | Phase 4: Dual Adapter Validation | Pending |
-| TEST-05 | Phase 1: Contracts & Testing Spine | Pending |
+| TEST-05 | Phase 1: Contracts & Testing Spine | Complete |
 | EDIT-01 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-02 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-03 | Phase 2: Closed-Loop Editor | Pending |

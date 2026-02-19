@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 1 of 11 (Contracts & Testing Spine)
-Plan: 5 of 7 in current phase
+Plan: 6 of 7 in current phase
 Status: Executing
-Last activity: 2026-02-19 -- Completed 01-05 (Component Registry)
+Last activity: 2026-02-19 -- Completed 01-06 (Fixtures & Conformance)
 
-Progress: [███████░░░] 5/7 plans in phase
+Progress: [████████░░] 6/7 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 5.0 min
-- Total execution time: 0.42 hours
+- Total plans completed: 6
+- Average duration: 11.0 min
+- Total execution time: 1.1 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01 | 5 | 25 min | 5.0 min |
+| 01 | 6 | 66 min | 11.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4 min), 01-02 (5 min), 01-03 (4 min), 01-04 (5 min), 01-05 (7 min)
-- Trend: stable
+- Last 5 plans: 01-02 (5 min), 01-03 (4 min), 01-04 (5 min), 01-05 (7 min), 01-06 (41 min)
+- Trend: 01-06 was larger scope (3 tasks, 24 files, 63 tests)
 
 *Updated after each plan completion*
 
@@ -67,9 +67,17 @@ Recent decisions affecting current work:
 - [01-05]: Registry backing store in _store.ts to avoid circular ES module initialization
 - [01-05]: glTF allowlist v0: 3 portable (core, lights_punctual, materials_unlit), 2 non-portable
 - [01-05]: KillZone damage defaults to Infinity for instant kill behavior
+- [01-06]: Builder flattens nested tree to ECSON flat entity map on build(), with SceneDocumentSchema.parse() validation
+- [01-06]: Deterministic IDs via counter-based generators with seed prefix for test reproducibility
+- [01-06]: Round-trip comparison uses portable subset extraction (strips tags, locked, metadata, component tuning)
+- [01-06]: fast-check property tests use fixed seed=42 with 100 iterations for CI reproducibility
+- [01-06]: Performance budgets use 2x CI margin (50/200/1000ms baselines for small/medium/large fixtures)
 
 ### Pending Todos
 
+- [Phase 1 Review] Consult `.planning/research/FUTURE_ENGINE_CONSIDERATIONS.md` Section 10 during 01-07 review — verify IR conventions are formally documented (coordinate system, normal maps, physics units, roughness not inverted, 1:N entity-to-node mapping documented).
+- [Phase 4] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` when validating Babylon.js adapter — ensure no web-only assumptions baked into IR.
+- [Phase 8] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` Section 7 when designing ejection adapter interface — directory structures, no binary formats.
 - [Phase 8] Re-evaluate `.planning/research/TEMPLATE_DESIGN_PLAYBOOK.md` — reconcile archetype specs with actual component registry, validate against built game runtime, update playtest process, finalize template backlog. Also review at Phase 7 (latency budgets) and Phase 10 (VR variants).
 
 ### Blockers/Concerns
@@ -79,5 +87,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 01-03-PLAN.md (PatchOps System) -- re-execution
+Stopped at: Completed 01-06-PLAN.md (Fixtures & Conformance)
 Resume file: None
