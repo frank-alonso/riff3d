@@ -24,6 +24,22 @@ const CORE_COMPONENT_TYPES = [
   "Material",
 ] as const;
 
+const GAMEPLAY_COMPONENT_TYPES = [
+  "ScoreZone",
+  "KillZone",
+  "Spawner",
+  "TriggerZone",
+  "Checkpoint",
+  "MovingPlatform",
+  "PathFollower",
+  "Timer",
+] as const;
+
+const ALL_COMPONENT_TYPES = [
+  ...CORE_COMPONENT_TYPES,
+  ...GAMEPLAY_COMPONENT_TYPES,
+] as const;
+
 describe("Component Registry", () => {
   describe("registry infrastructure", () => {
     it("contains exactly 9 core components", () => {
@@ -403,6 +419,233 @@ describe("Component Registry", () => {
     it("components without events have undefined events", () => {
       const def = getComponentDef("Light")!;
       expect(def.events).toBeUndefined();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Full registry with gameplay stubs (17 total)
+  // ---------------------------------------------------------------------------
+
+  describe("full registry (17 components)", () => {
+    it("contains exactly 17 component types total", () => {
+      const all = listComponents();
+      expect(all.length).toBe(17);
+      for (const type of ALL_COMPONENT_TYPES) {
+        expect(componentRegistry.has(type)).toBe(true);
+      }
+    });
+
+    it("listComponentsByCategory returns 7 gameplay components", () => {
+      const gameplay = listComponentsByCategory("gameplay");
+      expect(gameplay.length).toBe(7);
+      for (const def of gameplay) {
+        expect(def.category).toBe("gameplay");
+      }
+    });
+
+    it("listComponentsByCategory returns 1 logic component (Timer)", () => {
+      const logic = listComponentsByCategory("logic");
+      expect(logic.length).toBe(1);
+      expect(logic[0].type).toBe("Timer");
+    });
+
+    it("gameplay + logic = 8 stubs total", () => {
+      const gameplay = listComponentsByCategory("gameplay");
+      const logic = listComponentsByCategory("logic");
+      expect(gameplay.length + logic.length).toBe(8);
+    });
+  });
+
+  describe("each gameplay stub has required fields", () => {
+    for (const type of GAMEPLAY_COMPONENT_TYPES) {
+      it(`${type} has type, category, description, singleton, schema, editorHints`, () => {
+        const def = getComponentDef(type)!;
+        expect(def).toBeDefined();
+        expect(def.type).toBe(type);
+        expect(
+          ["rendering", "physics", "audio", "gameplay", "logic", "settings"].includes(
+            def.category,
+          ),
+        ).toBe(true);
+        expect(typeof def.description).toBe("string");
+        expect(def.description.length).toBeGreaterThan(0);
+        expect(typeof def.singleton).toBe("boolean");
+        expect(def.schema).toBeDefined();
+        expect(typeof def.schema.safeParse).toBe("function");
+        expect(def.editorHints).toBeDefined();
+        expect(Object.keys(def.editorHints).length).toBeGreaterThan(0);
+      });
+    }
+  });
+
+  describe("gameplay stubs validate with defaults", () => {
+    for (const type of GAMEPLAY_COMPONENT_TYPES) {
+      it(`${type} validates empty input (defaults applied)`, () => {
+        const def = getComponentDef(type)!;
+        const result = def.schema.safeParse({});
+        expect(result.success).toBe(true);
+      });
+    }
+  });
+
+  describe("gameplay stub defaults", () => {
+    it("ScoreZone defaults", () => {
+      const def = getComponentDef("ScoreZone")!;
+      const result = def.schema.safeParse({});
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.points).toBe(10);
+        expect(result.data.teamFilter).toBeNull();
+        expect(result.data.repeatable).toBe(false);
+        expect(result.data.cooldown).toBe(0);
+      }
+    });
+
+    it("KillZone defaults", () => {
+      const def = getComponentDef("KillZone")!;
+      const result = def.schema.safeParse({});
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.respawnBehavior).toBe("lastCheckpoint");
+        expect(result.data.damage).toBe(Infinity);
+      }
+    });
+
+    it("Spawner defaults", () => {
+      const def = getComponentDef("Spawner")!;
+      const result = def.schema.safeParse({});
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.spawnInterval).toBe(5);
+        expect(result.data.maxActive).toBe(5);
+        expect(result.data.spawnOnStart).toBe(true);
+      }
+    });
+
+    it("TriggerZone defaults", () => {
+      const def = getComponentDef("TriggerZone")!;
+      const result = def.schema.safeParse({});
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.triggerOnce).toBe(false);
+        expect(result.data.filterTags).toEqual([]);
+      }
+    });
+
+    it("Checkpoint defaults", () => {
+      const def = getComponentDef("Checkpoint")!;
+      const result = def.schema.safeParse({});
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.orderIndex).toBe(0);
+        expect(result.data.respawnOffset).toEqual({ x: 0, y: 1, z: 0 });
+      }
+    });
+
+    it("MovingPlatform defaults", () => {
+      const def = getComponentDef("MovingPlatform")!;
+      const result = def.schema.safeParse({});
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.axis).toBe("y");
+        expect(result.data.distance).toBe(5);
+        expect(result.data.speed).toBe(2);
+        expect(result.data.easing).toBe("easeInOut");
+      }
+    });
+
+    it("PathFollower defaults", () => {
+      const def = getComponentDef("PathFollower")!;
+      const result = def.schema.safeParse({});
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.waypointEntityIds).toEqual([]);
+        expect(result.data.speed).toBe(3);
+        expect(result.data.loopMode).toBe("loop");
+        expect(result.data.lookAtNext).toBe(true);
+      }
+    });
+
+    it("Timer defaults", () => {
+      const def = getComponentDef("Timer")!;
+      const result = def.schema.safeParse({});
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.duration).toBe(60);
+        expect(result.data.autoStart).toBe(false);
+        expect(result.data.loop).toBe(false);
+      }
+    });
+  });
+
+  describe("gameplay events and actions", () => {
+    it("ScoreZone has events and actions", () => {
+      const def = getComponentDef("ScoreZone")!;
+      expect(def.events).toBeDefined();
+      expect(def.events!.map((e) => e.name)).toContain("onScore");
+      expect(def.actions).toBeDefined();
+      expect(def.actions!.map((a) => a.name)).toContain("activate");
+      expect(def.actions!.map((a) => a.name)).toContain("deactivate");
+    });
+
+    it("KillZone has events and actions", () => {
+      const def = getComponentDef("KillZone")!;
+      expect(def.events!.map((e) => e.name)).toContain("onKill");
+      expect(def.actions!.map((a) => a.name)).toContain("activate");
+    });
+
+    it("Spawner has events and actions", () => {
+      const def = getComponentDef("Spawner")!;
+      expect(def.events!.map((e) => e.name)).toContain("onSpawn");
+      expect(def.actions!.map((a) => a.name)).toContain("spawn");
+      expect(def.actions!.map((a) => a.name)).toContain("reset");
+    });
+
+    it("TriggerZone has enter/exit/stay events", () => {
+      const def = getComponentDef("TriggerZone")!;
+      const eventNames = def.events!.map((e) => e.name);
+      expect(eventNames).toContain("onEnter");
+      expect(eventNames).toContain("onExit");
+      expect(eventNames).toContain("onStay");
+    });
+
+    it("Checkpoint has onActivate event", () => {
+      const def = getComponentDef("Checkpoint")!;
+      expect(def.events!.map((e) => e.name)).toContain("onActivate");
+    });
+
+    it("MovingPlatform has events and actions", () => {
+      const def = getComponentDef("MovingPlatform")!;
+      const eventNames = def.events!.map((e) => e.name);
+      expect(eventNames).toContain("onReachEnd");
+      expect(eventNames).toContain("onReachStart");
+      const actionNames = def.actions!.map((a) => a.name);
+      expect(actionNames).toContain("start");
+      expect(actionNames).toContain("stop");
+      expect(actionNames).toContain("reverse");
+    });
+
+    it("PathFollower has events and actions", () => {
+      const def = getComponentDef("PathFollower")!;
+      const eventNames = def.events!.map((e) => e.name);
+      expect(eventNames).toContain("onWaypointReached");
+      expect(eventNames).toContain("onPathComplete");
+      const actionNames = def.actions!.map((a) => a.name);
+      expect(actionNames).toContain("start");
+      expect(actionNames).toContain("stop");
+      expect(actionNames).toContain("reset");
+    });
+
+    it("Timer has events and actions", () => {
+      const def = getComponentDef("Timer")!;
+      const eventNames = def.events!.map((e) => e.name);
+      expect(eventNames).toContain("onStart");
+      expect(eventNames).toContain("onTick");
+      expect(eventNames).toContain("onComplete");
+      const actionNames = def.actions!.map((a) => a.name);
+      expect(actionNames).toContain("start");
+      expect(actionNames).toContain("stop");
+      expect(actionNames).toContain("reset");
     });
   });
 });

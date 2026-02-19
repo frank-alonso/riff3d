@@ -32,4 +32,12 @@ export type {
   EditorHint,
   ComponentEvent,
   ComponentAction,
+  GltfExtensionEntry,
+} from "./registry/index.js";
+
+// glTF Extension Allowlist
+export {
+  GLTF_ALLOWLIST,
+  isAllowedExtension,
+  getPortableExtensions,
 } from "./registry/index.js";

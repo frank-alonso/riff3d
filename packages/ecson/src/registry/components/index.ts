@@ -9,3 +9,13 @@ import "./audio-source.js";
 import "./audio-listener.js";
 import "./animation.js";
 import "./material.js";
+
+// Gameplay stub components (7 gameplay + 1 logic = 8)
+import "./score-zone.js";
+import "./kill-zone.js";
+import "./spawner.js";
+import "./trigger-zone.js";
+import "./checkpoint.js";
+import "./moving-platform.js";
+import "./path-follower.js";
+import "./timer.js";
