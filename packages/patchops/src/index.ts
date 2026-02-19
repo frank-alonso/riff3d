@@ -42,3 +42,12 @@ export {
 
 // Discriminated union
 export { PatchOpSchema, type PatchOp } from "./schemas.js";
+
+// Engine
+export { applyOp, applyOps } from "./engine.js";
+
+// Validation
+export { validateOp, type ValidationResult } from "./validation.js";
+
+// Migration
+export { migrateOp, MIGRATION_REGISTRY } from "./migrations/migrate-op.js";
