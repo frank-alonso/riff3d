@@ -17,7 +17,7 @@ The top risks are: (1) ECSON schema growing into a "universal format gravity wel
 
 For template-focused game design and AI-assistant authoring workflows, see:
 
-- `.planning/research/MINIGAME_TEMPLATES_AI_PLAYBOOK.md` — archetype schema v2, fun scoring rubric, telemetry contracts, template promotion gates, and AI generation workflow constraints.
+- `.planning/research/TEMPLATE_DESIGN_PLAYBOOK.md` — canonical minigame playbook with design psychology (loop + motivation) and shipping contracts (archetype schema, telemetry, promotion gates, AI workflow constraints).
 
 ---
 
@@ -168,13 +168,13 @@ Based on the combined research, a 6-phase structure is recommended. Every phase 
 
 **Rationale:** The game-specific layer sits on top of the stable foundation. Physics, character controller, game state machine, and behavior components are the fun-first wedge features. They must NOT contaminate the core — GameSettings is a module, not part of ECSON core schema.
 
-**Delivers:** Physics runtime via PlayCanvas Ammo.js + Babylon.js Havok (abstracted in Canonical IR as intent, not implementation), character controller (third-person, keyboard + touch), game state machine (lobby/countdown/playing/results), initial behavior component set (ScoreZone, KillZone, Timer, Spawner, Checkpoint), Play-test from editor ("Play" button transitions from edit mode to isolated runtime), win conditions and basic scoring.
+**Delivers:** Physics runtime via Rapier (`@dimforge/rapier3d-compat` v0.19.x — decided via spike, see `.planning/research/RAPIER_SPIKE.md`), character controller (third-person, keyboard + touch), game state machine (lobby/countdown/playing/results), initial behavior component set (ScoreZone, KillZone, Timer, Spawner, Checkpoint), Play-test from editor ("Play" button transitions from edit mode to isolated runtime), win conditions and basic scoring.
 
 **Implements:** Game runtime module on top of the core pipeline. Exit criteria: a scene with a character, platforms, and a ScoreZone can be authored and play-tested in the editor within the golden path workflow.
 
 **Avoids:** Fun-first to professional scaling trap (GameSettings is a module; creating a scene without a game template still works), performance trap for spatial indexing (BVH for selection raycasting implemented before large scenes exist)
 
-**Research flag:** HIGH — Physics behavior tolerance between PlayCanvas Ammo.js and Babylon.js Havok needs explicit measurement and tolerance definition. Character controller implementation details (jump feel, collision response, touch input normalization) merit a focused research spike.
+**Research flag:** MEDIUM — Rapier physics spike is complete (see `.planning/research/RAPIER_SPIKE.md`); remaining work is integrating Rapier as the unified web physics adapter behind Canonical IR's engine-agnostic contracts. Character controller implementation details (jump feel, collision response, touch input normalization) merit a focused research spike.
 
 ### Phase 6: Templates, Party System, and IQL
 
@@ -203,7 +203,7 @@ Game templates in Phase 6 (not Phase 1) follows the FOUNDATION.md principle that
 ### Research Flags
 
 **Needs dedicated research spike before implementation:**
-- **Phase 5 (Game Runtime):** Physics tolerance between Ammo.js and Havok needs empirical measurement. Character controller feel is notoriously hard to get right. Both deserve a focused research session before implementation begins.
+- **Phase 5 (Game Runtime):** Rapier spike is complete — physics engine decided. Character controller feel is notoriously hard to get right and deserves a focused research session before implementation begins.
 - **Phase 6 (Party System):** Cross-game score normalization has no established pattern in the literature. Design research needed before the data model is committed.
 - **Phase 6 (IQL MCP Server):** MCP server integration patterns with Claude Code/Cursor need validation against actual client behavior.
 
@@ -234,7 +234,7 @@ Game templates in Phase 6 (not Phase 1) follows the FOUNDATION.md principle that
 
 - **Cross-game score normalization:** No established pattern found in research for normalizing points-based (most points wins) vs. placement-based (best finishing position wins) scores in a party playlist. This is a design problem, not a technology problem. Needs design research in Phase 6 planning.
 
-- **Physics tolerance bands:** ARCHITECTURE.md recommends quantitative conformance tolerance (e.g., "bouncing ball dropped from 2m must bounce to 1.4-1.7m on all adapters"). The actual numbers need empirical measurement from both PlayCanvas Ammo.js and Babylon.js Havok in Phase 3. Define tolerance by measuring, not by estimating.
+- **Physics tolerance bands:** Rapier is the unified web physics engine (decided via spike — see `.planning/research/RAPIER_SPIKE.md`), eliminating the Ammo.js-vs-Havok tolerance problem for web runtime. Both rendering adapters (PlayCanvas, Babylon.js) read transforms from Canonical IR; physics runs in Rapier independently. Tolerance bands are still needed for exported projects targeting native engines (Unity PhysX, Unreal Chaos, Godot GodotPhysics) — but that's a v4.0 concern, not v1.
 
 - **IQL MCP client integration:** The IQL research documents MCP server design (4 tools: execute_iql, describe_scene, list_presets, validate_iql) but the actual MCP client integration with Claude Code / Cursor clients needs validation against real client behavior. This is a Phase 6 concern but worth confirming the MCP tool schema is stable before committing to it.
 
