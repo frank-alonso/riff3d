@@ -30,6 +30,12 @@ export const selectSelectedEntityIds = (s: EditorState) => s.selectedEntityIds;
 export const selectLoadProject = (s: EditorState) => s.loadProject;
 export const selectDispatchOp = (s: EditorState) => s.dispatchOp;
 export const selectSetSelection = (s: EditorState) => s.setSelection;
+export const selectCanUndo = (s: EditorState) => s.canUndo;
+export const selectCanRedo = (s: EditorState) => s.canRedo;
+export const selectUndo = (s: EditorState) => s.undo;
+export const selectRedo = (s: EditorState) => s.redo;
+export const selectDocVersion = (s: EditorState) => s.docVersion;
+export const selectLastOpType = (s: EditorState) => s.lastOpType;
 
 // Viewport
 export const selectGizmoMode = (s: EditorState) => s.gizmoMode;
