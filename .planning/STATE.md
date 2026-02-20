@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 2 of 11 (Closed-Loop Editor) -- IN PROGRESS
-Plan: 4 of 8 in current phase (02-03 complete, next: 02-04)
+Plan: 5 of 8 in current phase (02-04 complete, next: 02-05)
 Status: Executing
-Last activity: 2026-02-19 -- Completed 02-03 (Entity selection and transform gizmos)
+Last activity: 2026-02-19 -- Completed 02-04 (Scene hierarchy and inspector panel)
 
-Progress: [###-------] 3/8 plans in phase
+Progress: [####------] 4/8 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 12.1 min
-- Total execution time: 2.0 hours
+- Total plans completed: 11
+- Average duration: 11.7 min
+- Total execution time: 2.1 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 7 | 74 min | 10.6 min |
-| 02 | 3 | 48 min | 16.0 min |
+| 02 | 4 | 55 min | 13.8 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-07 (8 min), 02-01 (29 min), 02-02 (12 min), 02-03 (7 min)
-- Trend: 02-03 was fast (gizmo/selection/grid + toolbar, no API changes needed)
+- Last 5 plans: 02-01 (29 min), 02-02 (12 min), 02-03 (7 min), 02-04 (7 min)
+- Trend: 02-04 fast (hierarchy + inspector, all React components, no adapter changes needed)
 
 *Updated after each plan completion*
 
@@ -90,6 +90,9 @@ Recent decisions affecting current work:
 - [02-03]: Emissive color tint for selection highlight (simpler than outline shader)
 - [02-03]: Immediate-mode drawLine for grid (not mesh entity -- avoids selection picking)
 - [02-03]: CSS-based selection rectangle overlay (not canvas-drawn -- avoids WebGL state conflicts)
+- [02-04]: Zod schema introspection via _def property instead of direct zod import in editor
+- [02-04]: Quaternion-to-Euler conversion for rotation display (stored as quaternion, shown as degrees)
+- [02-04]: Debounced PatchOp dispatch (300ms) for keyboard inputs, immediate for slider/checkbox/color/dropdown
 
 ### Pending Todos
 
@@ -110,6 +113,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 02-03-PLAN.md
-Resume file: .planning/phases/02-closed-loop-editor/02-03-SUMMARY.md
-Next: Execute 02-04 (Inspector panel and property editing)
+Stopped at: Completed 02-04-PLAN.md
+Resume file: .planning/phases/02-closed-loop-editor/02-04-SUMMARY.md
+Next: Execute 02-05 (Undo/redo and auto-save)
