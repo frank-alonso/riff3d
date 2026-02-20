@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run __tests__/rls-integration.test.ts"
   },
   "dependencies": {
     "@riff3d/adapter-playcanvas": "workspace:*",
