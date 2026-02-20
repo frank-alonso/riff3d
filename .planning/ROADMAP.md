@@ -106,10 +106,16 @@ Plans:
   4. Performance budgets (load time, memory, FPS) are met for all golden fixture projects running in the PlayCanvas adapter
   5. All carry-forward actions from Phase 1-2 reviews are resolved or explicitly re-scheduled
   6. No unaddressed architecture drift from original contract definitions
-**Plans**: TBD
+**Plans**: 7 plans
 
 Plans:
-- [ ] 03-01: Foundation integration review, cross-phase audit, and gap analysis
+- [ ] 03-01: Adapter unit tests (CF-P2-01) -- mock PlayCanvas, test all adapter modules
+- [ ] 03-02: Test fixture migration (CF-P2-03) -- migrate to SceneDocumentSchema.parse()
+- [ ] 03-03: Adapter split + CI LoC enforcement (CF-P2-04) -- subpath exports, budget script
+- [ ] 03-04: RLS policy tests (CF-P2-02) -- mocked structural + Supabase integration
+- [ ] 03-05: Drag-preview ghost + performance budgets -- ghost entity, raycasting, tiered thresholds
+- [ ] 03-06: E2E smoke test + visual baseline beta -- Playwright, golden-path, screenshots
+- [ ] 03-07: Review gate: expanded-scope Codex audit + human verification
 
 ### Phase 4: Dual Adapter Validation
 **Goal**: The Babylon.js adapter proves the Canonical IR is truly engine-agnostic -- all golden fixtures render and behave within tolerance on both PlayCanvas and Babylon.js
@@ -338,7 +344,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. Contracts & Testing Spine | 7/7 | Complete    | 2026-02-19 |
 | 2. Closed-Loop Editor | 8/8 | Complete | 2026-02-20 |
-| 3. Review Gate: Foundation | 0/1 | Not started | - |
+| 3. Review Gate: Foundation | 0/7 | Not started | - |
 | 4. Dual Adapter Validation | 0/4 | Not started | - |
 | 5. Collaboration | 0/5 | Not started | - |
 | 6. Review Gate: Core Platform | 0/1 | Not started | - |
