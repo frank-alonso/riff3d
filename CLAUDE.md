@@ -6,12 +6,26 @@ Riff3D is a web-based 3D engine/editor foundation with a **contract-first, opera
 
 ## Architecture Rules (Non-Negotiable)
 
-1. **All mutations flow through PatchOps** — no hidden state mutations in UI or tools. Ever.
+1. **All mutations flow through PatchOps** — no hidden state mutations in UI or tools. Ever. See Approved Exceptions below.
 2. **Contracts before implementation** — specs (Zod schemas, type definitions) must exist before code that uses them.
 3. **Adapters read Canonical IR only** — adapters never touch ECSON or PatchOps directly.
 4. **2-template promotion rule** — core spec expands only when 2+ independent templates need a capability.
 5. **Editor is React; viewport is engine-native** — PlayCanvas/Babylon.js run in raw `<canvas>`, NOT React components. Communication via Zustand store.
 6. **Package dependency direction** — `ecson → patchops → canonical-ir → adapters → editor`. No circular deps. Adapters depend on contracts, not UI.
+7. **Adapter LoC budget** — each adapter's *core* module (IR consumption, scene builder, component mappers, environment) should stay under 1500 LoC. Editor interaction modules (gizmo manager, selection manager, camera controller, grid, import loaders) are co-located in the adapter package but tracked separately. Exceeding the core budget signals abstraction leak.
+
+### Approved Architectural Exceptions
+
+1. **System-level state replacement bypasses PatchOps** (Approved: Phase 2, 2026-02-20)
+   - **Scope:** `loadProject()` and playtest `stop()` restore operations that replace the entire ECSON document.
+   - **Rationale:** These are system-level state management operations (loading a project from database, restoring a pre-play snapshot), not user edits. There is no meaningful PatchOp for "replace entire document." The undo stack is also reset/restored in these operations, so PatchOp tracking is not applicable.
+   - **Constraint:** Only `loadProject()` and playtest `stop()` may bypass PatchOps. All other ECSON mutations must go through `dispatchOp()`.
+   - **Precedent:** Unity, Godot, and Unreal editors all bypass their undo systems for play mode snapshot/restore.
+
+2. **Adapter package LoC budget applies to core module only** (Approved: Phase 2, 2026-02-20)
+   - **Scope:** `packages/adapter-playcanvas` contains both core adapter code (818 LoC) and editor interaction tools (1625 LoC). The 1500 LoC budget applies to the core module.
+   - **Rationale:** Editor interaction modules (gizmo-manager, selection-manager, camera-controller, grid, glb-loader) need direct PlayCanvas type imports and are co-located for practical dependency reasons. They do not consume IR or violate the adapter boundary.
+   - **Phase 3 action:** Split into subpath exports (`@riff3d/adapter-playcanvas` core, `@riff3d/adapter-playcanvas/editor-tools`). Add CI enforcement for core budget.
 
 ## Technology Stack
 
@@ -130,7 +144,10 @@ Codex CLI (`codex`) is installed and configured as the independent auditor per `
 
 ```bash
 # Pre-execution: review phase plan (requires PLAN_SUMMARY)
-./scripts/codex-review.sh plan-review <N>
+./scripts/codex-review.sh plan-review <N>                   # improved single-pass
+./scripts/codex-review.sh plan-review <N> --plan XX-YY      # single plan
+./scripts/codex-review.sh plan-review <N> --chunked         # per-plan + synthesis (5+ plans)
+./scripts/codex-review.sh plan-review <N> --synthesis       # synthesis only
 
 # Post-execution: review evidence packet (requires EVIDENCE)
 ./scripts/codex-review.sh post-review <N>

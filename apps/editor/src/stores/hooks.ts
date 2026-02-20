@@ -22,6 +22,7 @@ export const selectActivePanel = (s: EditorState) => s.activePanel;
 export const selectInspectorVisible = (s: EditorState) => s.inspectorVisible;
 export const selectSetActivePanel = (s: EditorState) => s.setActivePanel;
 export const selectToggleInspector = (s: EditorState) => s.toggleInspector;
+export const selectIsReadOnly = (s: EditorState) => s.isReadOnly;
 
 // Scene
 export const selectEcsonDoc = (s: EditorState) => s.ecsonDoc;

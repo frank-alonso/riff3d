@@ -107,6 +107,12 @@ export const createSceneSlice: StateCreator<
   },
 
   dispatchOp: (op: PatchOp): PatchOp => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cross-slice read for read-only guard
+    const fullState = get() as any;
+    if (fullState.isReadOnly === true) {
+      throw new Error("Cannot dispatch PatchOp: editor is in read-only mode");
+    }
+
     const { ecsonDoc, undoStack } = get();
     if (!ecsonDoc) {
       throw new Error("Cannot dispatch PatchOp: no ECSON document loaded");

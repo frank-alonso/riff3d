@@ -42,9 +42,15 @@ export function validateOp(doc: SceneDocument, op: PatchOp): ValidationResult {
     }
 
     case "SetProperty": {
-      const { entityId } = op.payload;
-      // Special __environment__ entity targets doc.environment
+      const { entityId, path } = op.payload;
+      // Special __environment__ entity targets doc.environment.* only
       if (entityId === "__environment__") {
+        if (!path.startsWith("environment.")) {
+          return {
+            valid: false,
+            error: `__environment__ entity only allows paths starting with "environment.", got "${path}"`,
+          };
+        }
         return { valid: true };
       }
       if (doc.entities[entityId] === undefined) {

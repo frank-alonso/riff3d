@@ -120,13 +120,14 @@ export function EditorShell({
   // Auto-save: monitors docVersion changes and saves ECSON to Supabase
   useAutoSave(projectId);
 
-  // Load project into store on mount
+  // Load project into store on mount and set read-only mode for non-owners
   useEffect(() => {
     if (ecsonDoc && !hasLoadedProject.current) {
       hasLoadedProject.current = true;
+      editorStore.getState().setReadOnly(!isOwner);
       editorStore.getState().loadProject(ecsonDoc);
     }
-  }, [ecsonDoc]);
+  }, [ecsonDoc, isOwner]);
 
   // Persist panel layouts to localStorage
   const layoutProps = useDefaultLayout({

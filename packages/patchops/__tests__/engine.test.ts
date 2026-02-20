@@ -548,4 +548,62 @@ describe("applyOp", () => {
       expect(inverses[1]!.type).toBe("DeleteEntity");
     });
   });
+
+  describe("__environment__ path restriction", () => {
+    it("allows SetProperty with __environment__ and environment.* path", () => {
+      const op = makeOp("SetProperty", {
+        entityId: "__environment__",
+        path: "environment.ambientLight.color",
+        value: "#ffffff",
+      });
+      const inverse = applyOp(doc, op);
+      expect(inverse.type).toBe("SetProperty");
+      expect(doc.environment.ambientLight.color).toBe("#ffffff");
+    });
+
+    it("rejects SetProperty with __environment__ and non-environment path", () => {
+      expect(() => {
+        applyOp(
+          doc,
+          makeOp("SetProperty", {
+            entityId: "__environment__",
+            path: "schemaVersion",
+            value: 999,
+          }),
+        );
+      }).toThrow(
+        '__environment__ entity only allows paths starting with "environment."',
+      );
+    });
+
+    it("rejects SetProperty with __environment__ targeting entities", () => {
+      expect(() => {
+        applyOp(
+          doc,
+          makeOp("SetProperty", {
+            entityId: "__environment__",
+            path: "entities.root_001.name",
+            value: "hacked",
+          }),
+        );
+      }).toThrow(
+        '__environment__ entity only allows paths starting with "environment."',
+      );
+    });
+
+    it("rejects SetProperty with __environment__ targeting rootEntityId", () => {
+      expect(() => {
+        applyOp(
+          doc,
+          makeOp("SetProperty", {
+            entityId: "__environment__",
+            path: "rootEntityId",
+            value: "evil_root",
+          }),
+        );
+      }).toThrow(
+        '__environment__ entity only allows paths starting with "environment."',
+      );
+    });
+  });
 });
