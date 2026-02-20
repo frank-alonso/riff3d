@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 3 of 11 (Review Gate: Foundation)
-Plan: 2 of 7 in current phase
+Plan: 4 of 7 in current phase
 Status: Executing Phase 3
-Last activity: 2026-02-20 -- Completed 03-02 (Migrate test docs to SceneDocumentSchema.parse())
+Last activity: 2026-02-20 -- Completed 03-04 (RLS policy structural and integration tests)
 
-Progress: [###-------] 2/7 plans in phase
+Progress: [####------] 3/7 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
-- Average duration: 10.6 min
-- Total execution time: 3.0 hours
+- Total plans completed: 18
+- Average duration: 10.2 min
+- Total execution time: 3.1 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [###-------] 2/7 plans in phase
 |-------|-------|-------|----------|
 | 01 | 7 | 74 min | 10.6 min |
 | 02 | 8 | 100 min | 12.5 min |
-| 03 | 2 | 7 min | 3.5 min |
+| 03 | 3 | 10 min | 3.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-06 (10 min), 02-07 (5 min), 02-08 (23 min), 03-01 (4 min), 03-02 (3 min)
+- Last 5 plans: 02-07 (5 min), 02-08 (23 min), 03-01 (4 min), 03-02 (3 min), 03-04 (3 min)
 - Trend: Phase 3 review gate plans are fast -- focused remediation tasks
 
 *Updated after each plan completion*
@@ -113,6 +113,9 @@ Recent decisions affecting current work:
 - [02-08]: Adapter LoC budget applies to core module only (818 LoC); editor interaction modules tracked separately
 - [03-02]: Inline entity construction in tests uses EntitySchema.parse() with minimal required fields, Zod defaults handle optional fields
 - [03-02]: Environment settings omitted from test documents -- Zod defaults prevent invalid enum values like fog type "none"
+- [03-04]: Regex-based structural tests on migration SQL for fast CI feedback without Supabase dependency
+- [03-04]: describe.skipIf pattern for integration tests -- skip when env vars missing, no test failures in CI
+- [03-04]: Service role client for test cleanup ensures no stale test data accumulates
 
 ### Pending Todos
 
@@ -122,7 +125,7 @@ Recent decisions affecting current work:
 - ~~[Phase 2 - CF-05] Remove unused eslint-disable directive at patchops/src/engine.ts:518~~ DONE in 02-01
 - ~~[Phase 2/3 - CF-06] Document IR conventions in source code (coordinate system, normal maps, physics units, roughness, 1:N entity-to-node)~~ DONE in 02-02 (JSDoc in scene-builder.ts, adapter.ts)
 - [Phase 3 - CF-P2-01] Add adapter unit tests for core scene builder and component mappers; remove passWithNoTests
-- [Phase 3 - CF-P2-02] Add RLS policy integration tests (owner write, non-owner denied, public read-only)
+- ~~[Phase 3 - CF-P2-02] Add RLS policy integration tests (owner write, non-owner denied, public read-only)~~ DONE in 03-04
 - ~~[Phase 3 - CF-P2-03] Migrate test document construction to use SceneDocumentSchema.parse() for contract validity~~ DONE in 03-02
 - [Phase 3 - CF-P2-04] Split adapter into core/editor-tools subpath exports; add CI LoC budget enforcement
 - [Phase 3/4] Drag-preview ghost placement: when dragging an asset from the asset browser into the viewport, render a translucent ghost entity that follows the cursor using raycasting against scene geometry (ground plane fallback). Snap to surface normals, show placement position preview. Replace ghost with real entity on drop. Common editor convention (Unity placement ghost, Unreal drag proxy).
@@ -138,6 +141,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 03-02-PLAN.md
-Resume file: .planning/phases/03-review-gate-foundation/03-02-SUMMARY.md
-Next: Execute 03-03-PLAN.md
+Stopped at: Completed 03-04-PLAN.md
+Resume file: .planning/phases/03-review-gate-foundation/03-04-SUMMARY.md
+Next: Execute remaining Phase 3 plans
