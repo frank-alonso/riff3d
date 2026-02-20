@@ -16,7 +16,24 @@ export function useEditorStore<T>(selector: (state: EditorState) => T): T {
 }
 
 // Convenience selectors for common access patterns
+
+// UI
 export const selectActivePanel = (s: EditorState) => s.activePanel;
 export const selectInspectorVisible = (s: EditorState) => s.inspectorVisible;
 export const selectSetActivePanel = (s: EditorState) => s.setActivePanel;
 export const selectToggleInspector = (s: EditorState) => s.toggleInspector;
+
+// Scene
+export const selectEcsonDoc = (s: EditorState) => s.ecsonDoc;
+export const selectCanonicalScene = (s: EditorState) => s.canonicalScene;
+export const selectSelectedEntityIds = (s: EditorState) => s.selectedEntityIds;
+export const selectLoadProject = (s: EditorState) => s.loadProject;
+export const selectDispatchOp = (s: EditorState) => s.dispatchOp;
+export const selectSetSelection = (s: EditorState) => s.setSelection;
+
+// Viewport
+export const selectGizmoMode = (s: EditorState) => s.gizmoMode;
+export const selectCameraMode = (s: EditorState) => s.cameraMode;
+export const selectSnapEnabled = (s: EditorState) => s.snapEnabled;
+export const selectSetGizmoMode = (s: EditorState) => s.setGizmoMode;
+export const selectSetCameraMode = (s: EditorState) => s.setCameraMode;

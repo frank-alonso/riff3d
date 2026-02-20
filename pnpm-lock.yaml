@@ -44,9 +44,18 @@ importers:
 
   apps/editor:
     dependencies:
+      '@riff3d/adapter-playcanvas':
+        specifier: workspace:*
+        version: link:../../packages/adapter-playcanvas
+      '@riff3d/canonical-ir':
+        specifier: workspace:*
+        version: link:../../packages/canonical-ir
       '@riff3d/ecson':
         specifier: workspace:*
         version: link:../../packages/ecson
+      '@riff3d/patchops':
+        specifier: workspace:*
+        version: link:../../packages/patchops
       '@supabase/ssr':
         specifier: ^0.8.0
         version: 0.8.0(@supabase/supabase-js@2.97.0)

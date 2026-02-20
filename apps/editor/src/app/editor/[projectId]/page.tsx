@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
+import type { SceneDocument } from "@riff3d/ecson";
 
 /**
  * Editor page with dynamic import to prevent SSR of 3D engine components.
  * The EditorShell uses browser-only APIs (react-resizable-panels localStorage,
- * zustand, and eventually PlayCanvas canvas).
+ * zustand, PlayCanvas canvas).
+ *
+ * Project data (including ECSON document) is passed from the server layout
+ * via a script tag with id="__RIFF3D_PROJECT_DATA__".
  */
 const EditorShell = dynamic(
   () =>
@@ -60,22 +64,53 @@ interface ProjectData {
   projectName: string;
   isOwner: boolean;
   isPublic: boolean;
+  ecson: SceneDocument | null;
+}
+
+/** Read project data from the server-rendered script tag (DOM external store). */
+function getProjectDataSnapshot(): ProjectData | null {
+  if (typeof document === "undefined") return null;
+  const scriptEl = document.getElementById("__RIFF3D_PROJECT_DATA__");
+  if (!scriptEl?.textContent) return null;
+  try {
+    const data = JSON.parse(scriptEl.textContent) as {
+      projectId: string;
+      projectName: string;
+      isOwner: boolean;
+      isPublic: boolean;
+      ecson: SceneDocument | null;
+    };
+    return {
+      projectId: data.projectId,
+      projectName: data.projectName,
+      isOwner: data.isOwner,
+      isPublic: data.isPublic,
+      ecson: data.ecson ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Server snapshot always returns null (no DOM during SSR). */
+function getProjectDataServerSnapshot(): ProjectData | null {
+  return null;
+}
+
+/** No-op subscribe -- the DOM script tag never changes after mount. */
+function subscribeToProjectData(onStoreChange: () => void): () => void {
+  // The script tag data is static after SSR, no re-subscription needed.
+  // But we need to trigger a read after hydration completes.
+  void Promise.resolve().then(onStoreChange);
+  return () => {};
 }
 
 export default function EditorPage() {
-  const [projectData, setProjectData] = useState<ProjectData | null>(null);
-
-  useEffect(() => {
-    const container = document.querySelector("[data-project-id]");
-    if (container) {
-      setProjectData({
-        projectId: container.getAttribute("data-project-id") ?? "",
-        projectName: container.getAttribute("data-project-name") ?? "Untitled",
-        isOwner: container.getAttribute("data-is-owner") === "true",
-        isPublic: container.getAttribute("data-is-public") === "true",
-      });
-    }
-  }, []);
+  const projectData = useSyncExternalStore(
+    subscribeToProjectData,
+    getProjectDataSnapshot,
+    getProjectDataServerSnapshot,
+  );
 
   if (!projectData) return <EditorSkeleton />;
 
@@ -85,6 +120,7 @@ export default function EditorPage() {
       projectName={projectData.projectName}
       isOwner={projectData.isOwner}
       isPublic={projectData.isPublic}
+      ecsonDoc={projectData.ecson}
     />
   );
 }

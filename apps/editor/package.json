@@ -11,7 +11,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@riff3d/adapter-playcanvas": "workspace:*",
+    "@riff3d/canonical-ir": "workspace:*",
     "@riff3d/ecson": "workspace:*",
+    "@riff3d/patchops": "workspace:*",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.97.0",
     "lucide-react": "^0.575.0",

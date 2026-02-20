@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { createEmptyDocument } from "@riff3d/ecson";
+import { createDefaultScene } from "@/lib/default-scene";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ export function NewProjectModal({ open, onClose }: NewProjectModalProps) {
       return;
     }
 
-    const ecson = createEmptyDocument(name.trim());
+    const ecson = createDefaultScene(name.trim());
 
     const { data, error } = await supabase
       .from("projects")

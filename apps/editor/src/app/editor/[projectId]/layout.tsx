@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * Editor layout server component.
  *
+ * Fetches the project data including the ECSON document from Supabase
+ * and passes it to the client via a script tag with __RIFF3D_PROJECT_DATA__.
+ *
  * PROJ-03 access control:
  * - Project not found -> 404
  * - Private project + unauthenticated user -> redirect to /login with redirect param
@@ -25,23 +28,18 @@ export default async function EditorLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Fetch project -- use service-level select that respects RLS
-  // The "Public projects are readable by anyone" RLS policy allows
-  // unauthenticated reads of public projects
+  // Fetch project with ECSON document
   const { data: project, error } = await supabase
     .from("projects")
-    .select("id, owner_id, name, is_public")
+    .select("id, owner_id, name, is_public, ecson")
     .eq("id", projectId)
     .single();
 
   // Project not found (or private + unauthenticated = RLS blocks it)
   if (error || !project) {
-    // If user is not authenticated, this might be a private project
-    // Redirect to login with redirect param so they can try again
     if (!user) {
       redirect(`/login?redirect=/editor/${projectId}`);
     }
-    // Authenticated but still can't see it -> truly not found
     notFound();
   }
 
@@ -66,17 +64,25 @@ export default async function EditorLayout({
     }
   }
 
-  // Determine if the current user is the owner
   const isOwner = user?.id === project.owner_id;
 
+  // Serialize project data for the client.
+  // Using a script tag avoids data-attribute escaping issues with large JSON.
+  const projectData = JSON.stringify({
+    projectId: project.id,
+    projectName: project.name,
+    isOwner,
+    isPublic: project.is_public,
+    ecson: project.ecson,
+  });
+
   return (
-    <div
-      className="h-screen w-screen overflow-hidden bg-[var(--background)]"
-      data-project-id={project.id}
-      data-project-name={project.name}
-      data-is-owner={isOwner ? "true" : "false"}
-      data-is-public={project.is_public ? "true" : "false"}
-    >
+    <div className="h-screen w-screen overflow-hidden bg-[var(--background)]">
+      <script
+        id="__RIFF3D_PROJECT_DATA__"
+        type="application/json"
+        dangerouslySetInnerHTML={{ __html: projectData }}
+      />
       {children}
     </div>
   );
