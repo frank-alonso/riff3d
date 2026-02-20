@@ -71,26 +71,39 @@ interface ProjectData {
  * Cached project data snapshot. Parsed once from the DOM script tag and
  * reused on every call. useSyncExternalStore compares snapshots by reference,
  * so returning a new object each time causes an infinite re-render loop.
+ *
+ * We also track the raw script content so we can detect when the server layout
+ * renders a new project's data during client-side navigation (the module-scoped
+ * cache persists across Next.js client navigations).
  */
 let cachedProjectData: ProjectData | null | undefined;
+let cachedScriptContent: string | null = null;
 
 /** Read project data from the server-rendered script tag (DOM external store). */
 function getProjectDataSnapshot(): ProjectData | null {
-  if (cachedProjectData !== undefined) return cachedProjectData;
   if (typeof document === "undefined") return null;
   const scriptEl = document.getElementById("__RIFF3D_PROJECT_DATA__");
-  if (!scriptEl?.textContent) {
+  const currentContent = scriptEl?.textContent ?? null;
+
+  // Return cached data if the script tag content hasn't changed
+  if (cachedProjectData !== undefined && currentContent === cachedScriptContent) {
+    return cachedProjectData;
+  }
+
+  if (!currentContent) {
+    cachedScriptContent = currentContent;
     cachedProjectData = null;
     return null;
   }
   try {
-    const data = JSON.parse(scriptEl.textContent) as {
+    const data = JSON.parse(currentContent) as {
       projectId: string;
       projectName: string;
       isOwner: boolean;
       isPublic: boolean;
       ecson: SceneDocument | null;
     };
+    cachedScriptContent = currentContent;
     cachedProjectData = {
       projectId: data.projectId,
       projectName: data.projectName,
@@ -100,6 +113,7 @@ function getProjectDataSnapshot(): ProjectData | null {
     };
     return cachedProjectData;
   } catch {
+    cachedScriptContent = currentContent;
     cachedProjectData = null;
     return null;
   }
