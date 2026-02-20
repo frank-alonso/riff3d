@@ -22,8 +22,12 @@
     "@riff3d/patchops": "workspace:*"
   },
   "devDependencies": {
+    "@babylonjs/core": "~8.52.0",
     "@fast-check/vitest": "catalog:",
+    "@riff3d/adapter-babylon": "workspace:*",
+    "@riff3d/adapter-playcanvas": "workspace:*",
     "@types/node": "^20.19.33",
-    "fast-check": "catalog:"
+    "fast-check": "catalog:",
+    "playcanvas": "~2.16.0"
   }
 }

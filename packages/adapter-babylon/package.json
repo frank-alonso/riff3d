@@ -19,6 +19,8 @@
     "@riff3d/canonical-ir": "workspace:*"
   },
   "devDependencies": {
+    "@fast-check/vitest": "catalog:",
+    "fast-check": "catalog:",
     "typescript": "^5"
   }
 }

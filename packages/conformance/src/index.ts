@@ -14,6 +14,12 @@ export {
   type FixtureResult,
 } from "./harness";
 
+// Adapter conformance harness
+export {
+  runAdapterConformance,
+  type AdapterConformanceResult,
+} from "./adapter-conformance";
+
 // Round-trip utilities
 export { testRoundTrip, normalizeForComparison } from "./round-trip";
 
