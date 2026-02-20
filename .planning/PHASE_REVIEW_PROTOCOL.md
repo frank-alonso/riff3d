@@ -18,16 +18,27 @@
 
 ## Review Cadence
 
-Each phase has **two review points** — a lightweight pre-execution review (advisory) and a full post-execution review (gate decision):
+Each phase has **two review points** — an optional pre-execution review (advisory) and a mandatory post-execution review (gate decision):
 
-### Pre-Execution Review (Advisory)
-Run after planning is complete, before execution begins:
+### Pre-Execution Review (Advisory — Optional for Standard Phases)
+Run after planning is complete, before execution begins.
+
+**When to run pre-execution review:**
+- **Mandatory:** Review Gate phases (3, 6, 11) and novel-architecture phases (9 — AI/IQL is genuinely new territory).
+- **Optional:** Standard delivery phases (4, 5, 7, 8, 10). Skip unless the phase introduces new architectural patterns that benefit from a second opinion before coding.
+- **Rationale:** The GSD plan checker validates plan structure (wave conflicts, dependencies, requirement coverage). Codex reviewing plans in isolation adds limited value for standard phases because it can't deeply verify against codebase state. Post-execution review — where Codex audits real code against real contracts — is where the independent reviewer adds the most value.
+
+**When it runs:**
 
 1. Claude completes phase research and planning (RESEARCH.md, PLAN.md files).
 2. Claude publishes a plan summary to `.planning/reviews/phase-<N>/PHASE_<N>_PLAN_SUMMARY.md`.
 3. Codex writes `PHASE_<N>_PLAN_REVIEW.md` — flags concerns, blind spots, alternative approaches.
 4. Claude writes `PHASE_<N>_PLAN_REVIEW_RESPONSE.md` — adjustments or rebuttals.
 5. No formal gate — this review is **advisory, not blocking**. Claude proceeds to execution incorporating feedback at their judgment.
+
+**When it's skipped:**
+
+Claude creates a brief `PHASE_<N>_PLAN_REVIEW_SKIPPED.md` noting: "Pre-execution review skipped — standard delivery phase. Post-execution review will be run."
 
 ### Post-Execution Review (Gate Decision)
 Run after all plans in a phase are executed (and optionally after each major plan):
@@ -44,8 +55,9 @@ Run after all plans in a phase are executed (and optionally after each major pla
 All files live in `.planning/reviews/phase-<N>/`.
 
 Pre-execution review files:
-- `PHASE_<N>_PLAN_SUMMARY.md` (Claude — distilled plan context for Codex)
-- `PHASE_<N>_PLAN_REVIEW.md` (Codex — concerns, blind spots, alternatives)
+- `PHASE_<N>_PLAN_SUMMARY.md` (Claude — thin index pointing to plan files and key sources)
+- `PHASE_<N>_PLAN_REVIEW.md` (Codex — concerns, blind spots, alternatives; or synthesis review)
+- `PHASE_<N>_PLAN_REVIEW_<XX-YY>.md` (Codex — per-plan review, used in chunked mode)
 - `PHASE_<N>_PLAN_REVIEW_RESPONSE.md` (Claude — adjustments or rebuttals)
 
 Post-execution review files:
@@ -60,33 +72,31 @@ Optional:
 
 ## Pre-Execution Review: Plan Summary Contract (Claude)
 
-`PHASE_<N>_PLAN_SUMMARY.md` distills the research and planning output into a reviewable package. It should include:
+`PHASE_<N>_PLAN_SUMMARY.md` is a **thin index** that points Codex to the actual plan files and key source files. It does NOT re-summarize plan content — Codex reads the plans directly.
+
+The summary should include:
 
 1. Phase Goal
    - What this phase delivers and why it matters.
    - Requirement IDs covered.
+   - Success criteria (from roadmap).
 
-2. Approach
-   - High-level technical strategy (key design decisions, patterns chosen).
-   - Alternatives considered and why they were rejected.
+2. Plan Files
+   - Table of plan files with paths and one-sentence descriptions.
+   - Codex reads these files directly — the summary is just an index.
 
-3. Plan Overview
-   - List of plans with one-sentence descriptions.
-   - Dependency order and any parallelization.
+3. Key Source Files for Auditor
+   - List of key packages/files the auditor should inspect to verify plan claims.
+   - Focus on files that plans reference or depend on.
 
-4. Contract Impact
-   - Which contracts (PatchOps, ECSON, Canonical IR, component registry) will be created or modified.
-   - Expected breaking/non-breaking changes.
+4. Key Constraints and Decisions
+   - From CONTEXT.md — locked user decisions that plans must respect.
+   - Architecture rules particularly relevant to this phase.
 
-5. Risk and Assumptions
-   - What could go wrong.
-   - Assumptions that haven't been validated yet.
-   - Dependencies on external tools, libraries, or APIs.
-
-6. Questions for Auditor
+5. Questions for Auditor
    - Specific areas where a second opinion would be valuable.
 
-Sections that don't apply should be marked **"N/A"** with a brief reason, same as evidence packets.
+The summary deliberately omits Approach, Contract Impact, and Risks sections — these exist in the plan files themselves and should be verified by Codex directly rather than re-summarized by Claude.
 
 ## Pre-Execution Review: Plan Review Rubric (Codex)
 
@@ -188,7 +198,7 @@ Each finding format:
 
 A phase is complete only when:
 
-1. Pre-execution plan review is completed (or deferred per Auditor Unavailable rules).
+1. Pre-execution plan review is completed, explicitly skipped (standard phases), or deferred per Auditor Unavailable rules.
 2. Evidence packet is complete.
 3. Post-execution review and response loop is completed.
 4. Final review decision is recorded.
@@ -200,7 +210,10 @@ The review protocol is automated via `scripts/codex-review.sh`. This script wrap
 
 ```bash
 # Pre-execution plan review (after Claude creates PLAN_SUMMARY)
-./scripts/codex-review.sh plan-review <N>
+./scripts/codex-review.sh plan-review <N>                   # improved single-pass
+./scripts/codex-review.sh plan-review <N> --plan XX-YY      # single plan
+./scripts/codex-review.sh plan-review <N> --chunked         # per-plan + synthesis
+./scripts/codex-review.sh plan-review <N> --synthesis       # synthesis only
 
 # Post-execution evidence review (after Claude creates EVIDENCE)
 ./scripts/codex-review.sh post-review <N>
@@ -216,6 +229,8 @@ The review protocol is automated via `scripts/codex-review.sh`. This script wrap
 ```
 
 Options: `--dry-run` (show prompt without executing), `--verbose` (full output), `--model <name>` (override model).
+
+Plan review modes: `--plan <id>` (single plan), `--chunked` (all per-plan + synthesis), `--synthesis` (synthesis only, requires existing per-plan reviews).
 
 Codex runs in **read-only sandbox** mode — it can read the codebase but cannot modify it.
 
@@ -265,6 +280,43 @@ Mid-phase checkpoints:
 - Do not require a formal gate decision — the checkpoint produces findings only.
 - Are optional and triggered by Claude's judgment or the user's request.
 
+## Chunked Review Process (Large Phases)
+
+For phases with 5 or more plans, the pre-execution review uses a **chunked** approach instead of a single monolithic pass:
+
+### Per-Plan Reviews
+Each plan is reviewed individually. Codex reads the actual plan file content and verifies claims against the codebase. Output: `PHASE_<N>_PLAN_REVIEW_<XX-YY>.md` per plan.
+
+### Synthesis Review
+After all per-plan reviews complete, a synthesis review evaluates cross-cutting concerns:
+- Dependency coherence between plans
+- Contract consistency across plans touching the same schemas
+- Scope risk across all plans combined
+- Requirement coverage gaps
+- Integration risk at plan handoff points
+
+Output: `PHASE_<N>_PLAN_REVIEW.md` (the standard output file).
+
+### When to Use
+- **5+ plans**: Use `--chunked` (automatic in GSD workflow)
+- **< 5 plans**: Use default improved single-pass (Codex reads plan files from disk)
+- **Single plan**: Use `--plan <plan-id>` for targeted review
+
+### Commands
+```bash
+# Chunked: all per-plan reviews + synthesis
+./scripts/codex-review.sh plan-review <N> --chunked
+
+# Single plan review
+./scripts/codex-review.sh plan-review <N> --plan XX-YY
+
+# Synthesis only (after per-plan reviews exist)
+./scripts/codex-review.sh plan-review <N> --synthesis
+
+# Default improved single-pass
+./scripts/codex-review.sh plan-review <N>
+```
+
 ## Templates
 
 ### Pre-Execution Review Templates
@@ -272,35 +324,30 @@ Mid-phase checkpoints:
 ## `PHASE_<N>_PLAN_SUMMARY.md`
 
 ```md
-# Phase <N> Plan Summary
+# Phase <N> Plan Summary (Index)
 Date:
 Owner:
 Phase:
 
 ## Phase Goal
-- Goal:
+- Goal: (from roadmap)
 - Requirement IDs:
+- Success Criteria: (from roadmap)
 
-## Approach
-- Strategy:
-- Alternatives rejected:
+## Plan Files
+| Plan | File Path | One-Sentence Description |
+|------|-----------|--------------------------|
+| XX-01 | `.planning/phases/<dir>/XX-01-PLAN.md` | ... |
+| XX-02 | `.planning/phases/<dir>/XX-02-PLAN.md` | ... |
 
-## Plan Overview
-1. Plan XX-01: ...
-2. Plan XX-02: ...
+## Key Source Files for Auditor
+- (list key packages/files the auditor should inspect to verify claims)
 
-## Contract Impact
-- PatchOps:
-- ECSON:
-- Canonical IR:
-- Registry:
-- Breaking changes:
-
-## Risks and Assumptions
-- ...
+## Key Constraints and Decisions
+- (from CONTEXT.md — locked user decisions that plans must respect)
 
 ## Questions for Auditor
-- ...
+- (specific areas where a second opinion adds value)
 ```
 
 ## `PHASE_<N>_PLAN_REVIEW.md`
@@ -339,6 +386,14 @@ Auditor:
 # Phase <N> Plan Review Response
 Date:
 Owner:
+
+## Review Value Assessment
+<!-- Score: HIGH / MEDIUM / LOW -->
+<!-- Actionable items: <count> of <total findings> changed what we will do -->
+<!-- Brief note on whether the review caught risks or issues that would have grown -->
+Score: HIGH | MEDIUM | LOW
+Actionable: X of Y findings led to plan or execution changes
+Notes: (1-2 sentences on what the review contributed)
 
 ## Responses
 - Concern:
@@ -417,6 +472,15 @@ Auditor:
 # Phase <N> Review Response
 Date:
 Owner:
+
+## Review Value Assessment
+<!-- Score: HIGH / MEDIUM / LOW -->
+<!-- HIGH = caught real issues that changed implementation or prevented bugs -->
+<!-- MEDIUM = useful observations, some led to minor improvements -->
+<!-- LOW = mostly confirmatory, no actionable changes -->
+Score: HIGH | MEDIUM | LOW
+Actionable: X of Y findings led to code or process changes
+Notes: (1-2 sentences on what the review contributed)
 
 ## Responses to Findings
 - Finding ID:

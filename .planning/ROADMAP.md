@@ -8,7 +8,7 @@ Riff3D is built contracts-first: specs before implementations, primary adapter b
 
 Every delivery phase follows the **Phase Review Protocol** (see `.planning/PHASE_REVIEW_PROTOCOL.md`) with two review points:
 
-1. **Pre-execution (advisory):** After planning is complete, Claude publishes a plan summary and Codex reviews for feasibility, completeness, and architecture alignment. This is advisory — not blocking — but Claude incorporates feedback before proceeding to execution.
+1. **Pre-execution (advisory, optional for standard phases):** After planning is complete, Claude publishes a plan summary and Codex reviews for feasibility, completeness, and architecture alignment. This is advisory — not blocking. **Mandatory** for Review Gate phases (3, 6, 11) and novel-architecture phases (9). **Optional** for standard delivery phases (4, 5, 7, 8, 10) — skip unless the phase introduces genuinely new architectural territory. The GSD plan checker handles structural validation; Codex adds most value on post-execution code review.
 2. **Post-execution (gate decision):** After all plans are executed, Claude produces an evidence packet and Codex performs a full technical audit. The review loop is: Evidence → Codex Review → Claude Response → Codex Final Review → Gate Decision (`PASS`, `PASS_WITH_CONDITIONS`, or `FAIL`).
 
 Review Gate phases (3, 6, 11) run an expanded-scope version that also assesses cross-phase integration, cumulative debt, and architecture drift. If Codex is unavailable, reviews are deferred with a `DEFERRED_REVIEW` status and must be completed before the next Review Gate. All review artifacts live in `.planning/reviews/phase-<N>/`.
@@ -18,7 +18,7 @@ Review Gate phases (3, 6, 11) run an expanded-scope version that also assesses c
 Every delivery phase follows this sequence. A phase is not complete until all steps are done:
 
 1. [ ] **Plan** — Research and create all plan files (XX-01 through XX-NN)
-2. [ ] **Pre-execution review** — Publish `PHASE_<N>_PLAN_SUMMARY.md`, run `codex-review.sh plan-review <N>`, write response
+2. [ ] **Pre-execution review** *(optional for standard phases; mandatory for phases 3, 6, 9, 11)* — Publish `PHASE_<N>_PLAN_SUMMARY.md`, run `codex-review.sh plan-review <N>`, write response. If skipped, note "Pre-execution review: skipped (standard delivery phase)" in the phase review directory.
 3. [ ] **Execute** — Execute all plans in order (mid-phase checkpoint recommended for phases with 5+ plans)
 4. [ ] **Post-execution review** — Publish `PHASE_<N>_EVIDENCE.md`, run full Codex review loop (evidence → review → response → final review → decision)
 5. [ ] **Gate pass** — Phase marked complete only after `PASS` or `PASS_WITH_CONDITIONS`

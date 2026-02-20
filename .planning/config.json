@@ -8,7 +8,9 @@
     "research": true,
     "plan_check": true,
     "verifier": true,
-    "auto_advance": false
+    "auto_advance": false,
+    "pre_execution_review": "gate-and-novel",
+    "pre_execution_review_phases": [3, 6, 9, 11]
   },
   "git": {
     "branching_strategy": "none"
