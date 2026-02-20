@@ -1,5 +1,16 @@
 import { defineConfig } from "@playwright/test";
 
+/**
+ * Playwright E2E and visual regression configuration.
+ *
+ * Visual regression is REQUIRED CI (promoted from Phase 3 non-blocking beta).
+ * Per-fixture tolerance bands in e2e/fixtures/tolerance-bands.ts supersede
+ * the generic thresholds previously defined in this config's `expect` block.
+ * Individual tests pass their own maxDiffPixels/threshold via tolerance bands.
+ *
+ * The global expect.toHaveScreenshot thresholds are kept as safety fallbacks
+ * but individual tests should always use per-fixture values.
+ */
 export default defineConfig({
   testDir: "./e2e",
   timeout: 60_000,
@@ -19,12 +30,16 @@ export default defineConfig({
     {
       name: "visual",
       testMatch: /.*\.visual\.ts/,
+      // Visual regression is required CI (not non-blocking beta).
+      // Per-fixture tolerance bands provide precise thresholds.
     },
   ],
   expect: {
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.02,
-      threshold: 0.3,
+      // Global fallback thresholds. Individual tests use per-fixture tolerance
+      // bands from e2e/fixtures/tolerance-bands.ts for precise control.
+      maxDiffPixelRatio: 0.05,
+      threshold: 0.15,
     },
   },
   webServer: {

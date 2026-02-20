@@ -1,21 +1,22 @@
 /**
- * Visual baseline tests for golden fixture rendering.
+ * Visual baseline tests for golden fixture rendering (PlayCanvas).
  *
  * Captures Playwright screenshots of golden fixtures rendered via the
- * PlayCanvas adapter. These baselines establish the foundation for
- * Phase 4 dual-adapter visual comparison (PlayCanvas vs Babylon.js).
+ * PlayCanvas adapter. These baselines are now REQUIRED CI (promoted
+ * from Phase 3 non-blocking beta in Phase 4, plan 04-04).
+ *
+ * For dual-adapter visual regression (PlayCanvas + Babylon.js), see
+ * dual-adapter.visual.ts which uses per-fixture tolerance bands.
  *
  * Run: pnpm test:visual (requires dev server + Supabase with anonymous sign-ins enabled)
  * Update baselines: pnpm test:visual:update
- *
- * NOTE: Visual tests are non-blocking beta. They do NOT gate Phase 3
- * pass/fail. First run generates baselines (no comparison).
  *
  * Screenshot timing relies on the __sceneReady CustomEvent dispatched
  * by the PlayCanvas adapter after loadScene completes one render frame.
  */
 import { test, expect } from "@playwright/test";
 import { loginAsGuest } from "../helpers/auth";
+import { getToleranceBand } from "../fixtures/tolerance-bands";
 
 /**
  * Wait for the PlayCanvas adapter's __sceneReady signal.
@@ -97,11 +98,12 @@ test.describe("Visual baselines - golden fixture rendering", () => {
       await page.waitForTimeout(500);
 
       // Capture screenshot of the canvas element
-      // First run generates baselines; subsequent runs compare against them
+      // First run generates baselines; subsequent runs compare against them.
+      // Per-fixture tolerance bands (Phase 4) replace generic beta thresholds.
+      const tolerance = getToleranceBand(fixture.name);
       await expect(canvas).toHaveScreenshot(`${fixture.name}.png`, {
-        // Generous thresholds for WebGL rendering variance across GPU/driver
-        maxDiffPixelRatio: 0.02,
-        threshold: 0.3,
+        maxDiffPixels: Math.round(tolerance.maxDiffPixels * 1280 * 720),
+        threshold: tolerance.maxColorDelta,
       });
     });
   }
