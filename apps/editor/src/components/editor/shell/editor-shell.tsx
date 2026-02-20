@@ -9,6 +9,7 @@ import { useEditorStore } from "@/stores/hooks";
 import { editorStore } from "@/stores/editor-store";
 import { ViewportProvider } from "@/components/editor/viewport/viewport-provider";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { SceneTree } from "@/components/editor/hierarchy/scene-tree";
 import type { SceneDocument } from "@riff3d/ecson";
 
 /**
@@ -121,7 +122,7 @@ export function EditorShell({
                 minSize="15%"
                 maxSize="30%"
               >
-                <div className="h-full overflow-auto border-r border-[var(--border)] bg-[var(--panel)]">
+                <div className="h-full overflow-hidden border-r border-[var(--border)] bg-[var(--panel)]">
                   <div className="border-b border-[var(--border)] px-3 py-2">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
                       {activePanel === "hierarchy"
@@ -129,11 +130,13 @@ export function EditorShell({
                         : "Asset Browser"}
                     </h3>
                   </div>
-                  <div className="flex items-center justify-center p-4 text-xs text-[var(--muted-foreground)]">
-                    {activePanel === "hierarchy"
-                      ? "Hierarchy tree will render here (02-03)"
-                      : "Asset browser will render here (02-05)"}
-                  </div>
+                  {activePanel === "hierarchy" ? (
+                    <SceneTree />
+                  ) : (
+                    <div className="flex items-center justify-center p-4 text-xs text-[var(--muted-foreground)]">
+                      Asset browser will render here (02-05)
+                    </div>
+                  )}
                 </div>
               </Panel>
 
