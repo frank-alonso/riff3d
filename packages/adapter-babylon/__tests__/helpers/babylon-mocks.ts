@@ -22,8 +22,53 @@ export class MockVector3 {
     this.z = z;
   }
 
+  clone(): MockVector3 {
+    return new MockVector3(this.x, this.y, this.z);
+  }
+
+  add(other: MockVector3): MockVector3 {
+    return new MockVector3(this.x + other.x, this.y + other.y, this.z + other.z);
+  }
+
+  subtract(other: MockVector3): MockVector3 {
+    return new MockVector3(this.x - other.x, this.y - other.y, this.z - other.z);
+  }
+
+  scale(s: number): MockVector3 {
+    return new MockVector3(this.x * s, this.y * s, this.z * s);
+  }
+
+  normalize(): MockVector3 {
+    const len = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z) || 1;
+    return new MockVector3(this.x / len, this.y / len, this.z / len);
+  }
+
+  length(): number {
+    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+  }
+
+  applyRotationQuaternionInPlace(_quat: MockQuaternion): MockVector3 {
+    return this;
+  }
+
   static Zero(): MockVector3 {
     return new MockVector3(0, 0, 0);
+  }
+
+  static Up(): MockVector3 {
+    return new MockVector3(0, 1, 0);
+  }
+
+  static Cross(left: MockVector3, right: MockVector3): MockVector3 {
+    return new MockVector3(
+      left.y * right.z - left.z * right.y,
+      left.z * right.x - left.x * right.z,
+      left.x * right.y - left.y * right.x,
+    );
+  }
+
+  static TransformNormal(vec: MockVector3, _matrix: MockMatrix): MockVector3 {
+    return new MockVector3(vec.x, vec.y, vec.z);
   }
 }
 
@@ -42,6 +87,52 @@ export class MockQuaternion {
     this.w = w;
   }
 }
+
+// ─── Mock Matrix ─────────────────────────────────────────────────────────────
+
+export class MockMatrix {
+  private _data = new Float32Array(16);
+
+  constructor() {
+    // Identity matrix
+    this._data[0] = 1;
+    this._data[5] = 1;
+    this._data[10] = 1;
+    this._data[15] = 1;
+  }
+
+  clone(): MockMatrix {
+    return new MockMatrix();
+  }
+
+  invert(): MockMatrix {
+    return this;
+  }
+
+  decompose(
+    scale: MockVector3,
+    rotation: MockQuaternion,
+    translation: MockVector3,
+  ): boolean {
+    scale.x = 1;
+    scale.y = 1;
+    scale.z = 1;
+    rotation.x = 0;
+    rotation.y = 0;
+    rotation.z = 0;
+    rotation.w = 1;
+    translation.x = 0;
+    translation.y = 0;
+    translation.z = 0;
+    return true;
+  }
+
+  static FromQuaternionToRef(_quat: MockQuaternion, result: MockMatrix): void {
+    // No-op: result stays as identity
+    void result;
+  }
+}
+
 
 // ─── Mock Color3 ─────────────────────────────────────────────────────────────
 
@@ -232,6 +323,58 @@ export class MockCamera {
   static PERSPECTIVE_CAMERA = 0;
 }
 
+export class MockArcRotateCamera {
+  name: string;
+  alpha: number;
+  beta: number;
+  radius: number;
+  target: MockVector3;
+  position: MockVector3;
+  lowerRadiusLimit: number | null = null;
+  upperRadiusLimit: number | null = null;
+  lowerBetaLimit: number | null = null;
+  upperBetaLimit: number | null = null;
+  panningSensibility = 50;
+  wheelPrecision = 3;
+  pinchPrecision = 12;
+  keysUp: number[] = [];
+  keysDown: number[] = [];
+  keysLeft: number[] = [];
+  keysRight: number[] = [];
+
+  attachControl = vi.fn();
+  detachControl = vi.fn();
+  setTarget = vi.fn((target: MockVector3) => {
+    this.target = target;
+  });
+  setPosition = vi.fn((pos: MockVector3) => {
+    this.position = pos;
+  });
+  dispose = vi.fn();
+  getViewMatrix = vi.fn(() => new MockMatrix());
+
+  constructor(
+    name: string,
+    alpha: number,
+    beta: number,
+    radius: number,
+    target: MockVector3,
+    _scene?: unknown,
+  ) {
+    this.name = name;
+    this.alpha = alpha;
+    this.beta = beta;
+    this.radius = radius;
+    this.target = target;
+    // Compute approximate position from spherical coords
+    this.position = new MockVector3(
+      radius * Math.sin(beta) * Math.cos(alpha) + target.x,
+      radius * Math.cos(beta) + target.y,
+      radius * Math.sin(beta) * Math.sin(alpha) + target.z,
+    );
+  }
+}
+
 // ─── Mock Engine ─────────────────────────────────────────────────────────────
 
 export class MockEngine {
@@ -254,9 +397,11 @@ export class MockScene {
   fogStart = 0;
   fogEnd = 100;
   fogDensity = 0.01;
+  activeCamera: unknown = null;
 
   render = vi.fn();
   dispose = vi.fn();
+  pick = vi.fn(() => ({ hit: false, pickedMesh: null }));
 
   static FOGMODE_NONE = 0;
   static FOGMODE_LINEAR = 2;
@@ -320,6 +465,10 @@ export function getBabylonMockModules(): Record<string, () => Record<string, unk
     "@babylonjs/core/Maths/math.vector": () => ({
       Vector3: MockVector3,
       Quaternion: MockQuaternion,
+      Matrix: MockMatrix,
+    }),
+    "@babylonjs/core/Cameras/arcRotateCamera": () => ({
+      ArcRotateCamera: MockArcRotateCamera,
     }),
     "@babylonjs/core/Maths/math.color": () => ({
       Color3: MockColor3,

@@ -11,3 +11,9 @@ export {
   applyCamera,
   hexToColor3,
 } from "./component-mappers/index";
+export {
+  BabylonCameraController,
+  BabylonSelectionManager,
+  type BabylonSelectionStoreApi,
+  type BabylonSetSelectionCallback,
+} from "./editor-tools/index";

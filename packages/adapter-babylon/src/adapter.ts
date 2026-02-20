@@ -1,14 +1,15 @@
 import { Engine } from "@babylonjs/core/Engines/engine";
 import { Scene } from "@babylonjs/core/scene";
-import { UniversalCamera } from "@babylonjs/core/Cameras/universalCamera";
-import { Vector3, Quaternion } from "@babylonjs/core/Maths/math.vector";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { Color4 } from "@babylonjs/core/Maths/math.color";
 import type { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+import type { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import type { CanonicalScene } from "@riff3d/canonical-ir";
 import type { EngineAdapter, SerializedCameraState, IRDelta } from "./types";
 import { buildScene, destroySceneEntities } from "./scene-builder";
 import { applyEnvironment, getSkyboxColor } from "./environment";
 import { applyBabylonDelta } from "./delta";
+import { BabylonCameraController } from "./editor-tools/camera-controller";
 
 /**
  * Babylon.js adapter implementing the shared EngineAdapter interface.
@@ -39,7 +40,8 @@ export class BabylonAdapter implements EngineAdapter {
   private engine: Engine | null = null;
   private scene: Scene | null = null;
   private entityMap: Map<string, TransformNode> = new Map();
-  private editorCamera: UniversalCamera | null = null;
+  private cameraController: BabylonCameraController | null = null;
+  private editorCamera: ArcRotateCamera | null = null;
   private currentScene: CanonicalScene | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private inPlayMode = false;
@@ -51,7 +53,7 @@ export class BabylonAdapter implements EngineAdapter {
    * - Babylon Engine (preserveDrawingBuffer, stencil)
    * - Scene with dark blue clear color
    * - Render loop
-   * - Editor camera (UniversalCamera at position 0,3,-8)
+   * - Editor camera (ArcRotateCamera with orbit controls)
    */
   async initialize(canvas: HTMLCanvasElement): Promise<void> {
     // Guard against double initialization (React Strict Mode)
@@ -71,14 +73,9 @@ export class BabylonAdapter implements EngineAdapter {
     this.scene = new Scene(this.engine);
     this.scene.clearColor = new Color4(0.05, 0.05, 0.12, 1);
 
-    // Create editor camera
-    this.editorCamera = new UniversalCamera(
-      "__editorCamera",
-      new Vector3(0, 3, -8),
-      this.scene,
-    );
-    // Look at origin
-    this.editorCamera.setTarget(Vector3.Zero());
+    // Create camera controller with orbit controls
+    this.cameraController = new BabylonCameraController(this.scene, canvas);
+    this.editorCamera = this.cameraController.initialize();
 
     // Start render loop
     this.engine.runRenderLoop(() => {
@@ -158,45 +155,57 @@ export class BabylonAdapter implements EngineAdapter {
   }
 
   /**
+   * Get the internal entity map typed as Babylon TransformNodes.
+   * For use by adapter-internal systems (selection manager).
+   */
+  getTypedEntityMap(): Map<string, TransformNode> {
+    return this.entityMap;
+  }
+
+  /**
+   * Get the Babylon.js Scene instance.
+   * Used by selection manager and other editor tools.
+   */
+  getScene(): Scene | null {
+    return this.scene;
+  }
+
+  /**
+   * Get the canvas element.
+   * Used by editor tools that need DOM event binding.
+   */
+  getCanvas(): HTMLCanvasElement | null {
+    return this.canvas;
+  }
+
+  /**
    * Serialize the editor camera state for engine switching.
+   *
+   * Converts the ArcRotateCamera's orbital position to a position/quaternion
+   * format compatible with the PlayCanvas adapter.
    */
   serializeCameraState(): SerializedCameraState {
-    if (!this.editorCamera) {
+    if (!this.cameraController) {
       return {
         position: { x: 0, y: 3, z: -8 },
         rotation: { x: 0, y: 0, z: 0, w: 1 },
-        mode: "fly",
+        mode: "orbit",
       };
     }
 
-    const pos = this.editorCamera.position;
-    const rot = this.editorCamera.rotationQuaternion ?? new Quaternion(0, 0, 0, 1);
-
-    return {
-      position: { x: pos.x, y: pos.y, z: pos.z },
-      rotation: { x: rot.x, y: rot.y, z: rot.z, w: rot.w },
-      mode: "fly",
-    };
+    return this.cameraController.serializeCameraState();
   }
 
   /**
    * Restore the editor camera state after engine switch.
+   *
+   * Converts position/quaternion from PlayCanvas format to
+   * ArcRotateCamera orbital parameters.
    */
   restoreCameraState(state: SerializedCameraState): void {
-    if (!this.editorCamera) return;
+    if (!this.cameraController) return;
 
-    this.editorCamera.position = new Vector3(
-      state.position.x,
-      state.position.y,
-      state.position.z,
-    );
-
-    this.editorCamera.rotationQuaternion = new Quaternion(
-      state.rotation.x,
-      state.rotation.y,
-      state.rotation.z,
-      state.rotation.w,
-    );
+    this.cameraController.restoreCameraState(state);
   }
 
   /**
@@ -233,6 +242,11 @@ export class BabylonAdapter implements EngineAdapter {
    * Destroy the Babylon.js engine and clean up all resources.
    */
   dispose(): void {
+    // Clean up camera controller
+    this.cameraController?.dispose();
+    this.cameraController = null;
+    this.editorCamera = null;
+
     // Destroy scene entities
     destroySceneEntities(this.entityMap);
 
@@ -248,7 +262,6 @@ export class BabylonAdapter implements EngineAdapter {
       this.engine = null;
     }
 
-    this.editorCamera = null;
     this.currentScene = null;
     this.canvas = null;
   }

@@ -9,6 +9,8 @@ import {
   DragPreviewManager,
   type GridHandle,
 } from "@riff3d/adapter-playcanvas/editor-tools";
+import type { BabylonAdapter } from "@riff3d/adapter-babylon";
+import type { BabylonSelectionManager as BabylonSelectionManagerType } from "@riff3d/adapter-babylon";
 import type { EngineAdapter, SerializedCameraState } from "@riff3d/canonical-ir";
 import { compile } from "@riff3d/canonical-ir";
 import { generateOpId } from "@riff3d/ecson";
@@ -35,11 +37,12 @@ import type { EngineType } from "@/stores/slices/engine-slice";
  * - canonicalScene changes -> apply delta or rebuild scene
  * - cameraMode changes -> switch camera controller (PlayCanvas only)
  *
- * Editor subsystems (PlayCanvas-only, not available when Babylon is active):
- * - GizmoManager: transform gizmos attached to selected entities
- * - SelectionManager: click, shift-click, box-select entity picking
- * - Grid: ground plane with configurable grid size
- * - DragPreviewManager: ghost placement for asset drag-and-drop
+ * Editor subsystems:
+ * - GizmoManager: transform gizmos attached to selected entities (PlayCanvas only)
+ * - SelectionManager: click, shift-click, box-select entity picking (PlayCanvas)
+ * - BabylonSelectionManager: click-to-select entity picking (Babylon)
+ * - Grid: ground plane with configurable grid size (PlayCanvas only)
+ * - DragPreviewManager: ghost placement for asset drag-and-drop (PlayCanvas only)
  *
  * CRITICAL: This component must be loaded with `ssr: false` via dynamic
  * import in the parent to prevent SSR of PlayCanvas/Babylon (which require DOM).
@@ -121,6 +124,7 @@ export function ViewportCanvas() {
     let dragLeaveHandler: ((e: globalThis.DragEvent) => void) | null = null;
     let dropHandler: ((e: globalThis.DragEvent) => void) | null = null;
     let adapter: EngineAdapter | null = null;
+    let babylonSelectionManager: BabylonSelectionManagerType | null = null;
 
     // Initialize adapter asynchronously
     void createAdapter(activeEngine).then(async (newAdapter) => {
@@ -168,8 +172,6 @@ export function ViewportCanvas() {
       setLoadingProgress(70);
 
       // --- PlayCanvas-specific editor tools (gizmos, selection, grid, drag preview) ---
-      // These tools are only available when PlayCanvas is active.
-      // Babylon-specific editor tools are Phase 5+ scope.
       if (activeEngine === "playcanvas" && adapter instanceof PlayCanvasAdapter) {
         const pcAdapter = adapter;
         const app = pcAdapter.getApp();
@@ -328,6 +330,38 @@ export function ViewportCanvas() {
         }
       }
 
+      // --- Babylon-specific editor tools (selection) ---
+      // Basic click-to-select for the validation adapter.
+      if (activeEngine === "babylon") {
+        const { BabylonAdapter: BabylonAdapterClass, BabylonSelectionManager } =
+          await import("@riff3d/adapter-babylon");
+
+        // Stale check after dynamic import
+        if (currentSwitch !== switchCounter.current) return;
+
+        if (adapter instanceof BabylonAdapterClass) {
+          const bjsAdapter = adapter;
+          const bjsScene = bjsAdapter.getScene();
+          const bjsCanvas = bjsAdapter.getCanvas();
+
+          if (bjsScene && bjsCanvas) {
+            const entityMap = bjsAdapter.getTypedEntityMap();
+            const setSelection = (ids: string[]) => {
+              editorStore.getState().setSelection(ids);
+            };
+
+            babylonSelectionManager = new BabylonSelectionManager(
+              bjsScene,
+              bjsCanvas,
+              entityMap,
+              setSelection,
+              editorStore,
+            );
+            babylonSelectionManager.initialize();
+          }
+        }
+      }
+
       setLoadingProgress(90);
 
       // --- Delta-aware canonicalScene subscriber ---
@@ -344,11 +378,17 @@ export function ViewportCanvas() {
           } else {
             adapter.rebuildScene(canonicalScene);
           }
-          // Update entity map references for PlayCanvas editor tools
+          // Update entity map references for editor tools
           if (adapter instanceof PlayCanvasAdapter) {
             const newEntityMap = adapter.getTypedEntityMap();
             gizmoManager?.updateEntityMap(newEntityMap);
             selectionManager?.updateEntityMap(newEntityMap);
+          } else if (babylonSelectionManager) {
+            // Dynamic import -- check if adapter has getTypedEntityMap
+            const bjsAdapter = adapter as BabylonAdapter;
+            if (bjsAdapter.getTypedEntityMap) {
+              babylonSelectionManager.updateEntityMap(bjsAdapter.getTypedEntityMap());
+            }
           }
         },
       );
@@ -414,6 +454,7 @@ export function ViewportCanvas() {
       dragPreviewManager?.dispose();
       gizmoManager?.dispose();
       selectionManager?.dispose();
+      babylonSelectionManager?.dispose();
       gridHandle?.dispose();
       if (adapter) {
         adapter.dispose();

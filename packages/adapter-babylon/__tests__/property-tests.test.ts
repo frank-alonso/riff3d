@@ -17,6 +17,7 @@ import {
   MockMesh,
   MockVector3,
   MockQuaternion,
+  MockMatrix,
   MockColor3,
   MockColor4,
   MockPBRMetallicRoughnessMaterial,
@@ -25,6 +26,7 @@ import {
   MockPointLight,
   MockSpotLight,
   MockUniversalCamera,
+  MockArcRotateCamera,
   MockCamera,
   MockEngine,
   mockCreateBox,
@@ -84,6 +86,10 @@ vi.mock("@babylonjs/core/Meshes/mesh", () => ({ Mesh: MockMesh }));
 vi.mock("@babylonjs/core/Maths/math.vector", () => ({
   Vector3: MockVector3,
   Quaternion: MockQuaternion,
+  Matrix: MockMatrix,
+}));
+vi.mock("@babylonjs/core/Cameras/arcRotateCamera", () => ({
+  ArcRotateCamera: MockArcRotateCamera,
 }));
 vi.mock("@babylonjs/core/Maths/math.color", () => ({
   Color3: MockColor3,
