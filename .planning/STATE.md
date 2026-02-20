@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 2 of 11 (Closed-Loop Editor) -- IN PROGRESS
-Plan: 5 of 8 in current phase (02-04 complete, next: 02-05)
+Plan: 6 of 8 in current phase (02-05 complete, next: 02-06)
 Status: Executing
-Last activity: 2026-02-19 -- Completed 02-04 (Scene hierarchy and inspector panel)
+Last activity: 2026-02-19 -- Completed 02-05 (Undo/redo, clipboard, auto-save, carry-forward tests)
 
-Progress: [####------] 4/8 plans in phase
+Progress: [#####-----] 5/8 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 11.7 min
-- Total execution time: 2.1 hours
+- Total plans completed: 12
+- Average duration: 11.4 min
+- Total execution time: 2.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 7 | 74 min | 10.6 min |
-| 02 | 4 | 55 min | 13.8 min |
+| 02 | 5 | 62 min | 12.4 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (29 min), 02-02 (12 min), 02-03 (7 min), 02-04 (7 min)
-- Trend: 02-04 fast (hierarchy + inspector, all React components, no adapter changes needed)
+- Last 5 plans: 02-01 (29 min), 02-02 (12 min), 02-03 (7 min), 02-04 (7 min), 02-05 (7 min)
+- Trend: 02-05 fast (undo/redo stacks + clipboard + auto-save + 3 carry-forward test suites)
 
 *Updated after each plan completion*
 
@@ -93,12 +93,17 @@ Recent decisions affecting current work:
 - [02-04]: Zod schema introspection via _def property instead of direct zod import in editor
 - [02-04]: Quaternion-to-Euler conversion for rotation display (stored as quaternion, shown as degrees)
 - [02-04]: Debounced PatchOp dispatch (300ms) for keyboard inputs, immediate for slider/checkbox/color/dropdown
+- [02-05]: MAX_UNDO_DEPTH=200 to cap memory growth on long editing sessions
+- [02-05]: Custom event (riff3d:manual-save) for Ctrl+S to decouple keyboard shortcuts from auto-save hook
+- [02-05]: Tuning field IS preserved through IR round-trip (compiler/decompiler carry it), correcting plan assumption
+- [02-05]: Internal clipboard buffer as fallback when navigator.clipboard API fails
+- [02-05]: BatchOp for paste/duplicate operations so undo reverts entire operation atomically
 
 ### Pending Todos
 
-- [Phase 2 - CF-01] Add rotating-seed/high-run nightly property test suite with failure seed capture
-- [Phase 2 - CF-02] Add lossiness contract tests enumerating expected-stripped fields and asserting all others preserved
-- [Phase 2 - CF-03] Add lint rule or restricted API boundary + negative test for mutation-bypass enforcement
+- ~~[Phase 2 - CF-01] Add rotating-seed/high-run nightly property test suite with failure seed capture~~ DONE in 02-05
+- ~~[Phase 2 - CF-02] Add lossiness contract tests enumerating expected-stripped fields and asserting all others preserved~~ DONE in 02-05
+- ~~[Phase 2 - CF-03] Add lint rule or restricted API boundary + negative test for mutation-bypass enforcement~~ DONE in 02-05
 - ~~[Phase 2 - CF-05] Remove unused eslint-disable directive at patchops/src/engine.ts:518~~ DONE in 02-01
 - ~~[Phase 2/3 - CF-06] Document IR conventions in source code (coordinate system, normal maps, physics units, roughness, 1:N entity-to-node)~~ DONE in 02-02 (JSDoc in scene-builder.ts, adapter.ts)
 - [Phase 4/7 - CF-04] Add fixture coverage for non-portable glTF extensions when promoted to portable status
@@ -113,6 +118,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 02-04-PLAN.md
-Resume file: .planning/phases/02-closed-loop-editor/02-04-SUMMARY.md
-Next: Execute 02-05 (Undo/redo and auto-save)
+Stopped at: Completed 02-05-PLAN.md
+Resume file: .planning/phases/02-closed-loop-editor/02-05-SUMMARY.md
+Next: Execute 02-06 (Asset browser and drag-drop)
