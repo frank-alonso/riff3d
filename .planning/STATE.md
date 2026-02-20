@@ -95,6 +95,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 01-07-PLAN.md (Phase 1 Review Gate -- PASS_WITH_CONDITIONS)
-Resume file: None
-Next: Phase 2 planning (Closed-Loop Editor)
+Stopped at: Phase 2 context gathered
+Resume file: .planning/phases/02-closed-loop-editor/02-CONTEXT.md
+Next: Phase 2 planning (/gsd:plan-phase 2)
