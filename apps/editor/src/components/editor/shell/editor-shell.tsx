@@ -10,6 +10,7 @@ import { editorStore } from "@/stores/editor-store";
 import { ViewportProvider } from "@/components/editor/viewport/viewport-provider";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { SceneTree } from "@/components/editor/hierarchy/scene-tree";
+import { InspectorPanel } from "@/components/editor/inspector/inspector-panel";
 import type { SceneDocument } from "@riff3d/ecson";
 
 /**
@@ -172,15 +173,13 @@ export function EditorShell({
                 minSize="18%"
                 maxSize="35%"
               >
-                <div className="h-full overflow-auto border-l border-[var(--border)] bg-[var(--panel)]">
+                <div className="h-full overflow-hidden border-l border-[var(--border)] bg-[var(--panel)]">
                   <div className="border-b border-[var(--border)] px-3 py-2">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
                       Inspector
                     </h3>
                   </div>
-                  <div className="flex items-center justify-center p-4 text-xs text-[var(--muted-foreground)]">
-                    Select an entity to inspect (02-04)
-                  </div>
+                  <InspectorPanel />
                 </div>
               </Panel>
             </>
