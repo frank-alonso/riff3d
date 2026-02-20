@@ -1,8 +1,8 @@
 import type { StateCreator } from "zustand";
 import type { SceneDocument } from "@riff3d/ecson";
-import type { CanonicalScene } from "@riff3d/canonical-ir";
+import type { CanonicalScene, IRDelta } from "@riff3d/canonical-ir";
 import type { PatchOp } from "@riff3d/patchops";
-import { compile } from "@riff3d/canonical-ir";
+import { compile, computeDelta } from "@riff3d/canonical-ir";
 import { applyOp } from "@riff3d/patchops";
 
 /**
@@ -40,6 +40,16 @@ export interface SceneSlice {
   docVersion: number;
   /** The type of the last dispatched op (used by auto-save to detect structural changes). */
   lastOpType: string | null;
+
+  /**
+   * The last computed delta from the most recent PatchOp.
+   * Non-null when the op can be applied incrementally (O(1) property update).
+   * Null for full rebuilds (undo, redo, loadProject, structural ops).
+   *
+   * The viewport subscriber (04-03) checks this to decide between
+   * adapter.applyDelta() and adapter.rebuildScene().
+   */
+  lastDelta: IRDelta | null;
 
   /**
    * Load a project by setting the ECSON document and compiling to IR.
@@ -91,6 +101,7 @@ export const createSceneSlice: StateCreator<
   canRedo: false,
   docVersion: 0,
   lastOpType: null,
+  lastDelta: null,
 
   loadProject: (doc: SceneDocument) => {
     const canonicalScene = compile(doc);
@@ -103,6 +114,7 @@ export const createSceneSlice: StateCreator<
       canRedo: false,
       docVersion: 0,
       lastOpType: null,
+      lastDelta: null,
     });
   },
 
@@ -127,7 +139,11 @@ export const createSceneSlice: StateCreator<
       newUndoStack.shift();
     }
 
+    // Compute delta for incremental adapter update (O(1) when possible)
+    const lastDelta = computeDelta(op);
+
     // Recompile IR from the mutated document
+    // (still needed -- full IR is the source of truth for recompilation)
     const canonicalScene = compile(ecsonDoc);
 
     // Spread to create a new top-level reference so Zustand selectors
@@ -137,6 +153,7 @@ export const createSceneSlice: StateCreator<
     set((state) => ({
       ecsonDoc: { ...ecsonDoc },
       canonicalScene,
+      lastDelta,
       undoStack: newUndoStack,
       redoStack: [],
       canUndo: true,
@@ -164,6 +181,7 @@ export const createSceneSlice: StateCreator<
     set((state) => ({
       ecsonDoc: { ...ecsonDoc },
       canonicalScene,
+      lastDelta: null,
       undoStack: newUndoStack,
       redoStack: newRedoStack,
       canUndo: newUndoStack.length > 0,
@@ -189,6 +207,7 @@ export const createSceneSlice: StateCreator<
     set((state) => ({
       ecsonDoc: { ...ecsonDoc },
       canonicalScene,
+      lastDelta: null,
       undoStack: newUndoStack,
       redoStack: newRedoStack,
       canUndo: true,
