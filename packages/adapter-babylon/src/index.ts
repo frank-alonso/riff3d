@@ -1,4 +1,5 @@
 export { BabylonAdapter } from "./adapter";
+export { applyBabylonDelta } from "./delta";
 export type { EngineAdapter, SerializedCameraState, IRDelta } from "./types";
 export { buildScene, destroySceneEntities, type BuildSceneResult } from "./scene-builder";
 export { applyEnvironment, getSkyboxColor } from "./environment";

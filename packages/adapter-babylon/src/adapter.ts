@@ -8,6 +8,7 @@ import type { CanonicalScene } from "@riff3d/canonical-ir";
 import type { EngineAdapter, SerializedCameraState, IRDelta } from "./types";
 import { buildScene, destroySceneEntities } from "./scene-builder";
 import { applyEnvironment, getSkyboxColor } from "./environment";
+import { applyBabylonDelta } from "./delta";
 
 /**
  * Babylon.js adapter implementing the shared EngineAdapter interface.
@@ -129,12 +130,22 @@ export class BabylonAdapter implements EngineAdapter {
 
   /**
    * Apply an incremental scene update from Canonical IR.
-   * Stub: falls back to full rebuild. Incremental delta implementation
-   * will be added in 04-02.
+   *
+   * For property-level deltas (transform, visibility, component-property,
+   * environment), applies the change directly to the engine node (O(1)).
+   * For structural deltas (full-rebuild), falls back to rebuilding the
+   * entire scene from the current IR snapshot.
    */
-  applyDelta(_delta: IRDelta): void {
-    if (this.currentScene) {
-      this.rebuildScene(this.currentScene);
+  applyDelta(delta: IRDelta): void {
+    if (delta.type === "full-rebuild") {
+      if (this.currentScene) {
+        this.rebuildScene(this.currentScene);
+      }
+      return;
+    }
+
+    if (this.scene) {
+      applyBabylonDelta(this.entityMap, this.scene, delta);
     }
   }
 

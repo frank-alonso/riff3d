@@ -4,6 +4,7 @@ import type { EngineAdapter, SerializedCameraState, IRDelta } from "./types";
 import { buildScene, destroySceneEntities } from "./scene-builder";
 import { applyEnvironment, getSkyboxColor } from "./environment";
 import { CameraController, createEditorCamera } from "./editor-tools/camera-controller";
+import { applyPlayCanvasDelta } from "./delta";
 
 /**
  * PlayCanvas adapter implementing the EngineAdapter interface.
@@ -251,12 +252,22 @@ export class PlayCanvasAdapter implements EngineAdapter {
 
   /**
    * Apply an incremental scene update from Canonical IR.
-   * Stub: falls back to full rebuild. Incremental delta implementation
-   * will be added in 04-02.
+   *
+   * For property-level deltas (transform, visibility, component-property,
+   * environment), applies the change directly to the engine entity (O(1)).
+   * For structural deltas (full-rebuild), falls back to rebuilding the
+   * entire scene from the current IR snapshot.
    */
-  applyDelta(_delta: IRDelta): void {
-    if (this.currentScene) {
-      this.rebuildScene(this.currentScene);
+  applyDelta(delta: IRDelta): void {
+    if (delta.type === "full-rebuild") {
+      if (this.currentScene) {
+        this.rebuildScene(this.currentScene);
+      }
+      return;
+    }
+
+    if (this.app) {
+      applyPlayCanvasDelta(this.entityMap, this.app, this.editorCamera, delta);
     }
   }
 

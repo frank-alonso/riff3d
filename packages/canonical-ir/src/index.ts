@@ -16,3 +16,6 @@ export {
 // Compiler and decompiler
 export { compile } from "./compiler";
 export { decompile } from "./decompiler";
+
+// Delta computation (PatchOp -> IRDelta mapping)
+export { computeDelta } from "./delta";
