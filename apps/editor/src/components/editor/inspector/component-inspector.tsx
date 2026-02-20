@@ -172,11 +172,18 @@ export function ComponentInspector({
 
   return (
     <div className="border-b border-neutral-700">
-      {/* Component header */}
-      <button
-        type="button"
+      {/* Component header — uses div instead of button to avoid nested button violation */}
+      <div
+        role="button"
+        tabIndex={0}
         className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-neutral-800/50"
         onClick={() => setIsOpen(!isOpen)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setIsOpen(!isOpen);
+          }
+        }}
       >
         <ChevronDown
           className={`h-3.5 w-3.5 shrink-0 text-neutral-500 transition-transform ${
@@ -197,7 +204,7 @@ export function ComponentInspector({
         >
           <Trash2 className="h-3 w-3" />
         </button>
-      </button>
+      </div>
 
       {/* Component properties */}
       {isOpen && (

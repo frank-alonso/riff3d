@@ -69,9 +69,11 @@ export const createSceneSlice: StateCreator<
     // Recompile IR from the mutated document
     const canonicalScene = compile(ecsonDoc);
 
-    // Trigger store update (ecsonDoc reference is the same object,
-    // but we set canonicalScene to trigger subscribers)
-    set({ ecsonDoc, canonicalScene });
+    // Spread to create a new top-level reference so Zustand selectors
+    // watching ecsonDoc detect the change. applyOp mutates in place,
+    // so without this spread Object.is(old, new) === true and
+    // components like InspectorPanel never re-render.
+    set({ ecsonDoc: { ...ecsonDoc }, canonicalScene });
 
     return inverseOp;
   },

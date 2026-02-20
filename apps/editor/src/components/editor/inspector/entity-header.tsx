@@ -90,10 +90,12 @@ function eulerToQuaternion(euler: {
  * for keyboard input. On blur, force dispatch.
  */
 export function EntityHeader({ entityId }: EntityHeaderProps) {
-  const entity = useEditorStore((s) => {
-    const doc = s.ecsonDoc;
-    return doc?.entities[entityId] ?? null;
-  });
+  // Read ecsonDoc (new reference on every dispatchOp) rather than
+  // deriving entity inside the selector. The entity object itself is
+  // mutated in place by applyOp, so Object.is would return true for
+  // a fine-grained selector and skip re-renders.
+  const ecsonDoc = useEditorStore((s) => s.ecsonDoc);
+  const entity = ecsonDoc?.entities[entityId] ?? null;
 
   const [showAddComponent, setShowAddComponent] = useState(false);
   const nameDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
