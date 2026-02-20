@@ -52,7 +52,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Runtime & Adapters
 
 - [x] **ADPT-01**: PlayCanvas adapter compiles Canonical IR to PlayCanvas runtime (primary web adapter)
-- [ ] **ADPT-02**: Babylon.js adapter compiles Canonical IR to Babylon.js runtime (universality validation)
+- [x] **ADPT-02**: Babylon.js adapter compiles Canonical IR to Babylon.js runtime (universality validation)
 - [ ] **ADPT-03**: Adapter incremental update (property-level deltas, not full recompile on every edit)
 - [ ] **ADPT-04**: Both adapters pass conformance tests for golden fixtures within defined tolerance
 
@@ -229,7 +229,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RNDR-04 | Phase 2: Closed-Loop Editor | Complete |
 | RNDR-05 | Phase 2: Closed-Loop Editor | Complete |
 | ADPT-01 | Phase 2: Closed-Loop Editor | Complete |
-| ADPT-02 | Phase 4: Dual Adapter Validation | Pending |
+| ADPT-02 | Phase 4: Dual Adapter Validation | Complete |
 | ADPT-03 | Phase 4: Dual Adapter Validation | Pending |
 | ADPT-04 | Phase 4: Dual Adapter Validation | Pending |
 | COLLAB-01 | Phase 5: Collaboration | Pending |
