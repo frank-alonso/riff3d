@@ -86,6 +86,19 @@ export class MockQuaternion {
     this.z = z;
     this.w = w;
   }
+
+  static FromEulerAngles(pitch: number, yaw: number, roll: number): MockQuaternion {
+    // Simplified euler-to-quaternion for test purposes
+    const cx = Math.cos(pitch * 0.5), sx = Math.sin(pitch * 0.5);
+    const cy = Math.cos(yaw * 0.5), sy = Math.sin(yaw * 0.5);
+    const cz = Math.cos(roll * 0.5), sz = Math.sin(roll * 0.5);
+    return new MockQuaternion(
+      sx * cy * cz - cx * sy * sz,
+      cx * sy * cz + sx * cy * sz,
+      cx * cy * sz - sx * sy * cz,
+      cx * cy * cz + sx * sy * sz,
+    );
+  }
 }
 
 // ─── Mock Matrix ─────────────────────────────────────────────────────────────
@@ -309,8 +322,13 @@ export class MockUniversalCamera {
   orthoLeft: number | null = null;
   orthoRight: number | null = null;
 
+  inputs = {
+    clear: vi.fn(),
+  };
+
   detachControl = vi.fn();
   setTarget = vi.fn();
+  dispose = vi.fn();
 
   constructor(name: string, position: MockVector3, _scene?: unknown) {
     this.name = name;

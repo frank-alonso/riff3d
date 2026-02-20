@@ -120,6 +120,12 @@ export function EditorShell({
   // Auto-save: monitors docVersion changes and saves ECSON to Supabase
   useAutoSave(projectId);
 
+  // Track whether the project has been loaded into the store.
+  // ViewportCanvas is NOT rendered until this is true, preventing a race
+  // condition where the viewport starts initializing with the default engine
+  // before the preferred engine is applied from ECSON metadata.
+  const [projectReady, setProjectReady] = useState(false);
+
   // Load project into store on mount and set read-only mode for non-owners.
   // Also reads the preferred engine from ECSON metadata and switches if needed.
   useEffect(() => {
@@ -137,6 +143,10 @@ export function EditorShell({
           editorStore.getState().switchEngine(preferred);
         }
       }
+
+      // Signal that the store is ready — viewport can now render with the
+      // correct activeEngine from the start (no race condition).
+      setProjectReady(true);
     }
   }, [ecsonDoc, isOwner]);
 
@@ -277,7 +287,9 @@ export function EditorShell({
                 onDrop={handleViewportDrop}
               >
                 <ViewportProvider>
-                  <ViewportCanvas />
+                  {projectReady ? <ViewportCanvas /> : (
+                    <ViewportLoader stage="Loading project..." progress={-1} />
+                  )}
                 </ViewportProvider>
                 {/* Play mode border overlay */}
                 <PlayModeBorder />

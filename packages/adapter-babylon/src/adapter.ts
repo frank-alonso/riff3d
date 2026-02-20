@@ -1,9 +1,8 @@
 import { Engine } from "@babylonjs/core/Engines/engine";
 import { Scene } from "@babylonjs/core/scene";
-import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { Color4 } from "@babylonjs/core/Maths/math.color";
 import type { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import type { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
+import type { UniversalCamera } from "@babylonjs/core/Cameras/universalCamera";
 import type { CanonicalScene } from "@riff3d/canonical-ir";
 import type { EngineAdapter, SerializedCameraState, IRDelta } from "./types";
 import { buildScene, destroySceneEntities } from "./scene-builder";
@@ -41,7 +40,7 @@ export class BabylonAdapter implements EngineAdapter {
   private scene: Scene | null = null;
   private entityMap: Map<string, TransformNode> = new Map();
   private cameraController: BabylonCameraController | null = null;
-  private editorCamera: ArcRotateCamera | null = null;
+  private editorCamera: UniversalCamera | null = null;
   private currentScene: CanonicalScene | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private inPlayMode = false;

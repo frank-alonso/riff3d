@@ -1,56 +1,59 @@
-import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
-import { Vector3, Quaternion, Matrix } from "@babylonjs/core/Maths/math.vector";
+import { UniversalCamera } from "@babylonjs/core/Cameras/universalCamera";
+import { Vector3, Quaternion } from "@babylonjs/core/Maths/math.vector";
 import type { Scene } from "@babylonjs/core/scene";
 
 /**
  * Camera controller for the Babylon.js editor viewport.
  *
- * Controls are configured to match the PlayCanvas adapter's behavior:
- * - **Left-click:** Select objects (camera does NOT consume left-click)
- * - **Right-click + drag:** Orbit around target
- * - **Middle-click + drag:** Pan
- * - **Scroll wheel:** Zoom in/out
- * - **WASD:** Pan camera (custom handler, not ArcRotateCamera's built-in orbit keys)
+ * Uses DOM-based input matching the PlayCanvas adapter's fly-mode behavior:
+ * - **Left-click:** Free for selection (not consumed by camera)
+ * - **Right-click + drag:** Look around (rotate camera direction)
+ * - **WASD + right-click:** Move in the look direction
+ * - **QE / Space:** Move up/down (while right-clicking)
+ * - **Scroll wheel:** Zoom (move forward/backward)
  *
- * This is a validation adapter, so we provide basic but functional controls.
- * Full parity with PlayCanvas (fly mode, smooth damping) is deferred.
+ * The camera is a Babylon UniversalCamera with all built-in inputs DETACHED.
+ * All input is handled via raw DOM events for precise control over which
+ * mouse buttons trigger which behavior.
  *
  * Architecture note: This module is an editor interaction tool, tracked
  * separately from the core adapter LoC budget per the approved exception.
  */
 
-/** Default orbit distance from target. */
-const DEFAULT_RADIUS = 12;
+/** Damping factor for smooth camera motion. */
+const DAMPING = 0.92;
 
-/** Default orbit alpha (horizontal angle in radians). */
-const DEFAULT_ALPHA = Math.PI / 4;
+/** Movement speed in meters per second. */
+const MOVE_SPEED = 10;
 
-/** Default orbit beta (vertical angle in radians). */
-const DEFAULT_BETA = Math.PI / 3;
+/** Rotation speed in degrees per pixel. */
+const ROTATE_SPEED = 0.2;
 
-/** Minimum zoom distance. */
-const MIN_RADIUS = 0.5;
-
-/** Maximum zoom distance. */
-const MAX_RADIUS = 500;
-
-/** Pan speed multiplier. */
-const PAN_SPEED = 0.5;
-
-/** Zoom speed (wheel sensitivity). */
-const ZOOM_SPEED = 0.5;
-
-/** WASD pan speed in units per second. */
-const KEY_PAN_SPEED = 8;
+/** Zoom speed per scroll tick. */
+const ZOOM_SPEED = 2;
 
 export class BabylonCameraController {
   private scene: Scene;
   private canvas: HTMLCanvasElement;
-  private orbitCamera: ArcRotateCamera | null = null;
-  private currentMode: "fly" | "orbit" = "orbit";
+  private camera: UniversalCamera | null = null;
+  private currentMode: "fly" | "orbit" = "fly";
 
-  // WASD key tracking
+  // Fly mode state
+  private yaw = 0;
+  private pitch = -20;
+  private velocity = { x: 0, y: 0, z: 0 };
+
+  // Input state
+  private mouseDown: boolean[] = [false, false, false];
   private keys = new Set<string>();
+  private lastMouseX = 0;
+  private lastMouseY = 0;
+
+  // Bound event handlers for cleanup
+  private boundMouseDown: ((e: MouseEvent) => void) | null = null;
+  private boundMouseUp: ((e: MouseEvent) => void) | null = null;
+  private boundMouseMove: ((e: MouseEvent) => void) | null = null;
+  private boundWheel: ((e: WheelEvent) => void) | null = null;
   private boundKeyDown: ((e: KeyboardEvent) => void) | null = null;
   private boundKeyUp: ((e: KeyboardEvent) => void) | null = null;
   private boundContextMenu: ((e: Event) => void) | null = null;
@@ -64,239 +67,278 @@ export class BabylonCameraController {
 
   /**
    * Initialize the camera controller.
-   * Creates an ArcRotateCamera with right-click orbit (left-click free for selection).
-   *
-   * @returns The newly created orbit camera
+   * Creates a UniversalCamera with NO built-in inputs — all input handled via DOM.
    */
-  initialize(): ArcRotateCamera {
-    this.orbitCamera = new ArcRotateCamera(
+  initialize(): UniversalCamera {
+    this.camera = new UniversalCamera(
       "__editorCamera",
-      DEFAULT_ALPHA,
-      DEFAULT_BETA,
-      DEFAULT_RADIUS,
-      Vector3.Zero(),
+      new Vector3(0, 5, -10),
       this.scene,
     );
+    this.camera.minZ = 0.1;
+    this.camera.maxZ = 5000;
+    this.camera.fov = 60 * (Math.PI / 180); // Babylon uses radians
 
-    // Configure orbit limits
-    this.orbitCamera.lowerRadiusLimit = MIN_RADIUS;
-    this.orbitCamera.upperRadiusLimit = MAX_RADIUS;
-    this.orbitCamera.lowerBetaLimit = 0.01;
-    this.orbitCamera.upperBetaLimit = Math.PI - 0.01;
+    // Set initial rotation from yaw/pitch
+    this.updateCameraRotation();
 
-    // Configure input sensitivity
-    this.orbitCamera.panningSensibility = 1000 / PAN_SPEED;
-    this.orbitCamera.wheelPrecision = 1 / ZOOM_SPEED;
-    this.orbitCamera.pinchPrecision = 100;
-
-    // Reconfigure pointer input: orbit on RIGHT-click only (button 2),
-    // leaving left-click (button 0) free for selection manager.
-    // Middle-click (button 1) for pan (Babylon default).
-    const pointerInput = this.orbitCamera.inputs.attached[
-      "pointers"
-    ] as { buttons?: number[] } | undefined;
-    if (pointerInput) {
-      pointerInput.buttons = [2]; // Only right-click orbits
-    }
-
-    // Remove built-in keyboard input — it maps keys to orbit rotation,
-    // not panning. We handle WASD ourselves below.
-    this.orbitCamera.inputs.removeByType("ArcRotateCameraKeyboardMoveInput");
-
-    // Attach camera controls to canvas
-    this.orbitCamera.attachControl(this.canvas, true);
+    // Detach ALL built-in inputs — we handle everything ourselves
+    this.camera.inputs.clear();
 
     // Set as active camera
-    this.scene.activeCamera = this.orbitCamera;
+    this.scene.activeCamera = this.camera;
 
-    // Prevent context menu on right-click so right-drag works for orbit
+    // Bind DOM events
+    this.boundMouseDown = (e: MouseEvent) => this.onMouseDown(e);
+    this.boundMouseUp = (e: MouseEvent) => this.onMouseUp(e);
+    this.boundMouseMove = (e: MouseEvent) => this.onMouseMove(e);
+    this.boundWheel = (e: WheelEvent) => this.onWheel(e);
+    this.boundKeyDown = (e: KeyboardEvent) => this.onKeyDown(e);
+    this.boundKeyUp = (e: KeyboardEvent) => this.onKeyUp(e);
     this.boundContextMenu = (e: Event) => e.preventDefault();
-    this.canvas.addEventListener("contextmenu", this.boundContextMenu);
 
-    // Set up WASD panning via DOM key events + animation frame
-    this.boundKeyDown = (e: KeyboardEvent) => {
-      // Only track WASD/QE when canvas or its parent has focus
-      const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d", "q", "e"].includes(key)) {
-        this.keys.add(key);
-      }
-    };
-    this.boundKeyUp = (e: KeyboardEvent) => {
-      this.keys.delete(e.key.toLowerCase());
-    };
+    this.canvas.addEventListener("mousedown", this.boundMouseDown);
+    this.canvas.addEventListener("mouseup", this.boundMouseUp);
+    this.canvas.addEventListener("mousemove", this.boundMouseMove);
+    this.canvas.addEventListener("wheel", this.boundWheel, { passive: false });
+    this.canvas.addEventListener("contextmenu", this.boundContextMenu);
     window.addEventListener("keydown", this.boundKeyDown);
     window.addEventListener("keyup", this.boundKeyUp);
 
-    // Register WASD update with Babylon's render loop (works in tests too)
+    // Register update loop with Babylon's render cycle
     this.lastTime = typeof performance !== "undefined" ? performance.now() : 0;
     this.renderCallback = () => {
       const now = typeof performance !== "undefined" ? performance.now() : this.lastTime + 16;
-      const dt = (now - this.lastTime) / 1000;
+      const dt = Math.min((now - this.lastTime) / 1000, 0.1); // Cap at 100ms
       this.lastTime = now;
-      this.updateKeyPan(dt);
+      this.onUpdate(dt);
     };
     this.scene.registerBeforeRender(this.renderCallback);
 
-    return this.orbitCamera;
+    return this.camera;
+  }
+
+  private onMouseDown(e: MouseEvent): void {
+    this.mouseDown[e.button] = true;
+    this.lastMouseX = e.clientX;
+    this.lastMouseY = e.clientY;
+  }
+
+  private onMouseUp(e: MouseEvent): void {
+    this.mouseDown[e.button] = false;
+  }
+
+  private onMouseMove(e: MouseEvent): void {
+    const dx = e.clientX - this.lastMouseX;
+    const dy = e.clientY - this.lastMouseY;
+    this.lastMouseX = e.clientX;
+    this.lastMouseY = e.clientY;
+
+    // Right-click drag: look around (matching PlayCanvas fly mode)
+    if (this.mouseDown[2]) {
+      this.yaw -= dx * ROTATE_SPEED;
+      this.pitch -= dy * ROTATE_SPEED;
+      this.pitch = Math.max(-89, Math.min(89, this.pitch));
+      this.updateCameraRotation();
+    }
+  }
+
+  private onWheel(e: WheelEvent): void {
+    e.preventDefault();
+    if (!this.camera) return;
+
+    // Scroll: zoom (move forward/backward along look direction)
+    const delta = e.deltaY > 0 ? -1 : 1;
+    const forward = this.getForwardVector();
+    const pos = this.camera.position;
+    pos.x += forward.x * delta * ZOOM_SPEED;
+    pos.y += forward.y * delta * ZOOM_SPEED;
+    pos.z += forward.z * delta * ZOOM_SPEED;
+  }
+
+  private onKeyDown(e: KeyboardEvent): void {
+    this.keys.add(e.key.toLowerCase());
+  }
+
+  private onKeyUp(e: KeyboardEvent): void {
+    this.keys.delete(e.key.toLowerCase());
+  }
+
+  private onUpdate(dt: number): void {
+    if (!this.camera) return;
+
+    // Build movement direction from WASD/QE (only when right mouse held)
+    let moveX = 0;
+    let moveY = 0;
+    let moveZ = 0;
+
+    if (this.mouseDown[2]) {
+      if (this.keys.has("w")) moveZ += 1;
+      if (this.keys.has("s")) moveZ -= 1;
+      if (this.keys.has("a")) moveX -= 1;
+      if (this.keys.has("d")) moveX += 1;
+      if (this.keys.has("e") || this.keys.has(" ")) moveY += 1;
+      if (this.keys.has("q")) moveY -= 1;
+    }
+
+    const speed = (moveX !== 0 || moveY !== 0 || moveZ !== 0) ? MOVE_SPEED : 0;
+
+    // Compute world-space movement from camera rotation
+    let targetVelX = 0;
+    let targetVelY = 0;
+    let targetVelZ = 0;
+
+    if (speed > 0) {
+      const forward = this.getForwardVector();
+      const right = this.getRightVector();
+
+      // Normalize input direction
+      const len = Math.sqrt(moveX * moveX + moveY * moveY + moveZ * moveZ) || 1;
+      moveX /= len;
+      moveY /= len;
+      moveZ /= len;
+
+      targetVelX = (forward.x * moveZ + right.x * moveX) * speed;
+      targetVelY = (forward.y * moveZ + right.y * moveX + moveY) * speed;
+      targetVelZ = (forward.z * moveZ + right.z * moveX) * speed;
+    }
+
+    // Apply damping
+    const factor = 1 - Math.pow(DAMPING, dt * 60);
+    this.velocity.x += (targetVelX - this.velocity.x) * factor;
+    this.velocity.y += (targetVelY - this.velocity.y) * factor;
+    this.velocity.z += (targetVelZ - this.velocity.z) * factor;
+
+    // Update position
+    const pos = this.camera.position;
+    pos.x += this.velocity.x * dt;
+    pos.y += this.velocity.y * dt;
+    pos.z += this.velocity.z * dt;
   }
 
   /**
-   * Apply WASD/QE panning to the orbit target each frame.
+   * Update the camera rotation quaternion from yaw/pitch euler angles.
    */
-  private updateKeyPan(dt: number): void {
-    if (!this.orbitCamera || this.keys.size === 0) return;
-
-    // Build pan direction in camera-local space
-    let dx = 0;
-    let dy = 0;
-    let dz = 0;
-    if (this.keys.has("a")) dx -= 1;
-    if (this.keys.has("d")) dx += 1;
-    if (this.keys.has("w")) dz += 1;
-    if (this.keys.has("s")) dz -= 1;
-    if (this.keys.has("e")) dy += 1;
-    if (this.keys.has("q")) dy -= 1;
-
-    if (dx === 0 && dy === 0 && dz === 0) return;
-
-    const speed = KEY_PAN_SPEED * dt;
-
-    // Get camera's right and forward vectors for world-space panning
-    const camera = this.orbitCamera;
-    const viewMatrix = camera.getViewMatrix();
-    // Right vector = row 0 of view matrix
-    const right = new Vector3(
-      viewMatrix.m[0]!,
-      viewMatrix.m[4]!,
-      viewMatrix.m[8]!,
-    );
-    // Up vector = row 1 of view matrix
-    const up = new Vector3(
-      viewMatrix.m[1]!,
-      viewMatrix.m[5]!,
-      viewMatrix.m[9]!,
-    );
-    // Forward vector = row 2 of view matrix (negated for camera direction)
-    const forward = new Vector3(
-      -viewMatrix.m[2]!,
-      -viewMatrix.m[6]!,
-      -viewMatrix.m[10]!,
-    );
-
-    // Compute world-space pan offset
-    const offset = right.scale(dx * speed)
-      .add(up.scale(dy * speed))
-      .add(forward.scale(dz * speed));
-
-    // Move the orbit target (camera follows automatically)
-    camera.target.addInPlace(offset);
+  private updateCameraRotation(): void {
+    if (!this.camera) return;
+    // Babylon's Quaternion.FromEulerAngles takes (pitch, yaw, roll) in radians
+    const pitchRad = this.pitch * (Math.PI / 180);
+    const yawRad = this.yaw * (Math.PI / 180);
+    this.camera.rotationQuaternion = Quaternion.FromEulerAngles(pitchRad, yawRad, 0);
   }
 
   /**
-   * Get the active camera.
+   * Get forward direction vector from current yaw/pitch.
    */
-  getCamera(): ArcRotateCamera | null {
-    return this.orbitCamera;
+  private getForwardVector(): { x: number; y: number; z: number } {
+    const pitchRad = this.pitch * (Math.PI / 180);
+    const yawRad = this.yaw * (Math.PI / 180);
+    return {
+      x: Math.sin(yawRad) * Math.cos(pitchRad),
+      y: Math.sin(pitchRad),
+      z: Math.cos(yawRad) * Math.cos(pitchRad),
+    };
   }
 
   /**
-   * Get the current camera mode.
+   * Get right direction vector from current yaw.
    */
+  private getRightVector(): { x: number; y: number; z: number } {
+    const yawRad = this.yaw * (Math.PI / 180);
+    return {
+      x: Math.cos(yawRad),
+      y: 0,
+      z: -Math.sin(yawRad),
+    };
+  }
+
+  getCamera(): UniversalCamera | null {
+    return this.camera;
+  }
+
   getMode(): "fly" | "orbit" {
     return this.currentMode;
   }
 
   /**
-   * Serialize the camera state for engine switching.
-   *
-   * Converts ArcRotateCamera's spherical coordinates to a position/quaternion
-   * that can be transferred to the PlayCanvas adapter.
+   * Serialize camera state for engine switching.
    */
   serializeCameraState(): {
     position: { x: number; y: number; z: number };
     rotation: { x: number; y: number; z: number; w: number };
     mode: "fly" | "orbit";
   } {
-    if (!this.orbitCamera) {
+    if (!this.camera) {
       return {
-        position: { x: 0, y: 3, z: -8 },
+        position: { x: 0, y: 5, z: -10 },
         rotation: { x: 0, y: 0, z: 0, w: 1 },
-        mode: "orbit",
+        mode: "fly",
       };
     }
 
-    const pos = this.orbitCamera.position;
-
-    // Extract rotation from the camera's view matrix
-    const viewMatrix = this.orbitCamera.getViewMatrix();
-    const worldMatrix = viewMatrix.clone();
-    worldMatrix.invert();
-
-    const scale = Vector3.Zero();
-    const rotQuat = new Quaternion();
-    const translation = Vector3.Zero();
-    worldMatrix.decompose(scale, rotQuat, translation);
+    const pos = this.camera.position;
+    const rot = this.camera.rotationQuaternion ?? Quaternion.FromEulerAngles(
+      this.pitch * (Math.PI / 180),
+      this.yaw * (Math.PI / 180),
+      0,
+    );
 
     return {
       position: { x: pos.x, y: pos.y, z: pos.z },
-      rotation: { x: rotQuat.x, y: rotQuat.y, z: rotQuat.z, w: rotQuat.w },
+      rotation: { x: rot.x, y: rot.y, z: rot.z, w: rot.w },
       mode: this.currentMode,
     };
   }
 
   /**
-   * Restore camera state from a serialized state (from another engine).
-   *
-   * Converts position/quaternion to ArcRotateCamera parameters.
+   * Restore camera state from another engine.
    */
   restoreCameraState(state: {
     position: { x: number; y: number; z: number };
     rotation: { x: number; y: number; z: number; w: number };
   }): void {
-    if (!this.orbitCamera) return;
+    if (!this.camera) return;
 
-    const pos = new Vector3(state.position.x, state.position.y, state.position.z);
-    const rot = new Quaternion(
-      state.rotation.x,
-      state.rotation.y,
-      state.rotation.z,
-      state.rotation.w,
+    this.camera.position = new Vector3(
+      state.position.x,
+      state.position.y,
+      state.position.z,
     );
 
-    // Extract forward direction from the rotation quaternion
-    const rotMatrix = new Matrix();
-    Matrix.FromQuaternionToRef(rot, rotMatrix);
+    // Convert quaternion back to yaw/pitch for our euler-based controls
+    const q = state.rotation;
+    // Extract pitch (x-rotation) and yaw (y-rotation) from quaternion
+    // Using standard quaternion-to-euler conversion
+    const sinp = 2 * (q.w * q.x - q.z * q.y);
+    this.pitch = (Math.abs(sinp) >= 1
+      ? Math.sign(sinp) * 90
+      : Math.asin(sinp) * (180 / Math.PI));
+    const siny = 2 * (q.w * q.y + q.x * q.z);
+    const cosy = 1 - 2 * (q.y * q.y + q.x * q.x);
+    this.yaw = Math.atan2(siny, cosy) * (180 / Math.PI);
 
-    const localForward = new Vector3(0, 0, -1);
-    const worldForward = Vector3.TransformNormal(localForward, rotMatrix);
-
-    // Compute orbit target from position + forward * distance
-    const distance = Math.max(5, pos.length());
-    const target = pos.add(worldForward.scale(distance));
-
-    this.orbitCamera.setTarget(target);
-    this.orbitCamera.setPosition(pos);
+    this.updateCameraRotation();
   }
 
-  /**
-   * Clean up camera controls and event listeners.
-   */
   dispose(): void {
     if (this.renderCallback) {
       this.scene.unregisterBeforeRender(this.renderCallback);
       this.renderCallback = null;
     }
+
+    const canvas = this.canvas;
+    if (this.boundMouseDown) canvas.removeEventListener("mousedown", this.boundMouseDown);
+    if (this.boundMouseUp) canvas.removeEventListener("mouseup", this.boundMouseUp);
+    if (this.boundMouseMove) canvas.removeEventListener("mousemove", this.boundMouseMove);
+    if (this.boundWheel) canvas.removeEventListener("wheel", this.boundWheel);
+    if (this.boundContextMenu) canvas.removeEventListener("contextmenu", this.boundContextMenu);
     if (this.boundKeyDown) window.removeEventListener("keydown", this.boundKeyDown);
     if (this.boundKeyUp) window.removeEventListener("keyup", this.boundKeyUp);
-    if (this.boundContextMenu) {
-      this.canvas.removeEventListener("contextmenu", this.boundContextMenu);
-    }
     this.keys.clear();
 
-    if (this.orbitCamera) {
-      this.orbitCamera.detachControl();
-      this.orbitCamera.dispose();
-      this.orbitCamera = null;
+    if (this.camera) {
+      this.camera.dispose();
+      this.camera = null;
     }
   }
 }
