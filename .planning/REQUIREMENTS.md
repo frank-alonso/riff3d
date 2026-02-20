@@ -96,7 +96,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **PORT-01**: Game ejection -- export Canonical IR as standalone web project (Vite + runtime)
 - [x] **PORT-02**: Portable subset round-trips across ECSON <-> Canonical IR consistently
-- [ ] **PORT-03**: Tuning sections per engine target that degrade gracefully when unsupported
+- [x] **PORT-03**: Tuning sections per engine target that degrade gracefully when unsupported
 
 ### VR & Asymmetric Play
 
@@ -258,7 +258,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AI-04 | Phase 9: AI Authoring | Pending |
 | PORT-01 | Phase 8: Templates, Party System & Ejection | Pending |
 | PORT-02 | Phase 1: Contracts & Testing Spine | Complete |
-| PORT-03 | Phase 4: Dual Adapter Validation | Pending |
+| PORT-03 | Phase 4: Dual Adapter Validation | Complete |
 | VR-01 | Phase 10: VR & Asymmetric Play | Pending |
 | VR-02 | Phase 10: VR & Asymmetric Play | Pending |
 | VR-03 | Phase 10: VR & Asymmetric Play | Pending |
