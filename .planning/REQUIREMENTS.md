@@ -39,7 +39,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **EDIT-07**: Grid/snap system with configurable grid size and rotation snap
 - [x] **EDIT-08**: Save and auto-save (ECSON to persistent storage, auto-save on interval + significant changes)
 - [x] **EDIT-09**: Asset library/object palette with curated starter assets (primitives, props, materials, characters)
-- [ ] **EDIT-10**: Play-test from editor (editor -> runtime transition without page reload)
+- [x] **EDIT-10**: Play-test from editor (editor -> runtime transition without page reload)
 
 ### Rendering & Scene
 
@@ -222,7 +222,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-07 | Phase 2: Closed-Loop Editor | Complete |
 | EDIT-08 | Phase 2: Closed-Loop Editor | Complete |
 | EDIT-09 | Phase 2: Closed-Loop Editor | Complete |
-| EDIT-10 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-10 | Phase 2: Closed-Loop Editor | Complete |
 | RNDR-01 | Phase 2: Closed-Loop Editor | Complete |
 | RNDR-02 | Phase 2: Closed-Loop Editor | Complete |
 | RNDR-03 | Phase 2: Closed-Loop Editor | Complete |
