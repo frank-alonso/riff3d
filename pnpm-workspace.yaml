@@ -1,12 +1,12 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - apps/*
+  - packages/*
+
+catalog:
+  '@fast-check/vitest': ^0.2.4
+  fast-check: ^4.5.3
+  nanoid: ^5.1.5
+  zod: ^3.25.0
 
 onlyBuiltDependencies:
   - esbuild
-
-catalog:
-  zod: ^3.25.0
-  nanoid: ^5.1.5
-  "@fast-check/vitest": ^0.2.3
-  fast-check: ^4.5.3

@@ -18,6 +18,7 @@ The top risks are: (1) ECSON schema growing into a "universal format gravity wel
 For template-focused game design and AI-assistant authoring workflows, see:
 
 - `.planning/research/TEMPLATE_DESIGN_PLAYBOOK.md` — canonical minigame playbook with design psychology (loop + motivation) and shipping contracts (archetype schema, telemetry, promotion gates, AI workflow constraints).
+- `.planning/research/SPATIAL_VALIDATION_PLAYBOOK.md` — combined spatial validation research reference (merged from prototype `03-spatial-validation-research.md` + playbook draft). Covers jump arc physics, reachability graphs, difficulty tiers, validation reports, IQL spatial verbs, editor tooling concepts, and acceptance tests. Reference for Phase 7/8/9 planning — not authoritative.
 
 ---
 
