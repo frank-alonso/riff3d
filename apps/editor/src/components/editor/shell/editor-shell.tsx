@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import type { DragEvent } from "react";
 import dynamic from "next/dynamic";
 import { Group, Panel, Separator, useDefaultLayout } from "react-resizable-panels";
 import { ActivityBar } from "./activity-bar";
@@ -13,7 +14,13 @@ import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { SceneTree } from "@/components/editor/hierarchy/scene-tree";
 import { InspectorPanel } from "@/components/editor/inspector/inspector-panel";
+import { AssetBrowser } from "@/components/editor/assets/asset-browser";
+import { AssetStrip } from "@/components/editor/assets/asset-strip";
+import { ASSET_DRAG_MIME, getStarterAsset } from "@/lib/asset-manager";
+import { generateOpId } from "@riff3d/ecson";
 import type { SceneDocument } from "@riff3d/ecson";
+import { CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
+import type { PatchOp } from "@riff3d/patchops";
 
 /**
  * Dynamically import ViewportCanvas with ssr: false.
@@ -79,6 +86,58 @@ export function EditorShell({
     storage: typeof window !== "undefined" ? localStorage : undefined,
   });
 
+  /**
+   * Handle drag-over on the viewport container to allow asset drops.
+   */
+  const handleViewportDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
+    if (e.dataTransfer.types.includes(ASSET_DRAG_MIME)) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+    }
+  }, []);
+
+  /**
+   * Handle asset drop on the viewport.
+   * Reads the asset ID from the drag data, generates PatchOps, and dispatches.
+   */
+  const handleViewportDrop = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      const assetId = e.dataTransfer.getData(ASSET_DRAG_MIME);
+      if (!assetId) return;
+
+      e.preventDefault();
+
+      const asset = getStarterAsset(assetId);
+      const doc = editorStore.getState().ecsonDoc;
+      if (!asset || !doc) return;
+
+      const parentId = doc.rootEntityId;
+      const ops = asset.createOps(parentId);
+      if (ops.length === 0) return;
+
+      const createOp = ops.find((op) => op.type === "CreateEntity");
+      const newEntityId = createOp
+        ? (createOp.payload as { entityId: string }).entityId
+        : null;
+
+      const batchOp: PatchOp = {
+        id: generateOpId(),
+        timestamp: Date.now(),
+        origin: "user",
+        version: CURRENT_PATCHOP_VERSION,
+        type: "BatchOp",
+        payload: { ops },
+      };
+
+      editorStore.getState().dispatchOp(batchOp);
+
+      if (newEntityId) {
+        editorStore.getState().setSelection([newEntityId]);
+      }
+    },
+    [],
+  );
+
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden">
       {/* Top Bar */}
@@ -121,9 +180,7 @@ export function EditorShell({
                   {activePanel === "hierarchy" ? (
                     <SceneTree />
                   ) : (
-                    <div className="flex items-center justify-center p-4 text-xs text-[var(--muted-foreground)]">
-                      Asset browser will render here (02-05)
-                    </div>
+                    <AssetBrowser />
                   )}
                 </div>
               </Panel>
@@ -135,17 +192,19 @@ export function EditorShell({
           {/* Center: Viewport */}
           <Panel id={PANEL_IDS.center} minSize="30%">
             <div className="flex h-full flex-col">
-              {/* PlayCanvas Viewport */}
-              <div className="flex-1 bg-[#111111]">
+              {/* PlayCanvas Viewport with drop handler for asset spawning */}
+              <div
+                className="flex-1 bg-[#111111]"
+                onDragOver={handleViewportDragOver}
+                onDrop={handleViewportDrop}
+              >
                 <ViewportProvider>
                   <ViewportCanvas />
                 </ViewportProvider>
               </div>
 
-              {/* Bottom strip placeholder for asset drag-and-drop */}
-              <div className="flex h-8 items-center justify-center border-t border-[var(--border)] bg-[var(--panel)] text-xs text-[var(--muted-foreground)] opacity-50">
-                Asset drop zone (02-05)
-              </div>
+              {/* Compact asset strip for quick drag-and-drop */}
+              <AssetStrip />
             </div>
           </Panel>
 
