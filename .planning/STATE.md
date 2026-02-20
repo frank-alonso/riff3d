@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** All meaningful edits flow through a deterministic operation pipeline (IQL -> PatchOps -> ECSON -> Canonical IR -> Adapters), ensuring portability, reproducibility, and safe AI-driven manipulation.
-**Current focus:** Phase 3: Review Gate -- Foundation
+**Current focus:** Phase 4: Dual Adapter Validation
 
 ## Current Position
 
-Phase: 3 of 11 (Review Gate: Foundation)
-Plan: 7 of 7 in current phase
-Status: Executing Phase 3
-Last activity: 2026-02-20 -- Completed 03-05 (Drag preview ghost + tiered performance budgets)
+Phase: 4 of 11 (Dual Adapter Validation)
+Plan: 0 of 4 in current phase
+Status: Phase 3 Complete (PASS_WITH_CONDITIONS) -- Phase 4 ready to plan
+Last activity: 2026-02-20 -- Completed Phase 3 Review Gate (PASS_WITH_CONDITIONS)
 
-Progress: [#########-] 6/7 plans in phase
+Progress: [##########] 7/7 plans in phase (Phase 3 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
-- Average duration: 10.1 min
-- Total execution time: 3.2 hours
+- Total plans completed: 22
+- Average duration: 9.5 min
+- Total execution time: 3.5 hours
 
 **By Phase:**
 
@@ -29,16 +29,17 @@ Progress: [#########-] 6/7 plans in phase
 |-------|-------|-------|----------|
 | 01 | 7 | 74 min | 10.6 min |
 | 02 | 8 | 100 min | 12.5 min |
-| 03 | 4 | 17 min | 4.3 min |
+| 03 | 7 | 54 min | 7.7 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-08 (23 min), 03-01 (4 min), 03-02 (3 min), 03-04 (3 min), 03-05 (7 min)
-- Trend: Phase 3 review gate plans remain fast -- focused remediation tasks
+- Last 5 plans: 03-02 (3 min), 03-04 (3 min), 03-05 (7 min), 03-06 (4 min), 03-07 (25 min)
+- Trend: Phase 3 review gate complete; 03-07 longer due to Codex review round-trips + human verification
 
 *Updated after each plan completion*
 | Phase 03 P01 | 8 | 2 tasks | 11 files |
 | Phase 03 P05 | 7 | 2 tasks | 7 files |
 | Phase 03 P06 | 4 | 2 tasks | 9 files |
+| Phase 03 P07 | 25 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -125,6 +126,10 @@ Recent decisions affecting current work:
 - [03-05]: Editor-layer MIME parsing preserves dependency boundary -- DragPreviewManager accepts clean asset IDs, not ASSET_DRAG_MIME
 - [03-05]: SetProperty PatchOp appended to BatchOp for drop position (avoids modifying starter asset createOps contract)
 - [03-05]: Decompilation budgets added to tiered structure (Codex review S2 -- prevent existing coverage regression)
+- [03-07]: PASS_WITH_CONDITIONS gate decision -- 0 S0/S1, 4 S2, 1 S3 carry-forwards to Phase 4/7
+- [03-07]: F3-001 reclassified from S1 to S2 (evidence verifiable via deterministic test output)
+- [03-07]: Visual baselines remain non-blocking beta until Phase 4 characterizes cross-GPU noise
+- [03-07]: FPS/memory automated tracking deferred to Phase 7 (game loop FPS critical there)
 
 ### Pending Todos
 
@@ -136,8 +141,17 @@ Recent decisions affecting current work:
 - ~~[Phase 3 - CF-P2-01] Add adapter unit tests for core scene builder and component mappers; remove passWithNoTests~~ DONE in 03-01
 - ~~[Phase 3 - CF-P2-02] Add RLS policy integration tests (owner write, non-owner denied, public read-only)~~ DONE in 03-04
 - ~~[Phase 3 - CF-P2-03] Migrate test document construction to use SceneDocumentSchema.parse() for contract validity~~ DONE in 03-02
-- [Phase 3 - CF-P2-04] Split adapter into core/editor-tools subpath exports; add CI LoC budget enforcement
+- ~~[Phase 3 - CF-P2-04] Split adapter into core/editor-tools subpath exports; add CI LoC budget enforcement~~ DONE in 03-03
 - ~~[Phase 3/4] Drag-preview ghost placement: when dragging an asset from the asset browser into the viewport, render a translucent ghost entity that follows the cursor using raycasting against scene geometry (ground plane fallback). Snap to surface normals, show placement position preview. Replace ghost with real entity on drop. Common editor convention (Unity placement ghost, Unreal drag proxy).~~ DONE in 03-05
+- [Phase 4 - CF-P3-01] Attach CI run URLs + exported test artifacts to evidence packets
+- [Phase 4 - CF-P3-02] Promote visual regression to required nightly/CI with per-fixture tolerance bands
+- [Phase 4 - CF-P3-03] Add small multi-seed property suite (3 seeds x 50 iterations) to PR CI
+- [Phase 4/5 - CF-P3-04] Add mechanical mutation-boundary enforcement (no-restricted-imports or architecture guard)
+- [Phase 7 - CF-P3-05] Automate FPS/memory trend checks with explicit regression thresholds
+- [Phase 4] Fix infinite loading skeleton when navigating to editor from dashboard (direct URL works; dashboard->editor route triggers forever loading state)
+- [Phase 4] Wire drag-preview ghost to quick asset panel (bottom toolbar) — currently only works from left sidebar asset browser
+- [Phase 4] Add PatchOps operation log viewer UI (operations flow through PatchOps but no visible log in editor yet)
+- [Phase 4] Investigate scene load time — passable but noticeably slow on first load
 - [Phase 4/7 - CF-04] Add fixture coverage for non-portable glTF extensions when promoted to portable status
 - [Phase 4] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` when validating Babylon.js adapter -- ensure no web-only assumptions baked into IR.
 - [Phase 8] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` Section 7 when designing ejection adapter interface -- directory structures, no binary formats.
@@ -150,6 +164,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 03-05-PLAN.md
-Resume file: .planning/phases/03-review-gate-foundation/03-05-SUMMARY.md
-Next: Execute remaining Phase 3 plans (03-07)
+Stopped at: Completed Phase 3 (Review Gate: Foundation) -- PASS_WITH_CONDITIONS
+Resume file: .planning/phases/03-review-gate-foundation/03-07-SUMMARY.md
+Next: Plan and execute Phase 4 (Dual Adapter Validation)
