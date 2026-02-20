@@ -48,7 +48,7 @@ export function GlbImportButton() {
 
       // Dynamically import the GLB loader to avoid pulling PlayCanvas into SSR
       const { importGlb } = await import(
-        "@riff3d/adapter-playcanvas"
+        "@riff3d/adapter-playcanvas/editor-tools"
       );
 
       // We need the PlayCanvas app instance -- get it from the viewport adapter

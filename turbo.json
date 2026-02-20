@@ -12,6 +12,7 @@
       "dependsOn": ["^build"]
     },
     "lint": {},
+    "check-loc": {},
     "dev": {
       "cache": false,
       "persistent": true

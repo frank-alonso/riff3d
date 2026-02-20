@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   MockApplication,
   MockEntity,
-  MockColor,
   createPlayCanvasMockModule,
 } from "./helpers/pc-mocks";
 

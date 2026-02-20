@@ -2,17 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   MockApplication,
   MockEntity,
-  MockTranslateGizmo,
-  MockRotateGizmo,
-  MockScaleGizmo,
   MockGizmo,
   createPlayCanvasMockModule,
 } from "./helpers/pc-mocks";
 
 vi.mock("playcanvas", () => createPlayCanvasMockModule());
 
-import { GizmoManager } from "../src/gizmo-manager";
-import type { GizmoStoreApi, DispatchTransformCallback } from "../src/gizmo-manager";
+import { GizmoManager } from "../src/editor-tools/gizmo-manager";
+import type { GizmoStoreApi, DispatchTransformCallback } from "../src/editor-tools/gizmo-manager";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

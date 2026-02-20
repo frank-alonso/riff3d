@@ -3,7 +3,7 @@ import type { CanonicalScene } from "@riff3d/canonical-ir";
 import type { EngineAdapter } from "./types";
 import { buildScene, destroySceneEntities } from "./scene-builder";
 import { applyEnvironment, getSkyboxColor } from "./environment";
-import { CameraController, createEditorCamera } from "./camera-controller";
+import { CameraController, createEditorCamera } from "./editor-tools/camera-controller";
 
 /**
  * PlayCanvas adapter implementing the EngineAdapter interface.

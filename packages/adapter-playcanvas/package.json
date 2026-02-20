@@ -7,12 +7,17 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts"
+    },
+    "./editor-tools": {
+      "types": "./src/editor-tools/index.ts",
+      "import": "./src/editor-tools/index.ts"
     }
   },
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "check-loc": "bash ../../scripts/check-adapter-loc.sh"
   },
   "dependencies": {
     "playcanvas": "~2.16.0",

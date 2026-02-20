@@ -43,8 +43,8 @@ globalThis.document = {
 
 vi.mock("playcanvas", () => createPlayCanvasMockModule());
 
-import { SelectionManager } from "../src/selection-manager";
-import type { SelectionStoreApi, SetSelectionCallback } from "../src/selection-manager";
+import { SelectionManager } from "../src/editor-tools/selection-manager";
+import type { SelectionStoreApi, SetSelectionCallback } from "../src/editor-tools/selection-manager";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

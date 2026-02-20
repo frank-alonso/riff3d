@@ -34,7 +34,7 @@ globalThis.window = {
 
 vi.mock("playcanvas", () => createPlayCanvasMockModule());
 
-import { CameraController, createEditorCamera } from "../src/camera-controller";
+import { CameraController, createEditorCamera } from "../src/editor-tools/camera-controller";
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 

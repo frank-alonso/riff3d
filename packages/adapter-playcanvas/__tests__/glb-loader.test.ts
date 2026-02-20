@@ -10,8 +10,7 @@ import {
 
 vi.mock("playcanvas", () => createPlayCanvasMockModule());
 
-import { importGlb } from "../src/glb-loader";
-import type { GlbImportResult } from "../src/glb-loader";
+import { importGlb } from "../src/editor-tools/glb-loader";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

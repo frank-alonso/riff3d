@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { PlayCanvasAdapter } from "@riff3d/adapter-playcanvas";
 import {
-  PlayCanvasAdapter,
   GizmoManager,
   SelectionManager,
   createGrid,
-} from "@riff3d/adapter-playcanvas";
-import type { GridHandle } from "@riff3d/adapter-playcanvas";
+  type GridHandle,
+} from "@riff3d/adapter-playcanvas/editor-tools";
 import { compile } from "@riff3d/canonical-ir";
 import { generateOpId } from "@riff3d/ecson";
 import type { PatchOp } from "@riff3d/patchops";

@@ -6,7 +6,7 @@ import {
 
 vi.mock("playcanvas", () => createPlayCanvasMockModule());
 
-import { createGrid, GridHandle } from "../src/grid";
+import { createGrid, GridHandle } from "../src/editor-tools/grid";
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 

@@ -1,5 +1,5 @@
 import type { PatchOp } from "@riff3d/patchops";
-import type { GlbImportResult } from "@riff3d/adapter-playcanvas";
+import type { GlbImportResult } from "@riff3d/adapter-playcanvas/editor-tools";
 import { generateEntityId, generateOpId } from "@riff3d/ecson";
 import { CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
 
