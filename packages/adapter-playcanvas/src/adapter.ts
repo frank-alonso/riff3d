@@ -135,6 +135,30 @@ export class PlayCanvasAdapter implements EngineAdapter {
   }
 
   /**
+   * Get the internal entity map typed as PlayCanvas entities.
+   * For use by adapter-internal systems (gizmos, selection).
+   */
+  getTypedEntityMap(): Map<string, pc.Entity> {
+    return this.entityMap;
+  }
+
+  /**
+   * Get the PlayCanvas Application instance.
+   * Used by gizmo manager, selection manager, and grid.
+   */
+  getApp(): pc.Application | null {
+    return this.app;
+  }
+
+  /**
+   * Get the editor camera entity.
+   * Used by gizmo manager and selection manager.
+   */
+  getCameraEntity(): pc.Entity | null {
+    return this.editorCamera;
+  }
+
+  /**
    * Resize the canvas to match its container dimensions.
    * Called by ResizeObserver in the viewport component.
    */
