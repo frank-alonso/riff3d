@@ -82,17 +82,17 @@ Plans:
   3. A user can add entities, move/rotate/scale them with gizmos, edit properties in the inspector, reparent in the hierarchy tree, and every edit flows through PatchOps (verifiable in operation log)
   4. Undo/redo works across all edit types, and auto-save persists the ECSON document so closing and reopening the browser restores the exact scene state
   5. Pressing "Play" transitions to runtime mode where the scene runs without a page reload, and pressing "Stop" returns to the editor with all edits preserved
-**Plans**: TBD
+**Plans**: 8 plans
 
 Plans:
-- [ ] 02-01: Next.js editor shell, auth, and project management
-- [ ] 02-02: 3D viewport with PlayCanvas adapter integration
-- [ ] 02-03: Transform gizmos, grid/snap, and selection system
-- [ ] 02-04: Scene hierarchy, inspector panel, and component editing
-- [ ] 02-05: Undo/redo, copy/paste, save/auto-save
-- [ ] 02-06: Asset library, GLB import, and environment settings
-- [ ] 02-07: Play-test mode (edit-to-runtime transition)
-- [ ] 02-08: Phase 2 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
+- [ ] 02-01: Next.js editor shell, auth, and project management (Wave 1)
+- [ ] 02-02: 3D viewport with PlayCanvas adapter integration (Wave 2)
+- [ ] 02-03: Transform gizmos, grid/snap, and selection system (Wave 3)
+- [ ] 02-04: Scene hierarchy, inspector panel, and component editing (Wave 4)
+- [ ] 02-05: Undo/redo, copy/paste, save/auto-save (Wave 4)
+- [ ] 02-06: Asset library, GLB import, and environment settings (Wave 5)
+- [ ] 02-07: Play-test mode (edit-to-runtime transition) (Wave 5)
+- [ ] 02-08: Phase 2 Review (Pre-execution plan review + post-execution evidence audit → Gate decision) (Wave 6)
 
 ### Phase 3: Review Gate: Foundation
 **Goal**: Validate that the contracts are sound and the closed-loop editor is stable before building collaboration and the second adapter on top of it. This is an **expanded-scope review** (per Phase Review Protocol) that also assesses cross-phase integration across Phases 1-2, cumulative debt from any PASS_WITH_CONDITIONS decisions, architecture drift, and carry-forward reconciliation.
