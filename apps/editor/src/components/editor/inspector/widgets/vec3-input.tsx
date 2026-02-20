@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface Vec3InputProps {
   label: string;
@@ -16,16 +16,20 @@ interface Vec3InputProps {
  *
  * Maintains local state so the input feels responsive immediately,
  * even when the upstream store dispatch is debounced. Syncs from
- * the value prop when the store eventually updates.
+ * the value prop when the store eventually updates using the
+ * React-recommended "adjust state during render" pattern.
  */
 export function Vec3Input({ label, value, step = 0.1, onChange }: Vec3InputProps) {
   // Local state for responsive input — masks debounce latency
   const [local, setLocal] = useState(value);
 
-  // Sync from prop when the store updates (or entity changes)
-  useEffect(() => {
+  // Sync from prop when the store updates (adjust state during render,
+  // per https://react.dev/reference/react/useState#storing-information-from-previous-renders)
+  const [prev, setPrev] = useState(value);
+  if (prev.x !== value.x || prev.y !== value.y || prev.z !== value.z) {
+    setPrev(value);
     setLocal(value);
-  }, [value.x, value.y, value.z]); // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
   const handleChange = (axis: "x" | "y" | "z", raw: string) => {
     const parsed = parseFloat(raw);

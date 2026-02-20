@@ -221,7 +221,7 @@ export function EntityHeader({ entityId }: EntityHeaderProps) {
           Transform
         </h4>
 
-        {/* Position */}
+        {/* Position — immediate dispatch so arrow clicks update the scene instantly */}
         <Vec3Input
           label="Position"
           value={entity.transform.position}
@@ -231,6 +231,7 @@ export function EntityHeader({ entityId }: EntityHeaderProps) {
               "transform.position",
               value,
               entity.transform.position,
+              true,
             );
           }}
         />
@@ -246,6 +247,7 @@ export function EntityHeader({ entityId }: EntityHeaderProps) {
               "transform.rotation",
               quat,
               entity.transform.rotation,
+              true,
             );
           }}
         />
@@ -260,6 +262,7 @@ export function EntityHeader({ entityId }: EntityHeaderProps) {
               "transform.scale",
               value,
               entity.transform.scale,
+              true,
             );
           }}
         />

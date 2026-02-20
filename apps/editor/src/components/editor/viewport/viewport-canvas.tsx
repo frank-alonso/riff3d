@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PlayCanvasAdapter,
   GizmoManager,
@@ -15,6 +15,7 @@ import { CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
 import { editorStore } from "@/stores/editor-store";
 import { useViewportAdapter } from "./viewport-provider";
 import { FloatingToolbar } from "./floating-toolbar";
+import { ViewportLoader } from "./viewport-loader";
 
 /**
  * PlayCanvas viewport canvas component.
@@ -43,6 +44,12 @@ export function ViewportCanvas() {
   const isInitialized = useRef(false);
   const adapterRef = useViewportAdapter();
 
+  // Loading state for the viewport loader overlay
+  const [loadingStage, setLoadingStage] = useState<string | null>(
+    "Initializing WebGL...",
+  );
+  const [loadingProgress, setLoadingProgress] = useState(10);
+
   useEffect(() => {
     // Guard against React Strict Mode double-effect
     if (isInitialized.current) return;
@@ -68,12 +75,18 @@ export function ViewportCanvas() {
       const camera = adapter.getCameraEntity();
       if (!app || !camera) return;
 
+      setLoadingStage("Building scene...");
+      setLoadingProgress(50);
+
       // Load existing scene if available
       const { ecsonDoc } = editorStore.getState();
       if (ecsonDoc) {
         const scene = compile(ecsonDoc);
         adapter.loadScene(scene);
       }
+
+      setLoadingStage("Setting up editor tools...");
+      setLoadingProgress(70);
 
       // --- Initialize Grid ---
       const initialGridSize = editorStore.getState().gridSize;
@@ -122,6 +135,8 @@ export function ViewportCanvas() {
       selectionManager = new SelectionManager(app, camera, entityMap, setSelection, editorStore);
       selectionManager.initialize();
 
+      setLoadingProgress(90);
+
       // Subscribe to ecsonDoc changes -> rebuild scene and update managers
       docUnsub = editorStore.subscribe(
         (state) => state.canonicalScene,
@@ -161,6 +176,10 @@ export function ViewportCanvas() {
       };
       window.addEventListener("resize", onWindowResize);
       windowResizeHandler = onWindowResize;
+
+      // Done — dismiss the loader
+      setLoadingStage(null);
+      setLoadingProgress(100);
     });
 
     // Cleanup
@@ -191,6 +210,10 @@ export function ViewportCanvas() {
         className="block h-full w-full"
         tabIndex={0}
       />
+      {/* Loading overlay — shown until adapter init + scene build complete */}
+      {loadingStage && (
+        <ViewportLoader stage={loadingStage} progress={loadingProgress} />
+      )}
       {/* Floating toolbar overlay -- receives pointer events, canvas behind gets the rest */}
       <FloatingToolbar />
     </div>

@@ -8,6 +8,7 @@ import { TopBar } from "./top-bar";
 import { useEditorStore } from "@/stores/hooks";
 import { editorStore } from "@/stores/editor-store";
 import { ViewportProvider } from "@/components/editor/viewport/viewport-provider";
+import { ViewportLoader } from "@/components/editor/viewport/viewport-loader";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { SceneTree } from "@/components/editor/hierarchy/scene-tree";
 import { InspectorPanel } from "@/components/editor/inspector/inspector-panel";
@@ -25,26 +26,8 @@ const ViewportCanvas = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full w-full items-center justify-center bg-[#111111]">
-        <div className="flex flex-col items-center gap-3 text-[var(--muted-foreground)]">
-          <svg
-            width="64"
-            height="64"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="0.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="animate-pulse opacity-30"
-          >
-            <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
-            <path d="M12 12l8-4.5" />
-            <path d="M12 12v9" />
-            <path d="M12 12L4 7.5" />
-          </svg>
-          <span className="text-sm opacity-50">Loading viewport...</span>
-        </div>
+      <div className="relative h-full w-full">
+        <ViewportLoader stage="Loading 3D engine..." progress={-1} />
       </div>
     ),
   },
