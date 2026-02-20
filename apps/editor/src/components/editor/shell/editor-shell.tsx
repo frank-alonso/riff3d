@@ -120,12 +120,23 @@ export function EditorShell({
   // Auto-save: monitors docVersion changes and saves ECSON to Supabase
   useAutoSave(projectId);
 
-  // Load project into store on mount and set read-only mode for non-owners
+  // Load project into store on mount and set read-only mode for non-owners.
+  // Also reads the preferred engine from ECSON metadata and switches if needed.
   useEffect(() => {
     if (ecsonDoc && !hasLoadedProject.current) {
       hasLoadedProject.current = true;
       editorStore.getState().setReadOnly(!isOwner);
       editorStore.getState().loadProject(ecsonDoc);
+
+      // Read engine preference from ECSON metadata (per locked decision:
+      // engine choice is a project-level setting stored with the project).
+      const preferred = ecsonDoc.metadata?.preferredEngine;
+      if (preferred === "babylon" || preferred === "playcanvas") {
+        const currentEngine = editorStore.getState().activeEngine;
+        if (preferred !== currentEngine) {
+          editorStore.getState().switchEngine(preferred);
+        }
+      }
     }
   }, [ecsonDoc, isOwner]);
 

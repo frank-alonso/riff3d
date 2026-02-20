@@ -44,6 +44,9 @@ importers:
 
   apps/editor:
     dependencies:
+      '@riff3d/adapter-babylon':
+        specifier: workspace:*
+        version: link:../../packages/adapter-babylon
       '@riff3d/adapter-playcanvas':
         specifier: workspace:*
         version: link:../../packages/adapter-playcanvas

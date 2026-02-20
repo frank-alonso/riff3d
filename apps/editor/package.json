@@ -16,6 +16,7 @@
     "test:visual:update": "playwright test --project=visual --update-snapshots"
   },
   "dependencies": {
+    "@riff3d/adapter-babylon": "workspace:*",
     "@riff3d/adapter-playcanvas": "workspace:*",
     "@riff3d/canonical-ir": "workspace:*",
     "@riff3d/ecson": "workspace:*",

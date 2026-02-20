@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { PlayCanvasAdapter } from "@riff3d/adapter-playcanvas";
 import {
   GizmoManager,
@@ -9,42 +9,58 @@ import {
   DragPreviewManager,
   type GridHandle,
 } from "@riff3d/adapter-playcanvas/editor-tools";
+import type { EngineAdapter, SerializedCameraState } from "@riff3d/canonical-ir";
 import { compile } from "@riff3d/canonical-ir";
 import { generateOpId } from "@riff3d/ecson";
 import type { PatchOp } from "@riff3d/patchops";
 import { CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
 import { editorStore } from "@/stores/editor-store";
+import { useEditorStore } from "@/stores/hooks";
 import { ASSET_DRAG_MIME, getStarterAsset } from "@/lib/asset-manager";
 import { useViewportAdapter } from "./viewport-provider";
 import { FloatingToolbar } from "./floating-toolbar";
 import { ViewportLoader } from "./viewport-loader";
+import type { EngineType } from "@/stores/slices/engine-slice";
 
 /**
- * PlayCanvas viewport canvas component.
+ * Engine-agnostic viewport canvas component.
  *
  * Renders a <canvas> element that fills its container and initializes
- * the PlayCanvas adapter. Subscribes to the Zustand store to react to:
- * - ecsonDoc changes -> rebuild scene via adapter
- * - cameraMode changes -> switch camera controller
+ * the appropriate engine adapter based on `activeEngine` from the store.
+ * Reacts to engine switches by disposing the old adapter, preserving
+ * camera state, and creating a new adapter.
  *
- * Also initializes editor subsystems:
+ * Subscribes to the Zustand store for:
+ * - activeEngine changes -> switch adapter (dispose old, create new)
+ * - canonicalScene changes -> apply delta or rebuild scene
+ * - cameraMode changes -> switch camera controller (PlayCanvas only)
+ *
+ * Editor subsystems (PlayCanvas-only, not available when Babylon is active):
  * - GizmoManager: transform gizmos attached to selected entities
  * - SelectionManager: click, shift-click, box-select entity picking
  * - Grid: ground plane with configurable grid size
- *
- * Key link: The adapter subscribes to ecsonDoc changes from editorStore
- * and calls adapter.rebuildScene(compile(doc)) when the doc changes.
+ * - DragPreviewManager: ghost placement for asset drag-and-drop
  *
  * CRITICAL: This component must be loaded with `ssr: false` via dynamic
- * import in the parent to prevent SSR of PlayCanvas (which requires DOM).
+ * import in the parent to prevent SSR of PlayCanvas/Babylon (which require DOM).
  *
- * CRITICAL: Uses isInitialized ref to handle React Strict Mode double-effect.
+ * CRITICAL: Uses switchCounter ref to track engine switches and ensure
+ * stale async initialization callbacks do not interfere with newer ones.
  */
 export function ViewportCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isInitialized = useRef(false);
   const adapterRef = useViewportAdapter();
+
+  // Engine state from store
+  const activeEngine = useEditorStore((s) => s.activeEngine);
+  const isSwitchingEngine = useEditorStore((s) => s.isSwitchingEngine);
+
+  // Camera state preserved across engine switches
+  const pendingCameraState = useRef<SerializedCameraState | null>(null);
+
+  // Switch counter to invalidate stale async callbacks
+  const switchCounter = useRef(0);
 
   // Loading state for the viewport loader overlay
   const [loadingStage, setLoadingStage] = useState<string | null>(
@@ -52,15 +68,43 @@ export function ViewportCanvas() {
   );
   const [loadingProgress, setLoadingProgress] = useState(10);
 
+  /**
+   * Create an adapter instance for the given engine type.
+   * Babylon adapter is dynamically imported to avoid loading Babylon.js
+   * when not needed.
+   */
+  const createAdapter = useCallback(
+    async (engineType: EngineType): Promise<EngineAdapter> => {
+      if (engineType === "babylon") {
+        const { BabylonAdapter } = await import("@riff3d/adapter-babylon");
+        return new BabylonAdapter();
+      }
+      return new PlayCanvasAdapter();
+    },
+    [],
+  );
+
   useEffect(() => {
-    // Guard against React Strict Mode double-effect
-    if (isInitialized.current) return;
     if (!canvasRef.current || !containerRef.current) return;
 
-    isInitialized.current = true;
+    // Increment switch counter to invalidate any in-flight initialization
+    const currentSwitch = ++switchCounter.current;
 
-    const adapter = new PlayCanvasAdapter();
-    adapterRef.current = adapter;
+    // Serialize camera state from the previous adapter before disposing
+    if (adapterRef.current) {
+      pendingCameraState.current = adapterRef.current.serializeCameraState();
+      adapterRef.current.dispose();
+      adapterRef.current = null;
+    }
+
+    // Show loading overlay
+    setLoadingStage(
+      activeEngine === "babylon"
+        ? "Initializing Babylon.js..."
+        : "Initializing PlayCanvas...",
+    );
+    setLoadingProgress(10);
+    editorStore.getState().setEngineSwitching(true);
 
     let docUnsub: (() => void) | null = null;
     let cameraModeUnsub: (() => void) | null = null;
@@ -76,12 +120,30 @@ export function ViewportCanvas() {
     let dragOverHandler: ((e: globalThis.DragEvent) => void) | null = null;
     let dragLeaveHandler: ((e: globalThis.DragEvent) => void) | null = null;
     let dropHandler: ((e: globalThis.DragEvent) => void) | null = null;
+    let adapter: EngineAdapter | null = null;
 
     // Initialize adapter asynchronously
-    void adapter.initialize(canvasRef.current).then(() => {
-      const app = adapter.getApp();
-      const camera = adapter.getCameraEntity();
-      if (!app || !camera) return;
+    void createAdapter(activeEngine).then(async (newAdapter) => {
+      // Stale check: if another switch happened while we were creating,
+      // dispose this adapter and bail out
+      if (currentSwitch !== switchCounter.current) {
+        newAdapter.dispose();
+        return;
+      }
+
+      adapter = newAdapter;
+      adapterRef.current = adapter;
+
+      setLoadingStage("Initializing engine...");
+      setLoadingProgress(30);
+
+      await adapter.initialize(canvasRef.current!);
+
+      // Another stale check after async initialize
+      if (currentSwitch !== switchCounter.current) {
+        adapter.dispose();
+        return;
+      }
 
       setLoadingStage("Building scene...");
       setLoadingProgress(50);
@@ -93,168 +155,197 @@ export function ViewportCanvas() {
         adapter.loadScene(scene);
       }
 
+      // Restore camera state from previous engine (if switching)
+      if (pendingCameraState.current) {
+        adapter.restoreCameraState(pendingCameraState.current);
+        pendingCameraState.current = null;
+      }
+
+      // Reset selection on engine switch (per locked decision)
+      editorStore.getState().setSelection([]);
+
       setLoadingStage("Setting up editor tools...");
       setLoadingProgress(70);
 
-      // --- Initialize Grid ---
-      const initialGridSize = editorStore.getState().gridSize;
-      gridHandle = createGrid(app, initialGridSize);
+      // --- PlayCanvas-specific editor tools (gizmos, selection, grid, drag preview) ---
+      // These tools are only available when PlayCanvas is active.
+      // Babylon-specific editor tools are Phase 5+ scope.
+      if (activeEngine === "playcanvas" && adapter instanceof PlayCanvasAdapter) {
+        const pcAdapter = adapter;
+        const app = pcAdapter.getApp();
+        const camera = pcAdapter.getCameraEntity();
 
-      // Subscribe to grid size changes
-      gridSizeUnsub = editorStore.subscribe(
-        (state) => state.gridSize,
-        (newGridSize) => {
-          gridHandle?.updateGridSize(newGridSize);
-        },
-      );
+        if (app && camera) {
+          // --- Initialize Grid ---
+          const initialGridSize = editorStore.getState().gridSize;
+          gridHandle = createGrid(app, initialGridSize);
 
-      // --- Initialize Gizmo Manager ---
-      const entityMap = adapter.getTypedEntityMap();
+          // Subscribe to grid size changes
+          gridSizeUnsub = editorStore.subscribe(
+            (state) => state.gridSize,
+            (newGridSize) => {
+              gridHandle?.updateGridSize(newGridSize);
+            },
+          );
 
-      /**
-       * Dispatch a transform PatchOp when a gizmo drag ends.
-       * Creates a SetProperty op with the entity path and values.
-       */
-      const dispatchTransform = (
-        entityId: string,
-        path: string,
-        value: { x: number; y: number; z: number; w?: number },
-        previousValue: { x: number; y: number; z: number; w?: number },
-      ) => {
-        const op: PatchOp = {
-          id: generateOpId(),
-          timestamp: Date.now(),
-          origin: "user",
-          version: CURRENT_PATCHOP_VERSION,
-          type: "SetProperty",
-          payload: { entityId, path, value, previousValue },
-        };
-        editorStore.getState().dispatchOp(op);
-      };
+          // --- Initialize Gizmo Manager ---
+          const entityMap = pcAdapter.getTypedEntityMap();
 
-      gizmoManager = new GizmoManager(app, camera, entityMap, dispatchTransform);
-      gizmoManager.initialize(editorStore);
-
-      // --- Initialize Selection Manager ---
-      const setSelection = (ids: string[]) => {
-        editorStore.getState().setSelection(ids);
-      };
-
-      selectionManager = new SelectionManager(app, camera, entityMap, setSelection, editorStore);
-      selectionManager.initialize();
-
-      // --- Initialize Drag Preview Manager ---
-      const canvasEl = canvasRef.current;
-      if (canvasEl) {
-        dragPreviewManager = new DragPreviewManager({
-          app,
-          camera,
-          canvas: canvasEl,
-          onDrop: (position, assetId) => {
-            const asset = getStarterAsset(assetId);
-            const doc = editorStore.getState().ecsonDoc;
-            if (!asset || !doc) return;
-
-            const parentId = doc.rootEntityId;
-            const ops = asset.createOps(parentId);
-            if (ops.length === 0) return;
-
-            // Find the new entity ID from the CreateEntity op
-            const createOp = ops.find((op) => op.type === "CreateEntity");
-            const newEntityId = createOp
-              ? (createOp.payload as { entityId: string }).entityId
-              : null;
-
-            // Add a SetProperty op to place the entity at the drop position
-            if (newEntityId) {
-              ops.push({
-                id: generateOpId(),
-                timestamp: Date.now(),
-                origin: "user",
-                version: CURRENT_PATCHOP_VERSION,
-                type: "SetProperty",
-                payload: {
-                  entityId: newEntityId,
-                  path: "transform.position",
-                  value: position,
-                  previousValue: { x: 0, y: 0, z: 0 },
-                },
-              } as PatchOp);
-            }
-
-            // Dispatch as BatchOp for atomic undo
-            const batchOp: PatchOp = {
+          /**
+           * Dispatch a transform PatchOp when a gizmo drag ends.
+           */
+          const dispatchTransform = (
+            entityId: string,
+            path: string,
+            value: { x: number; y: number; z: number; w?: number },
+            previousValue: { x: number; y: number; z: number; w?: number },
+          ) => {
+            const op: PatchOp = {
               id: generateOpId(),
               timestamp: Date.now(),
               origin: "user",
               version: CURRENT_PATCHOP_VERSION,
-              type: "BatchOp",
-              payload: { ops },
+              type: "SetProperty",
+              payload: { entityId, path, value, previousValue },
+            };
+            editorStore.getState().dispatchOp(op);
+          };
+
+          gizmoManager = new GizmoManager(app, camera, entityMap, dispatchTransform);
+          gizmoManager.initialize(editorStore);
+
+          // --- Initialize Selection Manager ---
+          const setSelection = (ids: string[]) => {
+            editorStore.getState().setSelection(ids);
+          };
+
+          selectionManager = new SelectionManager(app, camera, entityMap, setSelection, editorStore);
+          selectionManager.initialize();
+
+          // --- Initialize Drag Preview Manager ---
+          const canvasEl = canvasRef.current;
+          if (canvasEl) {
+            dragPreviewManager = new DragPreviewManager({
+              app,
+              camera,
+              canvas: canvasEl,
+              onDrop: (position, assetId) => {
+                const asset = getStarterAsset(assetId);
+                const doc = editorStore.getState().ecsonDoc;
+                if (!asset || !doc) return;
+
+                const parentId = doc.rootEntityId;
+                const ops = asset.createOps(parentId);
+                if (ops.length === 0) return;
+
+                const createOp = ops.find((op) => op.type === "CreateEntity");
+                const newEntityId = createOp
+                  ? (createOp.payload as { entityId: string }).entityId
+                  : null;
+
+                if (newEntityId) {
+                  ops.push({
+                    id: generateOpId(),
+                    timestamp: Date.now(),
+                    origin: "user",
+                    version: CURRENT_PATCHOP_VERSION,
+                    type: "SetProperty",
+                    payload: {
+                      entityId: newEntityId,
+                      path: "transform.position",
+                      value: position,
+                      previousValue: { x: 0, y: 0, z: 0 },
+                    },
+                  } as PatchOp);
+                }
+
+                const batchOp: PatchOp = {
+                  id: generateOpId(),
+                  timestamp: Date.now(),
+                  origin: "user",
+                  version: CURRENT_PATCHOP_VERSION,
+                  type: "BatchOp",
+                  payload: { ops },
+                };
+
+                editorStore.getState().dispatchOp(batchOp);
+
+                if (newEntityId) {
+                  editorStore.getState().setSelection([newEntityId]);
+                }
+              },
+            });
+
+            const dpm = dragPreviewManager;
+
+            dragEnterHandler = (e: globalThis.DragEvent) => {
+              if (!e.dataTransfer?.types.includes(ASSET_DRAG_MIME)) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "copy";
+              const rect = canvasEl.getBoundingClientRect();
+              const assetId = e.dataTransfer.getData(ASSET_DRAG_MIME);
+              dpm.startPreview(assetId || "__pending__", e.clientX - rect.left, e.clientY - rect.top);
             };
 
-            editorStore.getState().dispatchOp(batchOp);
+            dragOverHandler = (e: globalThis.DragEvent) => {
+              if (!e.dataTransfer?.types.includes(ASSET_DRAG_MIME)) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "copy";
+              const rect = canvasEl.getBoundingClientRect();
+              dpm.updatePreview(e.clientX - rect.left, e.clientY - rect.top);
+            };
 
-            if (newEntityId) {
-              editorStore.getState().setSelection([newEntityId]);
-            }
-          },
-        });
+            dragLeaveHandler = (e: globalThis.DragEvent) => {
+              if (e.relatedTarget && canvasEl.contains(e.relatedTarget as Node)) return;
+              dpm.endPreview();
+            };
 
-        // Wire DOM drag events to the DragPreviewManager
-        // The editor layer parses ASSET_DRAG_MIME; the adapter only handles the 3D ghost.
-        const dpm = dragPreviewManager;
+            dropHandler = (e: globalThis.DragEvent) => {
+              const assetId = e.dataTransfer?.getData(ASSET_DRAG_MIME);
+              if (!assetId) return;
+              e.preventDefault();
+              const rect = canvasEl.getBoundingClientRect();
+              dpm.endPreview();
+              dpm.startPreview(assetId, e.clientX - rect.left, e.clientY - rect.top);
+              dpm.confirmDrop(e.clientX - rect.left, e.clientY - rect.top);
+            };
 
-        dragEnterHandler = (e: globalThis.DragEvent) => {
-          if (!e.dataTransfer?.types.includes(ASSET_DRAG_MIME)) return;
-          e.preventDefault();
-          e.dataTransfer.dropEffect = "copy";
-          const rect = canvasEl.getBoundingClientRect();
-          const assetId = e.dataTransfer.getData(ASSET_DRAG_MIME);
-          // On dragenter the getData may be empty due to browser security;
-          // store a placeholder and update on drop
-          dpm.startPreview(assetId || "__pending__", e.clientX - rect.left, e.clientY - rect.top);
-        };
+            canvasEl.addEventListener("dragenter", dragEnterHandler);
+            canvasEl.addEventListener("dragover", dragOverHandler);
+            canvasEl.addEventListener("dragleave", dragLeaveHandler);
+            canvasEl.addEventListener("drop", dropHandler);
+          }
 
-        dragOverHandler = (e: globalThis.DragEvent) => {
-          if (!e.dataTransfer?.types.includes(ASSET_DRAG_MIME)) return;
-          e.preventDefault();
-          e.dataTransfer.dropEffect = "copy";
-          const rect = canvasEl.getBoundingClientRect();
-          dpm.updatePreview(e.clientX - rect.left, e.clientY - rect.top);
-        };
-
-        dragLeaveHandler = (e: globalThis.DragEvent) => {
-          // Only end preview if actually leaving the canvas (not entering a child)
-          if (e.relatedTarget && canvasEl.contains(e.relatedTarget as Node)) return;
-          dpm.endPreview();
-        };
-
-        dropHandler = (e: globalThis.DragEvent) => {
-          const assetId = e.dataTransfer?.getData(ASSET_DRAG_MIME);
-          if (!assetId) return;
-          e.preventDefault();
-          const rect = canvasEl.getBoundingClientRect();
-          // Restart preview with real asset ID if we had a placeholder
-          dpm.endPreview();
-          dpm.startPreview(assetId, e.clientX - rect.left, e.clientY - rect.top);
-          dpm.confirmDrop(e.clientX - rect.left, e.clientY - rect.top);
-        };
-
-        canvasEl.addEventListener("dragenter", dragEnterHandler);
-        canvasEl.addEventListener("dragover", dragOverHandler);
-        canvasEl.addEventListener("dragleave", dragLeaveHandler);
-        canvasEl.addEventListener("drop", dropHandler);
+          // Listen for app instance requests (used by GLB import)
+          requestAppHandler = () => {
+            window.dispatchEvent(
+              new CustomEvent("riff3d:provide-app", {
+                detail: { app: pcAdapter.getApp() },
+              }),
+            );
+          };
+          window.addEventListener("riff3d:request-app", requestAppHandler);
+        }
       }
 
       setLoadingProgress(90);
 
-      // Subscribe to ecsonDoc changes -> rebuild scene and update managers
+      // --- Delta-aware canonicalScene subscriber ---
+      // Routes between adapter.applyDelta() (O(1) property updates) and
+      // adapter.rebuildScene() (structural changes). The lastDelta field
+      // was added by 04-02 to scene-slice.
       docUnsub = editorStore.subscribe(
         (state) => state.canonicalScene,
         (canonicalScene) => {
-          if (canonicalScene) {
+          if (!canonicalScene || !adapter) return;
+          const { lastDelta } = editorStore.getState();
+          if (lastDelta && lastDelta.type !== "full-rebuild") {
+            adapter.applyDelta(lastDelta);
+          } else {
             adapter.rebuildScene(canonicalScene);
-            // Update entity map references in managers after rebuild
+          }
+          // Update entity map references for PlayCanvas editor tools
+          if (adapter instanceof PlayCanvasAdapter) {
             const newEntityMap = adapter.getTypedEntityMap();
             gizmoManager?.updateEntityMap(newEntityMap);
             selectionManager?.updateEntityMap(newEntityMap);
@@ -262,49 +353,47 @@ export function ViewportCanvas() {
         },
       );
 
-      // Subscribe to cameraMode changes -> switch camera controller
-      cameraModeUnsub = editorStore.subscribe(
-        (state) => state.cameraMode,
-        (mode) => {
-          adapter.switchCameraMode(mode);
-        },
-      );
+      // Subscribe to cameraMode changes -> switch camera controller (PlayCanvas only)
+      if (activeEngine === "playcanvas" && adapter instanceof PlayCanvasAdapter) {
+        const pcAdapter = adapter;
+        cameraModeUnsub = editorStore.subscribe(
+          (state) => state.cameraMode,
+          (mode) => {
+            pcAdapter.switchCameraMode(mode);
+          },
+        );
+      }
 
       // Set up ResizeObserver for container resize -> adapter.resize()
-      if (containerRef.current) {
+      if (containerRef.current && adapter) {
+        const a = adapter;
         resizeObserver = new ResizeObserver(() => {
-          adapter.resize();
+          a.resize();
         });
         resizeObserver.observe(containerRef.current);
       }
 
-      // Backup: window resize catches dev-tools open/close and other
-      // browser chrome changes that ResizeObserver on the container
-      // may miss (the container CSS dimensions don't always update
-      // synchronously with the window resize event).
-      const onWindowResize = () => {
-        requestAnimationFrame(() => adapter.resize());
-      };
-      window.addEventListener("resize", onWindowResize);
-      windowResizeHandler = onWindowResize;
+      // Backup: window resize catches dev-tools open/close
+      if (adapter) {
+        const a = adapter;
+        const onWindowResize = () => {
+          requestAnimationFrame(() => a.resize());
+        };
+        window.addEventListener("resize", onWindowResize);
+        windowResizeHandler = onWindowResize;
+      }
 
-      // Listen for app instance requests (used by GLB import)
-      requestAppHandler = () => {
-        window.dispatchEvent(
-          new CustomEvent("riff3d:provide-app", {
-            detail: { app: adapter.getApp() },
-          }),
-        );
-      };
-      window.addEventListener("riff3d:request-app", requestAppHandler);
-
-      // Done — dismiss the loader
+      // Done -- dismiss the loader and clear switching state
       setLoadingStage(null);
       setLoadingProgress(100);
+      editorStore.getState().setEngineSwitching(false);
     });
 
-    // Cleanup
+    // Cleanup function: disposes adapter and removes all subscriptions
     return () => {
+      // Invalidate any in-flight async callbacks
+      switchCounter.current++;
+
       docUnsub?.();
       cameraModeUnsub?.();
       gridSizeUnsub?.();
@@ -326,11 +415,13 @@ export function ViewportCanvas() {
       gizmoManager?.dispose();
       selectionManager?.dispose();
       gridHandle?.dispose();
-      adapter.dispose();
+      if (adapter) {
+        adapter.dispose();
+        adapter = null;
+      }
       adapterRef.current = null;
-      isInitialized.current = false;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeEngine, createAdapter, adapterRef]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
@@ -342,9 +433,12 @@ export function ViewportCanvas() {
         className="block h-full w-full"
         tabIndex={0}
       />
-      {/* Loading overlay — shown until adapter init + scene build complete */}
-      {loadingStage && (
-        <ViewportLoader stage={loadingStage} progress={loadingProgress} />
+      {/* Loading overlay -- shown until adapter init + scene build complete */}
+      {(loadingStage || isSwitchingEngine) && (
+        <ViewportLoader
+          stage={loadingStage ?? "Switching engine..."}
+          progress={loadingProgress}
+        />
       )}
       {/* Floating toolbar overlay -- receives pointer events, canvas behind gets the rest */}
       <FloatingToolbar />

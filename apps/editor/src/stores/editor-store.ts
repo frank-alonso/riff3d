@@ -5,6 +5,7 @@ import { createSceneSlice, type SceneSlice } from "./slices/scene-slice";
 import { createViewportSlice, type ViewportSlice } from "./slices/viewport-slice";
 import { createSaveSlice, type SaveSlice } from "./slices/save-slice";
 import { createPlaytestSlice, type PlaytestSlice } from "./slices/playtest-slice";
+import { createEngineSlice, type EngineSlice } from "./slices/engine-slice";
 
 /**
  * The single editor store, composed from slices.
@@ -19,8 +20,9 @@ import { createPlaytestSlice, type PlaytestSlice } from "./slices/playtest-slice
  * - ViewportSlice: camera mode, gizmo mode, snap settings
  * - SaveSlice: save status, last saved timestamp
  * - PlaytestSlice: play/pause/stop state machine with ECSON snapshot
+ * - EngineSlice: active engine, switching state (04-03)
  */
-export type EditorState = UISlice & SceneSlice & ViewportSlice & SaveSlice & PlaytestSlice;
+export type EditorState = UISlice & SceneSlice & ViewportSlice & SaveSlice & PlaytestSlice & EngineSlice;
 
 export const editorStore = createStore<EditorState>()(
   subscribeWithSelector((...args) => ({
@@ -29,5 +31,6 @@ export const editorStore = createStore<EditorState>()(
     ...createViewportSlice(...args),
     ...createSaveSlice(...args),
     ...createPlaytestSlice(...args),
+    ...createEngineSlice(...args),
   })),
 );
