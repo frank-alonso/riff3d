@@ -60,6 +60,7 @@ export function ViewportCanvas() {
     let gizmoManager: GizmoManager | null = null;
     let selectionManager: SelectionManager | null = null;
     let gridHandle: GridHandle | null = null;
+    let windowResizeHandler: (() => void) | null = null;
 
     // Initialize adapter asynchronously
     void adapter.initialize(canvasRef.current).then(() => {
@@ -150,6 +151,16 @@ export function ViewportCanvas() {
         });
         resizeObserver.observe(containerRef.current);
       }
+
+      // Backup: window resize catches dev-tools open/close and other
+      // browser chrome changes that ResizeObserver on the container
+      // may miss (the container CSS dimensions don't always update
+      // synchronously with the window resize event).
+      const onWindowResize = () => {
+        requestAnimationFrame(() => adapter.resize());
+      };
+      window.addEventListener("resize", onWindowResize);
+      windowResizeHandler = onWindowResize;
     });
 
     // Cleanup
@@ -158,6 +169,9 @@ export function ViewportCanvas() {
       cameraModeUnsub?.();
       gridSizeUnsub?.();
       resizeObserver?.disconnect();
+      if (windowResizeHandler) {
+        window.removeEventListener("resize", windowResizeHandler);
+      }
       gizmoManager?.dispose();
       selectionManager?.dispose();
       gridHandle?.dispose();

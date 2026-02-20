@@ -225,6 +225,7 @@ export function EntityHeader({ entityId }: EntityHeaderProps) {
         <Vec3Input
           label="Position"
           value={entity.transform.position}
+          step={0.5}
           onChange={(value) => {
             dispatchSetProperty(
               "transform.position",
@@ -238,6 +239,7 @@ export function EntityHeader({ entityId }: EntityHeaderProps) {
         <Vec3Input
           label="Rotation"
           value={eulerRotation}
+          step={1}
           onChange={(euler) => {
             const quat = eulerToQuaternion(euler);
             dispatchSetProperty(
@@ -252,6 +254,7 @@ export function EntityHeader({ entityId }: EntityHeaderProps) {
         <Vec3Input
           label="Scale"
           value={entity.transform.scale}
+          step={0.1}
           onChange={(value) => {
             dispatchSetProperty(
               "transform.scale",
