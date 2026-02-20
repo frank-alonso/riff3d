@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 2 of 11 (Closed-Loop Editor) -- IN PROGRESS
-Plan: 6 of 8 in current phase (02-05 complete, next: 02-06)
+Plan: 7 of 8 in current phase (02-06 complete, next: 02-07)
 Status: Executing
-Last activity: 2026-02-19 -- Completed 02-05 (Undo/redo, clipboard, auto-save, carry-forward tests)
+Last activity: 2026-02-19 -- Completed 02-06 (Asset browser, GLB import, environment settings)
 
-Progress: [#####-----] 5/8 plans in phase
+Progress: [######----] 6/8 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: 11.4 min
-- Total execution time: 2.2 hours
+- Total plans completed: 13
+- Average duration: 11.2 min
+- Total execution time: 2.4 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 7 | 74 min | 10.6 min |
-| 02 | 5 | 62 min | 12.4 min |
+| 02 | 6 | 72 min | 12.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (29 min), 02-02 (12 min), 02-03 (7 min), 02-04 (7 min), 02-05 (7 min)
-- Trend: 02-05 fast (undo/redo stacks + clipboard + auto-save + 3 carry-forward test suites)
+- Last 5 plans: 02-02 (12 min), 02-03 (7 min), 02-04 (7 min), 02-05 (7 min), 02-06 (10 min)
+- Trend: Consistent pace, 02-06 slightly longer (GLB import pipeline + PatchOps engine extension)
 
 *Updated after each plan completion*
 
@@ -98,6 +98,10 @@ Recent decisions affecting current work:
 - [02-05]: Tuning field IS preserved through IR round-trip (compiler/decompiler carry it), correcting plan assumption
 - [02-05]: Internal clipboard buffer as fallback when navigator.clipboard API fails
 - [02-05]: BatchOp for paste/duplicate operations so undo reverts entire operation atomically
+- [02-06]: Custom DOM event bridge (riff3d:request-app) for GLB import to access PlayCanvas app instance
+- [02-06]: __environment__ virtual entity ID for document-level SetProperty PatchOps (ambient, fog, sky)
+- [02-06]: Local object URL for GLB loading in Phase 2 (Supabase Storage upload deferred to collaboration)
+- [02-06]: Environment panel shown in inspector when no entity selected (common editor UX pattern)
 
 ### Pending Todos
 
@@ -118,6 +122,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 02-05-PLAN.md
-Resume file: .planning/phases/02-closed-loop-editor/02-05-SUMMARY.md
-Next: Execute 02-06 (Asset browser and drag-drop)
+Stopped at: Completed 02-06-PLAN.md
+Resume file: .planning/phases/02-closed-loop-editor/02-06-SUMMARY.md
+Next: Execute 02-07 (Play-test mode)

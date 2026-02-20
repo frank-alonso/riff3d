@@ -38,7 +38,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **EDIT-06**: Copy/paste/duplicate within same scene
 - [x] **EDIT-07**: Grid/snap system with configurable grid size and rotation snap
 - [x] **EDIT-08**: Save and auto-save (ECSON to persistent storage, auto-save on interval + significant changes)
-- [ ] **EDIT-09**: Asset library/object palette with curated starter assets (primitives, props, materials, characters)
+- [x] **EDIT-09**: Asset library/object palette with curated starter assets (primitives, props, materials, characters)
 - [ ] **EDIT-10**: Play-test from editor (editor -> runtime transition without page reload)
 
 ### Rendering & Scene
@@ -46,8 +46,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **RNDR-01**: PBR materials (color, metalness, roughness, emissive at minimum)
 - [x] **RNDR-02**: Lighting (directional, point, spot + ambient/environment)
 - [x] **RNDR-03**: Camera entities (perspective and orthographic)
-- [ ] **RNDR-04**: GLB/glTF import with textures, materials, and embedded animations
-- [ ] **RNDR-05**: Environment settings (skybox color/image, fog type/density, ambient light)
+- [x] **RNDR-04**: GLB/glTF import with textures, materials, and embedded animations
+- [x] **RNDR-05**: Environment settings (skybox color/image, fog type/density, ambient light)
 
 ### Runtime & Adapters
 
@@ -221,13 +221,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-06 | Phase 2: Closed-Loop Editor | Complete |
 | EDIT-07 | Phase 2: Closed-Loop Editor | Complete |
 | EDIT-08 | Phase 2: Closed-Loop Editor | Complete |
-| EDIT-09 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-09 | Phase 2: Closed-Loop Editor | Complete |
 | EDIT-10 | Phase 2: Closed-Loop Editor | Pending |
 | RNDR-01 | Phase 2: Closed-Loop Editor | Complete |
 | RNDR-02 | Phase 2: Closed-Loop Editor | Complete |
 | RNDR-03 | Phase 2: Closed-Loop Editor | Complete |
-| RNDR-04 | Phase 2: Closed-Loop Editor | Pending |
-| RNDR-05 | Phase 2: Closed-Loop Editor | Pending |
+| RNDR-04 | Phase 2: Closed-Loop Editor | Complete |
+| RNDR-05 | Phase 2: Closed-Loop Editor | Complete |
 | ADPT-01 | Phase 2: Closed-Loop Editor | Complete |
 | ADPT-02 | Phase 4: Dual Adapter Validation | Pending |
 | ADPT-03 | Phase 4: Dual Adapter Validation | Pending |
