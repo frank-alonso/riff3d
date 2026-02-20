@@ -32,7 +32,7 @@ Every delivery phase follows this sequence. A phase is not complete until all st
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Contracts & Testing Spine** - Define all specs (PatchOps, ECSON, Canonical IR), build golden fixtures (including adversarial), prove round-trip determinism, CI pipeline, fast-check property tests, conformance harness, Rapier evaluation spike
-- [ ] **Phase 2: Closed-Loop Editor** - Minimal editor shell with PlayCanvas adapter proving the full pipeline end-to-end
+- [x] **Phase 2: Closed-Loop Editor** - Minimal editor shell with PlayCanvas adapter proving the full pipeline end-to-end
 - [ ] **Phase 3: Review Gate: Foundation** - Validate contracts and closed-loop before building on them
 - [ ] **Phase 4: Dual Adapter Validation** - Babylon.js adapter proves Canonical IR is truly engine-agnostic
 - [ ] **Phase 5: Collaboration** - Real-time co-editing with Yjs CRDTs, presence, and conflict resolution
@@ -86,13 +86,13 @@ Plans:
 
 Plans:
 - [x] 02-01: Next.js editor shell, auth, and project management (Wave 1)
-- [ ] 02-02: 3D viewport with PlayCanvas adapter integration (Wave 2)
-- [ ] 02-03: Transform gizmos, grid/snap, and selection system (Wave 3)
-- [ ] 02-04: Scene hierarchy, inspector panel, and component editing (Wave 4)
-- [ ] 02-05: Undo/redo, copy/paste, save/auto-save (Wave 4)
-- [ ] 02-06: Asset library, GLB import, and environment settings (Wave 5)
-- [ ] 02-07: Play-test mode (edit-to-runtime transition) (Wave 5)
-- [ ] 02-08: Phase 2 Review (Pre-execution plan review + post-execution evidence audit → Gate decision) (Wave 6)
+- [x] 02-02: 3D viewport with PlayCanvas adapter integration (Wave 2)
+- [x] 02-03: Transform gizmos, grid/snap, and selection system (Wave 3)
+- [x] 02-04: Scene hierarchy, inspector panel, and component editing (Wave 4)
+- [x] 02-05: Undo/redo, copy/paste, save/auto-save (Wave 4)
+- [x] 02-06: Asset library, GLB import, and environment settings (Wave 5)
+- [x] 02-07: Play-test mode (edit-to-runtime transition) (Wave 5)
+- [x] 02-08: Phase 2 Review (Pre-execution plan review + post-execution evidence audit → Gate decision: PASS_WITH_CONDITIONS) (Wave 6)
 
 ### Phase 3: Review Gate: Foundation
 **Goal**: Validate that the contracts are sound and the closed-loop editor is stable before building collaboration and the second adapter on top of it. This is an **expanded-scope review** (per Phase Review Protocol) that also assesses cross-phase integration across Phases 1-2, cumulative debt from any PASS_WITH_CONDITIONS decisions, architecture drift, and carry-forward reconciliation.
@@ -337,7 +337,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Contracts & Testing Spine | 7/7 | Complete    | 2026-02-19 |
-| 2. Closed-Loop Editor | 1/8 | In Progress | - |
+| 2. Closed-Loop Editor | 8/8 | Complete | 2026-02-20 |
 | 3. Review Gate: Foundation | 0/1 | Not started | - |
 | 4. Dual Adapter Validation | 0/4 | Not started | - |
 | 5. Collaboration | 0/5 | Not started | - |
@@ -350,4 +350,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-19 — Phase 2 plan 01 complete (editor shell, auth, project management)*
+*Last updated: 2026-02-20 — Phase 2 complete (PASS_WITH_CONDITIONS, all 8 plans done)*
