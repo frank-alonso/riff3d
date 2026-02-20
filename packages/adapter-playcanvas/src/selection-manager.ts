@@ -50,7 +50,6 @@ export class SelectionManager {
   private mouseDownPos: { x: number; y: number } | null = null;
   private mouseDownTime = 0;
   private isDragging = false;
-  private isAltDown = false;
 
   // Box selection overlay
   private selectionRect: HTMLDivElement | null = null;
@@ -71,8 +70,6 @@ export class SelectionManager {
   private boundMouseDown: ((e: MouseEvent) => void) | null = null;
   private boundMouseMove: ((e: MouseEvent) => void) | null = null;
   private boundMouseUp: ((e: MouseEvent) => void) | null = null;
-  private boundKeyDown: ((e: KeyboardEvent) => void) | null = null;
-  private boundKeyUp: ((e: KeyboardEvent) => void) | null = null;
 
   private unsubscribers: Array<() => void> = [];
 
@@ -102,14 +99,9 @@ export class SelectionManager {
     this.boundMouseDown = (e: MouseEvent) => this.onMouseDown(e);
     this.boundMouseMove = (e: MouseEvent) => this.onMouseMove(e);
     this.boundMouseUp = (e: MouseEvent) => this.onMouseUp(e);
-    this.boundKeyDown = (e: KeyboardEvent) => { this.isAltDown = e.altKey; };
-    this.boundKeyUp = (e: KeyboardEvent) => { this.isAltDown = e.altKey; };
-
     this.canvas.addEventListener("mousedown", this.boundMouseDown);
     this.canvas.addEventListener("mousemove", this.boundMouseMove);
     this.canvas.addEventListener("mouseup", this.boundMouseUp);
-    window.addEventListener("keydown", this.boundKeyDown);
-    window.addEventListener("keyup", this.boundKeyUp);
 
     // Create the selection rectangle overlay element
     this.createSelectionRectOverlay();
@@ -479,9 +471,6 @@ export class SelectionManager {
       if (this.boundMouseMove) this.canvas.removeEventListener("mousemove", this.boundMouseMove);
       if (this.boundMouseUp) this.canvas.removeEventListener("mouseup", this.boundMouseUp);
     }
-    if (this.boundKeyDown) window.removeEventListener("keydown", this.boundKeyDown);
-    if (this.boundKeyUp) window.removeEventListener("keyup", this.boundKeyUp);
-
     // Remove selection rect overlay
     if (this.selectionRect?.parentElement) {
       this.selectionRect.parentElement.removeChild(this.selectionRect);

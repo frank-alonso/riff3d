@@ -67,11 +67,22 @@ interface ProjectData {
   ecson: SceneDocument | null;
 }
 
+/**
+ * Cached project data snapshot. Parsed once from the DOM script tag and
+ * reused on every call. useSyncExternalStore compares snapshots by reference,
+ * so returning a new object each time causes an infinite re-render loop.
+ */
+let cachedProjectData: ProjectData | null | undefined;
+
 /** Read project data from the server-rendered script tag (DOM external store). */
 function getProjectDataSnapshot(): ProjectData | null {
+  if (cachedProjectData !== undefined) return cachedProjectData;
   if (typeof document === "undefined") return null;
   const scriptEl = document.getElementById("__RIFF3D_PROJECT_DATA__");
-  if (!scriptEl?.textContent) return null;
+  if (!scriptEl?.textContent) {
+    cachedProjectData = null;
+    return null;
+  }
   try {
     const data = JSON.parse(scriptEl.textContent) as {
       projectId: string;
@@ -80,14 +91,16 @@ function getProjectDataSnapshot(): ProjectData | null {
       isPublic: boolean;
       ecson: SceneDocument | null;
     };
-    return {
+    cachedProjectData = {
       projectId: data.projectId,
       projectName: data.projectName,
       isOwner: data.isOwner,
       isPublic: data.isPublic,
       ecson: data.ecson ?? null,
     };
+    return cachedProjectData;
   } catch {
+    cachedProjectData = null;
     return null;
   }
 }
@@ -97,11 +110,9 @@ function getProjectDataServerSnapshot(): ProjectData | null {
   return null;
 }
 
-/** No-op subscribe -- the DOM script tag never changes after mount. */
+/** No-op subscribe -- the DOM script tag is static after SSR, never changes. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function subscribeToProjectData(onStoreChange: () => void): () => void {
-  // The script tag data is static after SSR, no re-subscription needed.
-  // But we need to trigger a read after hydration completes.
-  void Promise.resolve().then(onStoreChange);
   return () => {};
 }
 
