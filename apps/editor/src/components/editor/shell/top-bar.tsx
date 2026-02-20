@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useEditorStore } from "@/stores/hooks";
 import type { SaveStatus } from "@/stores/slices/save-slice";
 import { PlayControls } from "@/components/editor/playtest/play-controls";
+import { EngineSwitcher } from "./engine-switcher";
 
 interface TopBarProps {
   projectId: string;
@@ -205,8 +206,11 @@ export function TopBar({
         )}
       </div>
 
-      {/* Center: Play controls */}
-      <PlayControls />
+      {/* Center: Engine switcher + Play controls */}
+      <div className="flex items-center gap-3">
+        <EngineSwitcher />
+        <PlayControls />
+      </div>
 
       {/* Right: Save status + User avatar */}
       <div className="flex items-center gap-3">

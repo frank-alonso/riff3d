@@ -4,6 +4,7 @@ import { useEditorStore } from "@/stores/hooks";
 import { EntityHeader } from "./entity-header";
 import { ComponentInspector } from "./component-inspector";
 import { EnvironmentPanel } from "./widgets/environment-panel";
+import { EngineTuningSection } from "./engine-tuning-section";
 
 /**
  * Inspector panel for the selected entity or environment settings.
@@ -24,7 +25,10 @@ export function InspectorPanel() {
   if (!ecsonDoc || selectedEntityIds.length === 0) {
     // Show environment settings when nothing is selected
     return ecsonDoc ? (
-      <EnvironmentPanel />
+      <div className="h-full overflow-auto">
+        <EnvironmentPanel />
+        <EngineTuningSection entityId={null} />
+      </div>
     ) : (
       <div className="flex h-full items-center justify-center p-4 text-xs text-neutral-500">
         No entity selected
@@ -72,6 +76,9 @@ export function InspectorPanel() {
           No components attached
         </div>
       )}
+
+      {/* Engine tuning section (collapsed by default) */}
+      <EngineTuningSection entityId={entityId} />
     </div>
   );
 }
