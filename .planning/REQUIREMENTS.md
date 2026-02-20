@@ -25,7 +25,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TEST-01**: 5-10 golden fixture projects created covering transforms+parenting, materials+lights, simple animation, events/triggers, character stub, timeline stub
 - [x] **TEST-02**: Round-trip tests passing (ECSON -> Canonical IR -> ECSON for portable subset)
 - [x] **TEST-03**: PatchOps replay determinism tests (ECSON0 + ops -> ECSON1 matches snapshot; replay twice yields identical output)
-- [ ] **TEST-04**: Adapter conformance tests per runtime target (fixtures render/behave within tolerance)
+- [x] **TEST-04**: Adapter conformance tests per runtime target (fixtures render/behave within tolerance)
 - [x] **TEST-05**: Performance budgets defined and enforced (load time, memory ceiling, FPS baseline for web runtime)
 
 ### Editor Core
@@ -54,7 +54,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ADPT-01**: PlayCanvas adapter compiles Canonical IR to PlayCanvas runtime (primary web adapter)
 - [x] **ADPT-02**: Babylon.js adapter compiles Canonical IR to Babylon.js runtime (universality validation)
 - [x] **ADPT-03**: Adapter incremental update (property-level deltas, not full recompile on every edit)
-- [ ] **ADPT-04**: Both adapters pass conformance tests for golden fixtures within defined tolerance
+- [x] **ADPT-04**: Both adapters pass conformance tests for golden fixtures within defined tolerance
 
 ### Collaboration
 
@@ -211,7 +211,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-01 | Phase 1: Contracts & Testing Spine | Complete |
 | TEST-02 | Phase 1: Contracts & Testing Spine | Complete |
 | TEST-03 | Phase 1: Contracts & Testing Spine | Complete |
-| TEST-04 | Phase 4: Dual Adapter Validation | Pending |
+| TEST-04 | Phase 4: Dual Adapter Validation | Complete |
 | TEST-05 | Phase 1: Contracts & Testing Spine | Complete |
 | EDIT-01 | Phase 2: Closed-Loop Editor | Complete |
 | EDIT-02 | Phase 2: Closed-Loop Editor | Complete |
@@ -231,7 +231,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADPT-01 | Phase 2: Closed-Loop Editor | Complete |
 | ADPT-02 | Phase 4: Dual Adapter Validation | Complete |
 | ADPT-03 | Phase 4: Dual Adapter Validation | Complete |
-| ADPT-04 | Phase 4: Dual Adapter Validation | Pending |
+| ADPT-04 | Phase 4: Dual Adapter Validation | Complete |
 | COLLAB-01 | Phase 5: Collaboration | Pending |
 | COLLAB-02 | Phase 5: Collaboration | Pending |
 | COLLAB-03 | Phase 5: Collaboration | Pending |

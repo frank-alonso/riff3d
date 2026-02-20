@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 4 of 11 (Dual Adapter Validation)
-Plan: 3 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: Executing Phase 4
-Last activity: 2026-02-20 -- Completed 04-03 (Viewport Engine Switching)
+Last activity: 2026-02-20 -- Completed 04-04 (Conformance Testing)
 
-Progress: [######----] 3/5 plans in phase
+Progress: [########--] 4/5 plans in phase
 
 ## Performance Metrics
 
@@ -43,6 +43,7 @@ Progress: [######----] 3/5 plans in phase
 | Phase 04 P01 | 10 | 2 tasks | 24 files |
 | Phase 04 P02 | 6 | 2 tasks | 12 files |
 | Phase 04 P03 | 5 | 2 tasks | 12 files |
+| Phase 04 P04 | 7 | 2 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -144,6 +145,11 @@ Recent decisions affecting current work:
 - [Phase 04]: [04-03]: Delta-aware canonicalScene subscriber routes lastDelta to applyDelta() vs rebuildScene() (completing 04-02 end-to-end wiring)
 - [Phase 04]: [04-03]: Dynamic import for Babylon adapter keeps initial bundle minimal (only loads @babylonjs/core on switch)
 - [Phase 04]: [04-03]: PlayCanvas-only editor tools (gizmos, selection, grid, drag preview) when Babylon active; Babylon editor tools deferred Phase 5+
+- [Phase 04]: [04-04]: Conformance package needs playcanvas + @babylonjs/core as devDependencies for vi.mock cross-package resolution in pnpm
+- [Phase 04]: [04-04]: Per-fixture tolerance bands replace Phase 3 generic beta thresholds; visual regression promoted to required CI
+- [Phase 04]: [04-04]: Spot light inner cone tolerance (0.15 color delta) explicitly documented as acceptable Babylon approximation difference
+- [Phase 04]: [04-04]: Cross-engine visual comparison is advisory only (not CI blocking); per-engine baselines are required
+- [Phase 04]: [04-04]: Multi-seed property tests use seeds 42, 123, 456 x 50 iterations for CI-reproducible coverage
 
 ### Pending Todos
 
@@ -158,8 +164,8 @@ Recent decisions affecting current work:
 - ~~[Phase 3 - CF-P2-04] Split adapter into core/editor-tools subpath exports; add CI LoC budget enforcement~~ DONE in 03-03
 - ~~[Phase 3/4] Drag-preview ghost placement: when dragging an asset from the asset browser into the viewport, render a translucent ghost entity that follows the cursor using raycasting against scene geometry (ground plane fallback). Snap to surface normals, show placement position preview. Replace ghost with real entity on drop. Common editor convention (Unity placement ghost, Unreal drag proxy).~~ DONE in 03-05
 - [Phase 4 - CF-P3-01] Attach CI run URLs + exported test artifacts to evidence packets
-- [Phase 4 - CF-P3-02] Promote visual regression to required nightly/CI with per-fixture tolerance bands
-- [Phase 4 - CF-P3-03] Add small multi-seed property suite (3 seeds x 50 iterations) to PR CI
+- ~~[Phase 4 - CF-P3-02] Promote visual regression to required nightly/CI with per-fixture tolerance bands~~ DONE in 04-04
+- ~~[Phase 4 - CF-P3-03] Add small multi-seed property suite (3 seeds x 50 iterations) to PR CI~~ DONE in 04-04
 - [Phase 4/5 - CF-P3-04] Add mechanical mutation-boundary enforcement (no-restricted-imports or architecture guard)
 - [Phase 7 - CF-P3-05] Automate FPS/memory trend checks with explicit regression thresholds
 - [Phase 4] Fix infinite loading skeleton when navigating to editor from dashboard (direct URL works; dashboard->editor route triggers forever loading state)
@@ -178,6 +184,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 04-03-PLAN.md
-Resume file: .planning/phases/04-dual-adapter-validation/04-03-SUMMARY.md
-Next: Execute 04-04-PLAN.md (Conformance Testing)
+Stopped at: Completed 04-04-PLAN.md
+Resume file: .planning/phases/04-dual-adapter-validation/04-04-SUMMARY.md
+Next: Execute 04-05-PLAN.md (Phase 4 Review Gate)
