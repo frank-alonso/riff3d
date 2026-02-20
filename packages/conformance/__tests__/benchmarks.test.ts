@@ -23,7 +23,7 @@ import {
   checkBudget,
 } from "../src/budgets";
 import { generateOpsForFixture } from "../src/replay";
-import { type SceneDocument, SceneDocumentSchema, CURRENT_SCHEMA_VERSION } from "@riff3d/ecson";
+import { SceneDocumentSchema, CURRENT_SCHEMA_VERSION } from "@riff3d/ecson";
 
 // ---------------------------------------------------------------------------
 // CI_MARGIN: 2x budget for CI environments (machine variance)
@@ -89,7 +89,7 @@ describe("Performance benchmarks", () => {
       const baseOps = generateOpsForFixture(fixture);
 
       // Repeat ops to get at least 100
-      const ops = [];
+      const ops: import("@riff3d/patchops").PatchOp[] = [];
       let counter = 0;
       for (const op of baseOps) {
         ops.push({
@@ -133,11 +133,8 @@ describe("Performance benchmarks", () => {
     });
 
     it("applies a BatchOp of 100 sub-ops within budget", () => {
-      const fixture = buildTransformsParentingFixture();
-      const baseOps = generateOpsForFixture(fixture);
-
-      // Repeat pattern to get 100 ops (create entities with unique IDs)
-      const ops = [];
+      // Create 100 CreateEntity sub-ops for the batch benchmark
+      const ops: import("@riff3d/patchops").PatchOp[] = [];
       for (let i = 0; i < 100; i++) {
         const entityId = `batch_ent_${String(i).padStart(6, "0")}`;
         ops.push({

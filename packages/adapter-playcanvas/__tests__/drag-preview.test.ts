@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   MockApplication,
   MockEntity,
-  MockStandardMaterial,
   MockVec3,
   createPlayCanvasMockModule,
 } from "./helpers/pc-mocks";
@@ -56,8 +55,8 @@ function createMockCamera(): MockEntity {
     // screenToWorld: populates output Vec3 based on screen coords and depth
     screenToWorld: vi.fn(
       (
-        sx: number,
-        sy: number,
+        _sx: number,
+        _sy: number,
         depth: number,
         output: MockVec3,
       ) => {

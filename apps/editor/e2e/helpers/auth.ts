@@ -1,32 +1,42 @@
 /**
  * Shared Playwright auth helper for E2E tests.
  *
- * Provides login utilities for test users. Credentials are sourced from
- * environment variables:
- *   - E2E_TEST_EMAIL: test user email address
- *   - E2E_TEST_PASSWORD: test user password
+ * Supports two auth modes:
+ * 1. Anonymous sign-in (default) — clicks "Continue as Guest" on login page
+ * 2. Credential-based login — uses E2E_TEST_EMAIL / E2E_TEST_PASSWORD env vars
  *
- * If env vars are not set, tests requiring auth should skip via test.skip().
+ * Anonymous auth is preferred for E2E tests since it requires no setup.
  */
 import type { Page } from "@playwright/test";
 
 /**
+ * Log in as an anonymous guest via the "Continue as Guest" button.
+ *
+ * This creates a real authenticated session without needing email/password.
+ * The anonymous user can create projects, edit scenes, and exercise the
+ * full editor pipeline.
+ *
+ * @param page - Playwright Page instance
+ */
+export async function loginAsGuest(page: Page): Promise<void> {
+  await page.goto("/login");
+  await page.getByRole("button", { name: /continue as guest/i }).click();
+
+  // Wait for redirect to dashboard (anonymous auth is instant)
+  await page.waitForURL("**/", { timeout: 15_000 });
+}
+
+/**
  * Check whether E2E auth credentials are configured.
- * Tests that require login should call `test.skip(!hasTestCredentials(), ...)`
- * to gracefully skip when credentials are absent.
+ * @deprecated Prefer loginAsGuest() which needs no credentials.
  */
 export function hasTestCredentials(): boolean {
   return !!(process.env.E2E_TEST_EMAIL && process.env.E2E_TEST_PASSWORD);
 }
 
 /**
- * Log in as the test user via the login page.
- *
- * Navigates to `/login`, fills the email/password form, submits,
- * and waits for redirect to the dashboard.
- *
- * @param page - Playwright Page instance
- * @throws If login fails or redirect does not occur within timeout
+ * Log in as the test user via email/password.
+ * @deprecated Prefer loginAsGuest() which needs no credentials.
  */
 export async function loginAsTestUser(page: Page): Promise<void> {
   const email = process.env.E2E_TEST_EMAIL;
@@ -38,16 +48,9 @@ export async function loginAsTestUser(page: Page): Promise<void> {
     );
   }
 
-  // Navigate to login page
   await page.goto("/login");
-
-  // Fill credentials
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
-
-  // Submit the form
   await page.getByRole("button", { name: /sign in|log in/i }).click();
-
-  // Wait for redirect to dashboard (successful login)
   await page.waitForURL("**/dashboard**", { timeout: 15_000 });
 }

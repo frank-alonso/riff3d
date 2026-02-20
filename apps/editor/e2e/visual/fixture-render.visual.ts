@@ -5,9 +5,8 @@
  * PlayCanvas adapter. These baselines establish the foundation for
  * Phase 4 dual-adapter visual comparison (PlayCanvas vs Babylon.js).
  *
- * Run: pnpm test:visual (requires dev server + Supabase + test user)
+ * Run: pnpm test:visual (requires dev server + Supabase with anonymous sign-ins enabled)
  * Update baselines: pnpm test:visual:update
- * Env vars: E2E_TEST_EMAIL, E2E_TEST_PASSWORD
  *
  * NOTE: Visual tests are non-blocking beta. They do NOT gate Phase 3
  * pass/fail. First run generates baselines (no comparison).
@@ -16,7 +15,7 @@
  * by the PlayCanvas adapter after loadScene completes one render frame.
  */
 import { test, expect } from "@playwright/test";
-import { hasTestCredentials, loginAsTestUser } from "../helpers/auth";
+import { loginAsGuest } from "../helpers/auth";
 
 /**
  * Wait for the PlayCanvas adapter's __sceneReady signal.
@@ -25,13 +24,11 @@ import { hasTestCredentials, loginAsTestUser } from "../helpers/auth";
 async function waitForSceneReady(page: import("@playwright/test").Page): Promise<void> {
   await page.evaluate(() => {
     return new Promise<void>((resolve, reject) => {
-      // Check if scene is already ready
       if ((window as unknown as Record<string, unknown>).__sceneAlreadyReady) {
         resolve();
         return;
       }
 
-      // Set a timeout to avoid hanging forever if signal never fires
       const timeout = setTimeout(() => {
         reject(new Error("__sceneReady signal not received within 15s"));
       }, 15_000);
@@ -63,13 +60,8 @@ const FIXTURES = [
 ] as const;
 
 test.describe("Visual baselines - golden fixture rendering", () => {
-  test.skip(
-    !hasTestCredentials(),
-    "Skipping: E2E_TEST_EMAIL and E2E_TEST_PASSWORD not set",
-  );
-
   test.beforeEach(async ({ page }) => {
-    await loginAsTestUser(page);
+    await loginAsGuest(page);
   });
 
   for (const fixture of FIXTURES) {

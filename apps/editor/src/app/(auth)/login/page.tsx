@@ -16,12 +16,28 @@ const providers: { id: Provider; label: string }[] = [
 
 function LoginForm() {
   const [loading, setLoading] = useState<Provider | null>(null);
+  const [guestLoading, setGuestLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") ?? "/";
+
+  async function handleGuestLogin() {
+    setGuestLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInAnonymously();
+
+    if (error) {
+      console.error("Guest login error:", error.message);
+      setGuestLoading(false);
+      return;
+    }
+
+    // Anonymous auth completes immediately — redirect to dashboard
+    window.location.href = redirectTo;
+  }
 
   async function handleLogin(provider: Provider) {
     setLoading(provider);
@@ -112,13 +128,28 @@ function LoginForm() {
                 key={id}
                 variant="secondary"
                 onClick={() => handleLogin(id)}
-                disabled={loading !== null || emailLoading}
+                disabled={loading !== null || emailLoading || guestLoading}
                 className="w-full justify-center"
               >
                 {loading === id ? "Redirecting..." : `Continue with ${label}`}
               </Button>
             ))}
           </div>
+
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-[var(--border)]" />
+            <span className="text-xs text-[var(--muted-foreground)]">or</span>
+            <div className="h-px flex-1 bg-[var(--border)]" />
+          </div>
+
+          <Button
+            variant="secondary"
+            onClick={handleGuestLogin}
+            disabled={loading !== null || emailLoading || guestLoading}
+            className="w-full justify-center"
+          >
+            {guestLoading ? "Setting up..." : "Continue as Guest"}
+          </Button>
         </>
       )}
     </>

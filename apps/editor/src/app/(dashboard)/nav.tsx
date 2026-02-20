@@ -8,9 +8,10 @@ import { LogOut, User } from "lucide-react";
 interface DashboardNavProps {
   email: string;
   avatarUrl?: string;
+  isAnonymous?: boolean;
 }
 
-export function DashboardNav({ email, avatarUrl }: DashboardNavProps) {
+export function DashboardNav({ email, avatarUrl, isAnonymous }: DashboardNavProps) {
   const router = useRouter();
 
   async function handleSignOut() {
@@ -44,14 +45,24 @@ export function DashboardNav({ email, avatarUrl }: DashboardNavProps) {
               <User size={14} className="text-[var(--muted-foreground)]" />
             </div>
           )}
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="rounded-md p-1.5 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
-            title="Sign out"
-          >
-            <LogOut size={16} />
-          </button>
+          {isAnonymous ? (
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="rounded-md px-2.5 py-1 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)]"
+            >
+              Sign up
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="rounded-md p-1.5 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+              title="Sign out"
+            >
+              <LogOut size={16} />
+            </button>
+          )}
         </div>
       </div>
     </nav>

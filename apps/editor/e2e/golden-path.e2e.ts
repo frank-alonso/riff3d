@@ -4,14 +4,13 @@
  * Exercises the full editor lifecycle: create -> edit -> save -> reload -> verify.
  * This test validates the complete pipeline end-to-end in an automated, repeatable way.
  *
- * Run: pnpm test:e2e (requires dev server + Supabase + test user)
- * Env vars: E2E_TEST_EMAIL, E2E_TEST_PASSWORD
+ * Run: pnpm test:e2e (requires dev server + Supabase with anonymous sign-ins enabled)
  *
  * The Playwright config's webServer option starts `pnpm dev` automatically
  * if no server is running on localhost:3000.
  */
 import { test, expect } from "@playwright/test";
-import { hasTestCredentials, loginAsTestUser } from "./helpers/auth";
+import { loginAsGuest } from "./helpers/auth";
 
 /**
  * Wait for the PlayCanvas adapter's __sceneReady signal.
@@ -20,7 +19,6 @@ import { hasTestCredentials, loginAsTestUser } from "./helpers/auth";
 async function waitForSceneReady(page: import("@playwright/test").Page): Promise<void> {
   await page.evaluate(() => {
     return new Promise<void>((resolve) => {
-      // Check if scene is already ready (event may have fired before we listened)
       if ((window as unknown as Record<string, unknown>).__sceneAlreadyReady) {
         resolve();
         return;
@@ -31,13 +29,11 @@ async function waitForSceneReady(page: import("@playwright/test").Page): Promise
 }
 
 test.describe("Golden-path editor lifecycle", () => {
-  test.skip(!hasTestCredentials(), "Skipping: E2E_TEST_EMAIL and E2E_TEST_PASSWORD not set");
-
   const testProjectName = `E2E Test Project ${Date.now()}`;
 
   test("create -> edit -> save -> reload -> verify", async ({ page }) => {
-    // 1. Login
-    await loginAsTestUser(page);
+    // 1. Login as anonymous guest (no credentials needed)
+    await loginAsGuest(page);
 
     // 2. Create project: click "New Project" on dashboard
     await page.getByRole("button", { name: /new project/i }).click();
@@ -106,11 +102,9 @@ test.describe("Golden-path editor lifecycle", () => {
     // Find and delete the test project
     const projectCard = page.locator(`text="${testProjectName}"`).first();
     if (await projectCard.isVisible()) {
-      // Look for a delete button on the project card
       const deleteButton = projectCard.locator("..").locator("[data-testid='delete-project']");
       if (await deleteButton.isVisible()) {
         await deleteButton.click();
-        // Confirm deletion if there's a confirmation dialog
         const confirmButton = page.getByRole("button", { name: /confirm|delete|yes/i });
         if (await confirmButton.isVisible()) {
           await confirmButton.click();

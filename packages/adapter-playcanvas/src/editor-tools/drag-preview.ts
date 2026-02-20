@@ -164,9 +164,6 @@ export class DragPreviewManager {
       return { x: 0, y: 0, z: 0 };
     }
 
-    const canvasWidth = this.canvas.width;
-    const canvasHeight = this.canvas.height;
-
     // Get near and far points from camera projection
     const nearPoint = new pc.Vec3();
     const farPoint = new pc.Vec3();
