@@ -36,6 +36,7 @@ Progress: [####------] 3/7 plans in phase
 - Trend: Phase 3 review gate plans are fast -- focused remediation tasks
 
 *Updated after each plan completion*
+| Phase 03 P01 | 8 | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,7 @@ Recent decisions affecting current work:
 - [03-04]: Regex-based structural tests on migration SQL for fast CI feedback without Supabase dependency
 - [03-04]: describe.skipIf pattern for integration tests -- skip when env vars missing, no test failures in CI
 - [03-04]: Service role client for test cleanup ensures no stale test data accumulates
+- [Phase 03]: [03-01]: globalThis stubs for DOM APIs (HTMLCanvasElement, window, document) instead of jsdom for adapter tests
 
 ### Pending Todos
 
@@ -124,7 +126,7 @@ Recent decisions affecting current work:
 - ~~[Phase 2 - CF-03] Add lint rule or restricted API boundary + negative test for mutation-bypass enforcement~~ DONE in 02-05
 - ~~[Phase 2 - CF-05] Remove unused eslint-disable directive at patchops/src/engine.ts:518~~ DONE in 02-01
 - ~~[Phase 2/3 - CF-06] Document IR conventions in source code (coordinate system, normal maps, physics units, roughness, 1:N entity-to-node)~~ DONE in 02-02 (JSDoc in scene-builder.ts, adapter.ts)
-- [Phase 3 - CF-P2-01] Add adapter unit tests for core scene builder and component mappers; remove passWithNoTests
+- ~~[Phase 3 - CF-P2-01] Add adapter unit tests for core scene builder and component mappers; remove passWithNoTests~~ DONE in 03-01
 - ~~[Phase 3 - CF-P2-02] Add RLS policy integration tests (owner write, non-owner denied, public read-only)~~ DONE in 03-04
 - ~~[Phase 3 - CF-P2-03] Migrate test document construction to use SceneDocumentSchema.parse() for contract validity~~ DONE in 03-02
 - [Phase 3 - CF-P2-04] Split adapter into core/editor-tools subpath exports; add CI LoC budget enforcement
@@ -141,6 +143,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 03-04-PLAN.md
-Resume file: .planning/phases/03-review-gate-foundation/03-04-SUMMARY.md
-Next: Execute remaining Phase 3 plans
+Stopped at: Completed 03-01-PLAN.md
+Resume file: .planning/phases/03-review-gate-foundation/03-01-SUMMARY.md
+Next: Execute remaining Phase 3 plans (03-03, 03-05, 03-06, 03-07)
