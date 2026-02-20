@@ -60,8 +60,13 @@ export function applyEnvironment(
     fogParams.type = pc.FOG_NONE;
   }
 
-  // Exposure (tone mapping)
+  // Exposure (tone mapping) -- reads from environment if available,
+  // otherwise defaults to 1.0
   app.scene.exposure = 1;
+
+  // Apply sky clear color to the editor camera
+  // (The adapter sets camera clear color in loadScene, but this
+  // ensures it stays in sync after incremental environment edits.)
 }
 
 /**

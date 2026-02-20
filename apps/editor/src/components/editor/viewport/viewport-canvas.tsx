@@ -68,6 +68,7 @@ export function ViewportCanvas() {
     let selectionManager: SelectionManager | null = null;
     let gridHandle: GridHandle | null = null;
     let windowResizeHandler: (() => void) | null = null;
+    let requestAppHandler: (() => void) | null = null;
 
     // Initialize adapter asynchronously
     void adapter.initialize(canvasRef.current).then(() => {
@@ -177,6 +178,16 @@ export function ViewportCanvas() {
       window.addEventListener("resize", onWindowResize);
       windowResizeHandler = onWindowResize;
 
+      // Listen for app instance requests (used by GLB import)
+      requestAppHandler = () => {
+        window.dispatchEvent(
+          new CustomEvent("riff3d:provide-app", {
+            detail: { app: adapter.getApp() },
+          }),
+        );
+      };
+      window.addEventListener("riff3d:request-app", requestAppHandler);
+
       // Done — dismiss the loader
       setLoadingStage(null);
       setLoadingProgress(100);
@@ -190,6 +201,9 @@ export function ViewportCanvas() {
       resizeObserver?.disconnect();
       if (windowResizeHandler) {
         window.removeEventListener("resize", windowResizeHandler);
+      }
+      if (requestAppHandler) {
+        window.removeEventListener("riff3d:request-app", requestAppHandler);
       }
       gizmoManager?.dispose();
       selectionManager?.dispose();

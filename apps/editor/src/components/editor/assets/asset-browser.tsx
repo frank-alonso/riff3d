@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { getAssetsByCategory, getStarterAsset, STARTER_ASSETS } from "@/lib/asset-manager";
 import type { AssetCategory } from "@/lib/asset-manager";
 import { AssetCard } from "./asset-card";
+import { GlbImportButton } from "./glb-import";
 import { useEditorStore } from "@/stores/hooks";
 import { generateOpId } from "@riff3d/ecson";
 import { CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
@@ -84,9 +85,9 @@ export function AssetBrowser() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Search input */}
+      {/* Search input + Import button */}
       <div className="border-b border-[var(--border)] px-3 py-2">
-        <div className="flex items-center gap-2 rounded-md bg-[var(--muted)] px-2 py-1.5">
+        <div className="mb-2 flex items-center gap-2 rounded-md bg-[var(--muted)] px-2 py-1.5">
           <Search size={12} className="text-[var(--muted-foreground)]" />
           <input
             type="text"
@@ -96,6 +97,7 @@ export function AssetBrowser() {
             className="w-full bg-transparent text-xs text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none"
           />
         </div>
+        <GlbImportButton />
       </div>
 
       {/* Asset grid */}

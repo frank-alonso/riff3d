@@ -248,6 +248,21 @@ function applySetProperty(
   op: Extract<PatchOp, { type: "SetProperty" }>,
 ): PatchOp {
   const { entityId, path, value, previousValue: _previousValue } = op.payload;
+
+  // Special __environment__ entity: targets doc instead of an entity.
+  // Paths like "environment.ambientLight.color" are resolved against the doc root.
+  if (entityId === "__environment__") {
+    const actualPrevious = getByPath(doc as unknown as Record<string, unknown>, path);
+    setByPath(doc as unknown as Record<string, unknown>, path, value);
+
+    return makeInverse("SetProperty", {
+      entityId,
+      path,
+      value: actualPrevious,
+      previousValue: value,
+    });
+  }
+
   const entity = doc.entities[entityId]!;
 
   const actualPrevious = getByPath(entity as unknown as Record<string, unknown>, path);

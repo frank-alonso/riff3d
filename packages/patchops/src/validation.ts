@@ -41,7 +41,18 @@ export function validateOp(doc: SceneDocument, op: PatchOp): ValidationResult {
       return { valid: true };
     }
 
-    case "SetProperty":
+    case "SetProperty": {
+      const { entityId } = op.payload;
+      // Special __environment__ entity targets doc.environment
+      if (entityId === "__environment__") {
+        return { valid: true };
+      }
+      if (doc.entities[entityId] === undefined) {
+        return { valid: false, error: `Entity '${entityId}' does not exist` };
+      }
+      return { valid: true };
+    }
+
     case "AddComponent":
     case "RemoveComponent":
     case "SetComponentProperty":
