@@ -43,3 +43,9 @@ export const selectCameraMode = (s: EditorState) => s.cameraMode;
 export const selectSnapEnabled = (s: EditorState) => s.snapEnabled;
 export const selectSetGizmoMode = (s: EditorState) => s.setGizmoMode;
 export const selectSetCameraMode = (s: EditorState) => s.setCameraMode;
+
+// Save
+export const selectSaveStatus = (s: EditorState) => s.saveStatus;
+export const selectLastSavedAt = (s: EditorState) => s.lastSavedAt;
+export const selectSetSaveStatus = (s: EditorState) => s.setSaveStatus;
+export const selectMarkSaved = (s: EditorState) => s.markSaved;

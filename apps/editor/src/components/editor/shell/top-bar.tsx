@@ -1,15 +1,50 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, Square, Save, User, Globe, LinkIcon } from "lucide-react";
+import { Play, Pause, Square, Save, User, Globe, LinkIcon, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { useEditorStore } from "@/stores/hooks";
+import type { SaveStatus } from "@/stores/slices/save-slice";
 
 interface TopBarProps {
   projectId: string;
   projectName: string;
   isOwner: boolean;
   isPublic: boolean;
+}
+
+function SaveIndicator({ status }: { status: SaveStatus }) {
+  switch (status) {
+    case "saved":
+      return (
+        <span className="flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]">
+          <Save size={12} className="text-green-500" />
+          Saved
+        </span>
+      );
+    case "saving":
+      return (
+        <span className="flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]">
+          <Loader2 size={12} className="animate-spin" />
+          Saving...
+        </span>
+      );
+    case "unsaved":
+      return (
+        <span className="flex items-center gap-1.5 text-xs text-yellow-500">
+          <span className="inline-block h-2 w-2 rounded-full bg-yellow-500" />
+          Unsaved changes
+        </span>
+      );
+    case "error":
+      return (
+        <span className="flex items-center gap-1.5 text-xs text-red-500">
+          <AlertCircle size={12} />
+          Save failed
+        </span>
+      );
+  }
 }
 
 export function TopBar({
@@ -24,6 +59,7 @@ export function TopBar({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
+  const saveStatus = useEditorStore((s) => s.saveStatus);
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -82,7 +118,7 @@ export function TopBar({
 
   function copyLink() {
     const url = `${window.location.origin}/editor/${projectId}`;
-    navigator.clipboard.writeText(url);
+    void navigator.clipboard.writeText(url);
     toast.success("Link copied!");
   }
 
@@ -95,9 +131,9 @@ export function TopBar({
             ref={inputRef}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            onBlur={saveName}
+            onBlur={() => void saveName()}
             onKeyDown={(e) => {
-              if (e.key === "Enter") saveName();
+              if (e.key === "Enter") void saveName();
               if (e.key === "Escape") {
                 setName(projectName);
                 setEditing(false);
@@ -137,7 +173,7 @@ export function TopBar({
               <div className="absolute left-0 top-full z-20 mt-1 w-44 rounded-lg border border-[var(--border)] bg-[var(--card)] py-1 shadow-xl">
                 <button
                   type="button"
-                  onClick={togglePublic}
+                  onClick={() => void togglePublic()}
                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[var(--foreground)] hover:bg-[var(--muted)]"
                 >
                   <Globe size={14} />
@@ -189,10 +225,7 @@ export function TopBar({
 
       {/* Right: Save status + User avatar */}
       <div className="flex items-center gap-3">
-        <span className="flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]">
-          <Save size={12} />
-          Saved
-        </span>
+        <SaveIndicator status={saveStatus} />
         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)]">
           <User size={12} className="text-[var(--muted-foreground)]" />
         </div>

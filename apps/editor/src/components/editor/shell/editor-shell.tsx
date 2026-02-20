@@ -10,6 +10,7 @@ import { editorStore } from "@/stores/editor-store";
 import { ViewportProvider } from "@/components/editor/viewport/viewport-provider";
 import { ViewportLoader } from "@/components/editor/viewport/viewport-loader";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { useAutoSave } from "@/hooks/use-auto-save";
 import { SceneTree } from "@/components/editor/hierarchy/scene-tree";
 import { InspectorPanel } from "@/components/editor/inspector/inspector-panel";
 import type { SceneDocument } from "@riff3d/ecson";
@@ -58,8 +59,11 @@ export function EditorShell({
   const inspectorVisible = useEditorStore((s) => s.inspectorVisible);
   const hasLoadedProject = useRef(false);
 
-  // Register all editor keyboard shortcuts (W/E/R, Escape, Delete, F)
+  // Register all editor keyboard shortcuts (W/E/R, Escape, Delete, F, undo/redo, copy/paste/duplicate)
   useKeyboardShortcuts();
+
+  // Auto-save: monitors docVersion changes and saves ECSON to Supabase
+  useAutoSave(projectId);
 
   // Load project into store on mount
   useEffect(() => {
