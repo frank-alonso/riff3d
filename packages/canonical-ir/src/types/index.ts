@@ -29,3 +29,6 @@ export {
   CanonicalSceneSchema,
   type CanonicalScene,
 } from "./canonical-scene";
+
+export type { EngineAdapter, SerializedCameraState } from "./engine-adapter";
+export type { IRDelta } from "./ir-delta";

@@ -1,6 +1,6 @@
 import * as pc from "playcanvas";
 import type { CanonicalScene } from "@riff3d/canonical-ir";
-import type { EngineAdapter } from "./types";
+import type { EngineAdapter, SerializedCameraState, IRDelta } from "./types";
 import { buildScene, destroySceneEntities } from "./scene-builder";
 import { applyEnvironment, getSkyboxColor } from "./environment";
 import { CameraController, createEditorCamera } from "./editor-tools/camera-controller";
@@ -247,6 +247,63 @@ export class PlayCanvasAdapter implements EngineAdapter {
    */
   isInPlayMode(): boolean {
     return this.inPlayMode;
+  }
+
+  /**
+   * Apply an incremental scene update from Canonical IR.
+   * Stub: falls back to full rebuild. Incremental delta implementation
+   * will be added in 04-02.
+   */
+  applyDelta(_delta: IRDelta): void {
+    if (this.currentScene) {
+      this.rebuildScene(this.currentScene);
+    }
+  }
+
+  /**
+   * Serialize the editor camera state for engine switching.
+   * Returns position, rotation (quaternion), and camera mode.
+   */
+  serializeCameraState(): SerializedCameraState {
+    if (!this.editorCamera) {
+      return {
+        position: { x: 0, y: 3, z: -8 },
+        rotation: { x: 0, y: 0, z: 0, w: 1 },
+        mode: this.getCameraMode(),
+      };
+    }
+
+    const pos = this.editorCamera.getLocalPosition();
+    const rot = this.editorCamera.getLocalRotation();
+
+    return {
+      position: { x: pos.x, y: pos.y, z: pos.z },
+      rotation: { x: rot.x, y: rot.y, z: rot.z, w: rot.w },
+      mode: this.getCameraMode(),
+    };
+  }
+
+  /**
+   * Restore the editor camera state after engine switch.
+   */
+  restoreCameraState(state: SerializedCameraState): void {
+    if (!this.editorCamera) return;
+
+    this.editorCamera.setLocalPosition(
+      state.position.x,
+      state.position.y,
+      state.position.z,
+    );
+    this.editorCamera.setLocalRotation(
+      state.rotation.x,
+      state.rotation.y,
+      state.rotation.z,
+      state.rotation.w,
+    );
+
+    if (state.mode !== this.getCameraMode()) {
+      this.switchCameraMode(state.mode);
+    }
   }
 
   /**
