@@ -108,9 +108,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Project Management
 
-- [ ] **PROJ-01**: User accounts and authentication (social logins: Google, Discord, GitHub)
-- [ ] **PROJ-02**: Project list/dashboard with thumbnails and last-modified dates
-- [ ] **PROJ-03**: Shareable project links (deep-link into specific project/scene)
+- [x] **PROJ-01**: User accounts and authentication (social logins: Google, Discord, GitHub)
+- [x] **PROJ-02**: Project list/dashboard with thumbnails and last-modified dates
+- [x] **PROJ-03**: Shareable project links (deep-link into specific project/scene)
 
 ## v2 Requirements
 
@@ -264,9 +264,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VR-03 | Phase 10: VR & Asymmetric Play | Pending |
 | VR-04 | Phase 10: VR & Asymmetric Play | Pending |
 | VR-05 | Phase 10: VR & Asymmetric Play | Pending |
-| PROJ-01 | Phase 2: Closed-Loop Editor | Pending |
-| PROJ-02 | Phase 2: Closed-Loop Editor | Pending |
-| PROJ-03 | Phase 2: Closed-Loop Editor | Pending |
+| PROJ-01 | Phase 2: Closed-Loop Editor | Complete |
+| PROJ-02 | Phase 2: Closed-Loop Editor | Complete |
+| PROJ-03 | Phase 2: Closed-Loop Editor | Complete |
 
 **Coverage:**
 - v1 requirements: 69 total

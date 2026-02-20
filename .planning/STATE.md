@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** All meaningful edits flow through a deterministic operation pipeline (IQL -> PatchOps -> ECSON -> Canonical IR -> Adapters), ensuring portability, reproducibility, and safe AI-driven manipulation.
-**Current focus:** Phase 1 COMPLETE -- Phase 2: Closed-Loop Editor next
+**Current focus:** Phase 2: Closed-Loop Editor -- executing plans
 
 ## Current Position
 
-Phase: 1 of 11 (Contracts & Testing Spine) -- COMPLETE
-Plan: 7 of 7 in current phase (all plans complete)
-Status: Phase Complete (PASS_WITH_CONDITIONS)
-Last activity: 2026-02-19 -- Completed 01-07 (Phase 1 Review Gate)
+Phase: 2 of 11 (Closed-Loop Editor) -- IN PROGRESS
+Plan: 2 of 8 in current phase (02-01 complete, next: 02-02)
+Status: Executing
+Last activity: 2026-02-19 -- Completed 02-01 (Editor shell, auth, project management)
 
-Progress: [██████████] 7/7 plans in phase
+Progress: [#---------] 1/8 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 10.6 min
-- Total execution time: 1.2 hours
+- Total plans completed: 8
+- Average duration: 12.9 min
+- Total execution time: 1.7 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 7 | 74 min | 10.6 min |
+| 02 | 1 | 29 min | 29 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (4 min), 01-04 (5 min), 01-05 (7 min), 01-06 (41 min), 01-07 (8 min)
-- Trend: 01-07 was review-only (no code, 2 tasks with human checkpoint)
+- Last 5 plans: 01-05 (7 min), 01-06 (41 min), 01-07 (8 min), 02-01 (29 min)
+- Trend: 02-01 was large (auth + dashboard + editor shell + Turbopack fixes across 124 files)
 
 *Updated after each plan completion*
 
@@ -75,18 +76,23 @@ Recent decisions affecting current work:
 - [01-07]: PASS_WITH_CONDITIONS -- Phase 1 passes with 4 S2 + 1 S3 findings, no S0/S1 blockers
 - [01-07]: Carry-forward items CF-01 through CF-06 targeting Phase 2/3 for resolution
 - [01-07]: F-04 (non-portable glTF extensions) resolved inline via explicit de-scope per 2-template rule
+- [02-01]: Email magic link as primary auth (social providers still available but secondary)
+- [02-01]: react-resizable-panels v4 API: Group/Panel/Separator instead of PanelGroup
+- [02-01]: Stripped .js extensions from 123 imports across all packages for Turbopack compatibility
+- [02-01]: Zustand vanilla store with subscribeWithSelector middleware, slice-based composition
+- [02-01]: Supabase SSR auth pattern: createBrowserClient for client, createServerClient for server, getUser() not getSession()
 
 ### Pending Todos
 
 - [Phase 2 - CF-01] Add rotating-seed/high-run nightly property test suite with failure seed capture
 - [Phase 2 - CF-02] Add lossiness contract tests enumerating expected-stripped fields and asserting all others preserved
 - [Phase 2 - CF-03] Add lint rule or restricted API boundary + negative test for mutation-bypass enforcement
-- [Phase 2 - CF-05] Remove unused eslint-disable directive at patchops/src/engine.ts:518
+- ~~[Phase 2 - CF-05] Remove unused eslint-disable directive at patchops/src/engine.ts:518~~ DONE in 02-01
 - [Phase 2/3 - CF-06] Document IR conventions in source code (coordinate system, normal maps, physics units, roughness, 1:N entity-to-node)
 - [Phase 4/7 - CF-04] Add fixture coverage for non-portable glTF extensions when promoted to portable status
-- [Phase 4] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` when validating Babylon.js adapter — ensure no web-only assumptions baked into IR.
-- [Phase 8] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` Section 7 when designing ejection adapter interface — directory structures, no binary formats.
-- [Phase 8] Re-evaluate `.planning/research/TEMPLATE_DESIGN_PLAYBOOK.md` — reconcile archetype specs with actual component registry, validate against built game runtime, update playtest process, finalize template backlog. Also review at Phase 7 (latency budgets) and Phase 10 (VR variants).
+- [Phase 4] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` when validating Babylon.js adapter -- ensure no web-only assumptions baked into IR.
+- [Phase 8] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` Section 7 when designing ejection adapter interface -- directory structures, no binary formats.
+- [Phase 8] Re-evaluate `.planning/research/TEMPLATE_DESIGN_PLAYBOOK.md` -- reconcile archetype specs with actual component registry, validate against built game runtime, update playtest process, finalize template backlog. Also review at Phase 7 (latency budgets) and Phase 10 (VR variants).
 
 ### Blockers/Concerns
 
@@ -95,6 +101,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-closed-loop-editor/02-CONTEXT.md
-Next: Phase 2 planning (/gsd:plan-phase 2)
+Stopped at: Completed 02-01-PLAN.md
+Resume file: .planning/phases/02-closed-loop-editor/02-01-SUMMARY.md
+Next: Execute 02-02 (3D viewport with PlayCanvas adapter integration)

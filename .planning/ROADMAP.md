@@ -85,7 +85,7 @@ Plans:
 **Plans**: 8 plans
 
 Plans:
-- [ ] 02-01: Next.js editor shell, auth, and project management (Wave 1)
+- [x] 02-01: Next.js editor shell, auth, and project management (Wave 1)
 - [ ] 02-02: 3D viewport with PlayCanvas adapter integration (Wave 2)
 - [ ] 02-03: Transform gizmos, grid/snap, and selection system (Wave 3)
 - [ ] 02-04: Scene hierarchy, inspector panel, and component editing (Wave 4)
@@ -337,7 +337,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Contracts & Testing Spine | 7/7 | Complete    | 2026-02-19 |
-| 2. Closed-Loop Editor | 0/8 | Not started | - |
+| 2. Closed-Loop Editor | 1/8 | In Progress | - |
 | 3. Review Gate: Foundation | 0/1 | Not started | - |
 | 4. Dual Adapter Validation | 0/4 | Not started | - |
 | 5. Collaboration | 0/5 | Not started | - |
@@ -350,4 +350,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-19 — Phase 1 complete (PASS_WITH_CONDITIONS)*
+*Last updated: 2026-02-19 — Phase 2 plan 01 complete (editor shell, auth, project management)*
