@@ -20,7 +20,7 @@ import {
   buildTimelineStubFixture,
   buildAdversarialFixture,
 } from "@riff3d/fixtures";
-import type { SceneDocument, Entity } from "@riff3d/ecson";
+import type { Entity } from "@riff3d/ecson";
 import { compile, decompile } from "@riff3d/canonical-ir";
 
 // ---------------------------------------------------------------------------
@@ -46,14 +46,6 @@ const EXPECTED_STRIPPED_DOC_FIELDS: ReadonlySet<string> = new Set([
   "metadata",
   "schemaVersion",
   "gameSettings",
-]);
-
-/**
- * Component-level fields that are expected to NOT survive the round-trip.
- * Component tuning (engine-specific hints) is stripped.
- */
-const EXPECTED_STRIPPED_COMPONENT_FIELDS: ReadonlySet<string> = new Set([
-  "tuning",
 ]);
 
 // ---------------------------------------------------------------------------
