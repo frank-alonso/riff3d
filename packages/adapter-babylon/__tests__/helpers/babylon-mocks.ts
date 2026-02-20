@@ -342,6 +342,14 @@ export class MockArcRotateCamera {
   keysLeft: number[] = [];
   keysRight: number[] = [];
 
+  // Mock inputs manager for camera controller configuration
+  inputs = {
+    attached: {
+      pointers: { buttons: [0, 1, 2] },
+    },
+    removeByType: vi.fn(),
+  };
+
   attachControl = vi.fn();
   detachControl = vi.fn();
   setTarget = vi.fn((target: MockVector3) => {
@@ -402,6 +410,8 @@ export class MockScene {
   render = vi.fn();
   dispose = vi.fn();
   pick = vi.fn(() => ({ hit: false, pickedMesh: null }));
+  registerBeforeRender = vi.fn();
+  unregisterBeforeRender = vi.fn();
 
   static FOGMODE_NONE = 0;
   static FOGMODE_LINEAR = 2;

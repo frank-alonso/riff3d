@@ -5,15 +5,12 @@ import type { Scene } from "@babylonjs/core/scene";
 /**
  * Camera controller for the Babylon.js editor viewport.
  *
- * Implements orbit camera mode using Babylon's ArcRotateCamera for intuitive
- * 3D navigation. The editor starts in orbit mode by default (matching the
- * PlayCanvas adapter's orbit behavior).
- *
- * Controls (orbit mode):
- * - **Left-click + drag:** Orbit around target
- * - **Right-click + drag:** Pan
+ * Controls are configured to match the PlayCanvas adapter's behavior:
+ * - **Left-click:** Select objects (camera does NOT consume left-click)
+ * - **Right-click + drag:** Orbit around target
+ * - **Middle-click + drag:** Pan
  * - **Scroll wheel:** Zoom in/out
- * - **WASD:** Pan (when canvas has focus)
+ * - **WASD:** Pan camera (custom handler, not ArcRotateCamera's built-in orbit keys)
  *
  * This is a validation adapter, so we provide basic but functional controls.
  * Full parity with PlayCanvas (fly mode, smooth damping) is deferred.
@@ -43,11 +40,22 @@ const PAN_SPEED = 0.5;
 /** Zoom speed (wheel sensitivity). */
 const ZOOM_SPEED = 0.5;
 
+/** WASD pan speed in units per second. */
+const KEY_PAN_SPEED = 8;
+
 export class BabylonCameraController {
   private scene: Scene;
   private canvas: HTMLCanvasElement;
   private orbitCamera: ArcRotateCamera | null = null;
   private currentMode: "fly" | "orbit" = "orbit";
+
+  // WASD key tracking
+  private keys = new Set<string>();
+  private boundKeyDown: ((e: KeyboardEvent) => void) | null = null;
+  private boundKeyUp: ((e: KeyboardEvent) => void) | null = null;
+  private boundContextMenu: ((e: Event) => void) | null = null;
+  private renderCallback: (() => void) | null = null;
+  private lastTime = 0;
 
   constructor(scene: Scene, canvas: HTMLCanvasElement) {
     this.scene = scene;
@@ -56,12 +64,11 @@ export class BabylonCameraController {
 
   /**
    * Initialize the camera controller.
-   * Creates an ArcRotateCamera and attaches controls to the canvas.
+   * Creates an ArcRotateCamera with right-click orbit (left-click free for selection).
    *
    * @returns The newly created orbit camera
    */
   initialize(): ArcRotateCamera {
-    // Create ArcRotateCamera for orbit controls
     this.orbitCamera = new ArcRotateCamera(
       "__editorCamera",
       DEFAULT_ALPHA,
@@ -74,7 +81,7 @@ export class BabylonCameraController {
     // Configure orbit limits
     this.orbitCamera.lowerRadiusLimit = MIN_RADIUS;
     this.orbitCamera.upperRadiusLimit = MAX_RADIUS;
-    this.orbitCamera.lowerBetaLimit = 0.01; // Don't flip upside down
+    this.orbitCamera.lowerBetaLimit = 0.01;
     this.orbitCamera.upperBetaLimit = Math.PI - 0.01;
 
     // Configure input sensitivity
@@ -82,11 +89,19 @@ export class BabylonCameraController {
     this.orbitCamera.wheelPrecision = 1 / ZOOM_SPEED;
     this.orbitCamera.pinchPrecision = 100;
 
-    // Enable keyboard controls (WASD pan)
-    this.orbitCamera.keysUp = [87]; // W
-    this.orbitCamera.keysDown = [83]; // S
-    this.orbitCamera.keysLeft = [65]; // A
-    this.orbitCamera.keysRight = [68]; // D
+    // Reconfigure pointer input: orbit on RIGHT-click only (button 2),
+    // leaving left-click (button 0) free for selection manager.
+    // Middle-click (button 1) for pan (Babylon default).
+    const pointerInput = this.orbitCamera.inputs.attached[
+      "pointers"
+    ] as { buttons?: number[] } | undefined;
+    if (pointerInput) {
+      pointerInput.buttons = [2]; // Only right-click orbits
+    }
+
+    // Remove built-in keyboard input — it maps keys to orbit rotation,
+    // not panning. We handle WASD ourselves below.
+    this.orbitCamera.inputs.removeByType("ArcRotateCameraKeyboardMoveInput");
 
     // Attach camera controls to canvas
     this.orbitCamera.attachControl(this.canvas, true);
@@ -94,7 +109,87 @@ export class BabylonCameraController {
     // Set as active camera
     this.scene.activeCamera = this.orbitCamera;
 
+    // Prevent context menu on right-click so right-drag works for orbit
+    this.boundContextMenu = (e: Event) => e.preventDefault();
+    this.canvas.addEventListener("contextmenu", this.boundContextMenu);
+
+    // Set up WASD panning via DOM key events + animation frame
+    this.boundKeyDown = (e: KeyboardEvent) => {
+      // Only track WASD/QE when canvas or its parent has focus
+      const key = e.key.toLowerCase();
+      if (["w", "a", "s", "d", "q", "e"].includes(key)) {
+        this.keys.add(key);
+      }
+    };
+    this.boundKeyUp = (e: KeyboardEvent) => {
+      this.keys.delete(e.key.toLowerCase());
+    };
+    window.addEventListener("keydown", this.boundKeyDown);
+    window.addEventListener("keyup", this.boundKeyUp);
+
+    // Register WASD update with Babylon's render loop (works in tests too)
+    this.lastTime = typeof performance !== "undefined" ? performance.now() : 0;
+    this.renderCallback = () => {
+      const now = typeof performance !== "undefined" ? performance.now() : this.lastTime + 16;
+      const dt = (now - this.lastTime) / 1000;
+      this.lastTime = now;
+      this.updateKeyPan(dt);
+    };
+    this.scene.registerBeforeRender(this.renderCallback);
+
     return this.orbitCamera;
+  }
+
+  /**
+   * Apply WASD/QE panning to the orbit target each frame.
+   */
+  private updateKeyPan(dt: number): void {
+    if (!this.orbitCamera || this.keys.size === 0) return;
+
+    // Build pan direction in camera-local space
+    let dx = 0;
+    let dy = 0;
+    let dz = 0;
+    if (this.keys.has("a")) dx -= 1;
+    if (this.keys.has("d")) dx += 1;
+    if (this.keys.has("w")) dz += 1;
+    if (this.keys.has("s")) dz -= 1;
+    if (this.keys.has("e")) dy += 1;
+    if (this.keys.has("q")) dy -= 1;
+
+    if (dx === 0 && dy === 0 && dz === 0) return;
+
+    const speed = KEY_PAN_SPEED * dt;
+
+    // Get camera's right and forward vectors for world-space panning
+    const camera = this.orbitCamera;
+    const viewMatrix = camera.getViewMatrix();
+    // Right vector = row 0 of view matrix
+    const right = new Vector3(
+      viewMatrix.m[0]!,
+      viewMatrix.m[4]!,
+      viewMatrix.m[8]!,
+    );
+    // Up vector = row 1 of view matrix
+    const up = new Vector3(
+      viewMatrix.m[1]!,
+      viewMatrix.m[5]!,
+      viewMatrix.m[9]!,
+    );
+    // Forward vector = row 2 of view matrix (negated for camera direction)
+    const forward = new Vector3(
+      -viewMatrix.m[2]!,
+      -viewMatrix.m[6]!,
+      -viewMatrix.m[10]!,
+    );
+
+    // Compute world-space pan offset
+    const offset = right.scale(dx * speed)
+      .add(up.scale(dy * speed))
+      .add(forward.scale(dz * speed));
+
+    // Move the orbit target (camera follows automatically)
+    camera.target.addInPlace(offset);
   }
 
   /**
@@ -116,9 +211,6 @@ export class BabylonCameraController {
    *
    * Converts ArcRotateCamera's spherical coordinates to a position/quaternion
    * that can be transferred to the PlayCanvas adapter.
-   *
-   * The rotation quaternion represents the camera's orientation such that
-   * the camera's local -Z axis points toward the target (PlayCanvas convention).
    */
   serializeCameraState(): {
     position: { x: number; y: number; z: number };
@@ -135,14 +227,11 @@ export class BabylonCameraController {
 
     const pos = this.orbitCamera.position;
 
-    // Extract rotation from the camera's view matrix.
-    // The view matrix is world-to-camera; we need camera-to-world rotation.
+    // Extract rotation from the camera's view matrix
     const viewMatrix = this.orbitCamera.getViewMatrix();
-    // Invert to get camera-to-world transform
     const worldMatrix = viewMatrix.clone();
     worldMatrix.invert();
 
-    // Extract rotation quaternion from the world matrix
     const scale = Vector3.Zero();
     const rotQuat = new Quaternion();
     const translation = Vector3.Zero();
@@ -159,8 +248,6 @@ export class BabylonCameraController {
    * Restore camera state from a serialized state (from another engine).
    *
    * Converts position/quaternion to ArcRotateCamera parameters.
-   * The target is computed from position + forward direction derived
-   * from the rotation quaternion.
    */
   restoreCameraState(state: {
     position: { x: number; y: number; z: number };
@@ -176,32 +263,36 @@ export class BabylonCameraController {
       state.rotation.w,
     );
 
-    // Extract forward direction from the rotation quaternion.
-    // PlayCanvas uses right-handed Y-up where camera local forward is -Z.
-    // Create a rotation matrix from the quaternion and extract the forward.
+    // Extract forward direction from the rotation quaternion
     const rotMatrix = new Matrix();
     Matrix.FromQuaternionToRef(rot, rotMatrix);
 
-    // The -Z column of the rotation matrix gives the forward direction
-    // in the right-handed convention. For Babylon (left-handed), we negate.
-    // Column 2 of the rotation matrix = local Z axis in world space.
     const localForward = new Vector3(0, 0, -1);
     const worldForward = Vector3.TransformNormal(localForward, rotMatrix);
 
-    // Compute orbit target: position + forward * distance
-    // Use the current orbit radius as the base distance, or compute from height
+    // Compute orbit target from position + forward * distance
     const distance = Math.max(5, pos.length());
     const target = pos.add(worldForward.scale(distance));
 
-    // Set target first, then position -- ArcRotateCamera computes alpha/beta/radius
     this.orbitCamera.setTarget(target);
     this.orbitCamera.setPosition(pos);
   }
 
   /**
-   * Clean up camera controls.
+   * Clean up camera controls and event listeners.
    */
   dispose(): void {
+    if (this.renderCallback) {
+      this.scene.unregisterBeforeRender(this.renderCallback);
+      this.renderCallback = null;
+    }
+    if (this.boundKeyDown) window.removeEventListener("keydown", this.boundKeyDown);
+    if (this.boundKeyUp) window.removeEventListener("keyup", this.boundKeyUp);
+    if (this.boundContextMenu) {
+      this.canvas.removeEventListener("contextmenu", this.boundContextMenu);
+    }
+    this.keys.clear();
+
     if (this.orbitCamera) {
       this.orbitCamera.detachControl();
       this.orbitCamera.dispose();
