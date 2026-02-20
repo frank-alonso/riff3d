@@ -31,12 +31,12 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Editor Core
 
 - [x] **EDIT-01**: 3D viewport with orbit/pan/zoom and WASD fly-camera
-- [ ] **EDIT-02**: Transform gizmos (translate/rotate/scale) with configurable snap-to-grid
+- [x] **EDIT-02**: Transform gizmos (translate/rotate/scale) with configurable snap-to-grid
 - [ ] **EDIT-03**: Scene hierarchy tree view with drag-to-reparent, multi-select, search/filter
 - [ ] **EDIT-04**: Properties/inspector panel auto-generated from component schemas
 - [ ] **EDIT-05**: Undo/redo via invertible PatchOps with per-user undo stacks
 - [ ] **EDIT-06**: Copy/paste/duplicate within same scene
-- [ ] **EDIT-07**: Grid/snap system with configurable grid size and rotation snap
+- [x] **EDIT-07**: Grid/snap system with configurable grid size and rotation snap
 - [ ] **EDIT-08**: Save and auto-save (ECSON to persistent storage, auto-save on interval + significant changes)
 - [ ] **EDIT-09**: Asset library/object palette with curated starter assets (primitives, props, materials, characters)
 - [ ] **EDIT-10**: Play-test from editor (editor -> runtime transition without page reload)
@@ -214,12 +214,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-04 | Phase 4: Dual Adapter Validation | Pending |
 | TEST-05 | Phase 1: Contracts & Testing Spine | Complete |
 | EDIT-01 | Phase 2: Closed-Loop Editor | Complete |
-| EDIT-02 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-02 | Phase 2: Closed-Loop Editor | Complete |
 | EDIT-03 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-04 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-05 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-06 | Phase 2: Closed-Loop Editor | Pending |
-| EDIT-07 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-07 | Phase 2: Closed-Loop Editor | Complete |
 | EDIT-08 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-09 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-10 | Phase 2: Closed-Loop Editor | Pending |

@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 2 of 11 (Closed-Loop Editor) -- IN PROGRESS
-Plan: 3 of 8 in current phase (02-02 complete, next: 02-03)
+Plan: 4 of 8 in current phase (02-03 complete, next: 02-04)
 Status: Executing
-Last activity: 2026-02-19 -- Completed 02-02 (3D viewport with PlayCanvas adapter)
+Last activity: 2026-02-19 -- Completed 02-03 (Entity selection and transform gizmos)
 
-Progress: [##--------] 2/8 plans in phase
+Progress: [###-------] 3/8 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 12.7 min
-- Total execution time: 1.9 hours
+- Total plans completed: 10
+- Average duration: 12.1 min
+- Total execution time: 2.0 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 7 | 74 min | 10.6 min |
-| 02 | 2 | 41 min | 20.5 min |
+| 02 | 3 | 48 min | 16.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-06 (41 min), 01-07 (8 min), 02-01 (29 min), 02-02 (12 min)
-- Trend: 02-02 was fast (adapter package + viewport integration, no external service setup needed)
+- Last 5 plans: 01-07 (8 min), 02-01 (29 min), 02-02 (12 min), 02-03 (7 min)
+- Trend: 02-03 was fast (gizmo/selection/grid + toolbar, no API changes needed)
 
 *Updated after each plan completion*
 
@@ -86,6 +86,10 @@ Recent decisions affecting current work:
 - [02-02]: Direct ECSON construction for default scene (not PatchOps -- simpler for initial creation)
 - [02-02]: useSyncExternalStore for server-to-client project data transfer (React 19 lint compliance)
 - [02-02]: Script tag for ECSON transfer from server layout to client page
+- [02-03]: Minimal store interface types (GizmoStoreApi, SelectionStoreApi) on adapter side to avoid circular dependency
+- [02-03]: Emissive color tint for selection highlight (simpler than outline shader)
+- [02-03]: Immediate-mode drawLine for grid (not mesh entity -- avoids selection picking)
+- [02-03]: CSS-based selection rectangle overlay (not canvas-drawn -- avoids WebGL state conflicts)
 
 ### Pending Todos
 
@@ -106,6 +110,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 02-02-PLAN.md
-Resume file: .planning/phases/02-closed-loop-editor/02-02-SUMMARY.md
-Next: Execute 02-03 (Entity selection and transform gizmos)
+Stopped at: Completed 02-03-PLAN.md
+Resume file: .planning/phases/02-closed-loop-editor/02-03-SUMMARY.md
+Next: Execute 02-04 (Inspector panel and property editing)
