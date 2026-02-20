@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 3 of 11 (Review Gate: Foundation)
-Plan: 6 of 7 in current phase
+Plan: 7 of 7 in current phase
 Status: Executing Phase 3
-Last activity: 2026-02-20 -- Completed 03-06 (E2E and visual regression testing)
+Last activity: 2026-02-20 -- Completed 03-05 (Drag preview ghost + tiered performance budgets)
 
-Progress: [########--] 5/7 plans in phase
+Progress: [#########-] 6/7 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
-- Average duration: 10.2 min
-- Total execution time: 3.1 hours
+- Total plans completed: 19
+- Average duration: 10.1 min
+- Total execution time: 3.2 hours
 
 **By Phase:**
 
@@ -29,14 +29,15 @@ Progress: [########--] 5/7 plans in phase
 |-------|-------|-------|----------|
 | 01 | 7 | 74 min | 10.6 min |
 | 02 | 8 | 100 min | 12.5 min |
-| 03 | 3 | 10 min | 3.3 min |
+| 03 | 4 | 17 min | 4.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-07 (5 min), 02-08 (23 min), 03-01 (4 min), 03-02 (3 min), 03-04 (3 min)
-- Trend: Phase 3 review gate plans are fast -- focused remediation tasks
+- Last 5 plans: 02-08 (23 min), 03-01 (4 min), 03-02 (3 min), 03-04 (3 min), 03-05 (7 min)
+- Trend: Phase 3 review gate plans remain fast -- focused remediation tasks
 
 *Updated after each plan completion*
 | Phase 03 P01 | 8 | 2 tasks | 11 files |
+| Phase 03 P05 | 7 | 2 tasks | 7 files |
 | Phase 03 P06 | 4 | 2 tasks | 9 files |
 
 ## Accumulated Context
@@ -121,6 +122,9 @@ Recent decisions affecting current work:
 - [Phase 03]: [03-01]: globalThis stubs for DOM APIs (HTMLCanvasElement, window, document) instead of jsdom for adapter tests
 - [Phase 03]: __sceneReady signal in loadScene only (rebuildScene delegates to loadScene, avoiding double-fire)
 - [Phase 03]: Visual E2E tests non-blocking beta with generous thresholds (2% pixel, 0.3 color) for GPU variance
+- [03-05]: Editor-layer MIME parsing preserves dependency boundary -- DragPreviewManager accepts clean asset IDs, not ASSET_DRAG_MIME
+- [03-05]: SetProperty PatchOp appended to BatchOp for drop position (avoids modifying starter asset createOps contract)
+- [03-05]: Decompilation budgets added to tiered structure (Codex review S2 -- prevent existing coverage regression)
 
 ### Pending Todos
 
@@ -133,7 +137,7 @@ Recent decisions affecting current work:
 - ~~[Phase 3 - CF-P2-02] Add RLS policy integration tests (owner write, non-owner denied, public read-only)~~ DONE in 03-04
 - ~~[Phase 3 - CF-P2-03] Migrate test document construction to use SceneDocumentSchema.parse() for contract validity~~ DONE in 03-02
 - [Phase 3 - CF-P2-04] Split adapter into core/editor-tools subpath exports; add CI LoC budget enforcement
-- [Phase 3/4] Drag-preview ghost placement: when dragging an asset from the asset browser into the viewport, render a translucent ghost entity that follows the cursor using raycasting against scene geometry (ground plane fallback). Snap to surface normals, show placement position preview. Replace ghost with real entity on drop. Common editor convention (Unity placement ghost, Unreal drag proxy).
+- ~~[Phase 3/4] Drag-preview ghost placement: when dragging an asset from the asset browser into the viewport, render a translucent ghost entity that follows the cursor using raycasting against scene geometry (ground plane fallback). Snap to surface normals, show placement position preview. Replace ghost with real entity on drop. Common editor convention (Unity placement ghost, Unreal drag proxy).~~ DONE in 03-05
 - [Phase 4/7 - CF-04] Add fixture coverage for non-portable glTF extensions when promoted to portable status
 - [Phase 4] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` when validating Babylon.js adapter -- ensure no web-only assumptions baked into IR.
 - [Phase 8] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` Section 7 when designing ejection adapter interface -- directory structures, no binary formats.
@@ -146,6 +150,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 03-06-PLAN.md
-Resume file: .planning/phases/03-review-gate-foundation/03-06-SUMMARY.md
+Stopped at: Completed 03-05-PLAN.md
+Resume file: .planning/phases/03-review-gate-foundation/03-05-SUMMARY.md
 Next: Execute remaining Phase 3 plans (03-07)
