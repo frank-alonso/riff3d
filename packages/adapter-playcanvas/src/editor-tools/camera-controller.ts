@@ -285,6 +285,30 @@ export class CameraController {
   }
 
   /**
+   * Get the current yaw/pitch euler angles (degrees).
+   * Returns the active mode's angles (fly or orbit).
+   */
+  getEulerAngles(): { yaw: number; pitch: number } {
+    if (this.currentMode === "fly") {
+      return { yaw: this.flyYaw, pitch: this.flyPitch };
+    }
+    return { yaw: this.orbitYaw, pitch: this.orbitPitch };
+  }
+
+  /**
+   * Set yaw/pitch from external state (e.g. engine switch restore).
+   * Updates the internal euler angles so the next update frame
+   * doesn't overwrite the restored rotation.
+   */
+  setEulerAngles(yaw: number, pitch: number): void {
+    this.flyYaw = yaw;
+    this.flyPitch = pitch;
+    this.flyVelocity.set(0, 0, 0);
+    this.orbitYaw = yaw;
+    this.orbitPitch = pitch;
+  }
+
+  /**
    * Clean up event listeners and controllers.
    */
   dispose(): void {

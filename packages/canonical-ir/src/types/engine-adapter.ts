@@ -21,11 +21,24 @@ import type { IRDelta } from "./ir-delta";
  *
  * When switching between adapters (PlayCanvas <-> Babylon), the camera
  * position/rotation can be transferred to maintain the user's viewpoint.
+ *
+ * All values are in a **common right-handed Y-up coordinate system**
+ * (matching PlayCanvas). Babylon adapters convert to/from left-handed
+ * coordinates during serialize/deserialize.
+ *
+ * The optional `yaw`/`pitch` fields (degrees) take precedence over
+ * `rotation` when available, avoiding lossy quaternion conversion.
+ *   - Positive yaw = turn left (counterclockwise from above)
+ *   - Positive pitch = look up
  */
 export interface SerializedCameraState {
   position: { x: number; y: number; z: number };
   rotation: { x: number; y: number; z: number; w: number };
   mode: "fly" | "orbit";
+  /** Yaw in degrees (positive = turn left). Takes precedence over rotation. */
+  yaw?: number;
+  /** Pitch in degrees (positive = look up). Takes precedence over rotation. */
+  pitch?: number;
 }
 
 /**

@@ -40,7 +40,20 @@ Phase 4: Dual Adapter Validation passes with conditions.
 | CF-P4-02 | Align CLAUDE.md exception contract with actual bypass points (add engine preference) | Phase 5 | Claude |
 | CF-P4-03 | Attach CI run URLs/artifacts to evidence packets | Phase 5 | Claude |
 | CF-P4-04 | Cross-engine drift trend monitoring (when performance dashboard built) | Phase 7 | Claude |
+| CF-P4-05 | Camera position/rotation not synced when swapping engines (default orientations differ) | Phase 5 | Claude |
+| CF-P4-06 | Babylon-first load sometimes fails to render PlayCanvas on switch (race condition) | Phase 5 | Claude |
+| CF-P4-07 | Browser resize sometimes causes scene to stop rendering (needs robust resize observer) | Phase 5 | Claude |
+
+## Post-Gate Fix Attempts
+
+After the gate decision, three fix commits were made to address CF-P4-05/06/07:
+- `b8ee396` fix(04): add camera controls, selection, and camera state transfer for Babylon adapter
+- `338b7a2` fix(04): align Babylon camera controls with PlayCanvas behavior
+- `9b632b9` fix(04): rewrite Babylon camera to UniversalCamera fly mode + fix engine load race
+
+These partially improved the issues but did not fully resolve them. The remaining work is carried forward to Phase 5 for proper planning and execution.
 
 ---
 *Decision recorded: 2026-02-20*
+*Decision amended: 2026-02-20 (added CF-P4-05/06/07 post-gate carry-forwards)*
 *Gate: PASS_WITH_CONDITIONS*

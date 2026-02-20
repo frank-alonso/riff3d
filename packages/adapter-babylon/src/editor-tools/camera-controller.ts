@@ -50,9 +50,12 @@ export class BabylonCameraController {
   private lastMouseY = 0;
 
   // Bound event handlers for cleanup
-  private boundMouseDown: ((e: MouseEvent) => void) | null = null;
-  private boundMouseUp: ((e: MouseEvent) => void) | null = null;
-  private boundMouseMove: ((e: MouseEvent) => void) | null = null;
+  // NOTE: Uses pointer events, not mouse events. Babylon's Scene calls
+  // preventDefault() on pointerdown (preventDefaultOnPointerDown=true),
+  // which suppresses subsequent mousedown/mousemove/mouseup per spec.
+  private boundPointerDown: ((e: PointerEvent) => void) | null = null;
+  private boundPointerUp: ((e: PointerEvent) => void) | null = null;
+  private boundPointerMove: ((e: PointerEvent) => void) | null = null;
   private boundWheel: ((e: WheelEvent) => void) | null = null;
   private boundKeyDown: ((e: KeyboardEvent) => void) | null = null;
   private boundKeyUp: ((e: KeyboardEvent) => void) | null = null;
@@ -88,18 +91,18 @@ export class BabylonCameraController {
     // Set as active camera
     this.scene.activeCamera = this.camera;
 
-    // Bind DOM events
-    this.boundMouseDown = (e: MouseEvent) => this.onMouseDown(e);
-    this.boundMouseUp = (e: MouseEvent) => this.onMouseUp(e);
-    this.boundMouseMove = (e: MouseEvent) => this.onMouseMove(e);
+    // Bind DOM events — pointer events, not mouse events (see note above)
+    this.boundPointerDown = (e: PointerEvent) => this.onPointerDown(e);
+    this.boundPointerUp = (e: PointerEvent) => this.onPointerUp(e);
+    this.boundPointerMove = (e: PointerEvent) => this.onPointerMove(e);
     this.boundWheel = (e: WheelEvent) => this.onWheel(e);
     this.boundKeyDown = (e: KeyboardEvent) => this.onKeyDown(e);
     this.boundKeyUp = (e: KeyboardEvent) => this.onKeyUp(e);
     this.boundContextMenu = (e: Event) => e.preventDefault();
 
-    this.canvas.addEventListener("mousedown", this.boundMouseDown);
-    this.canvas.addEventListener("mouseup", this.boundMouseUp);
-    this.canvas.addEventListener("mousemove", this.boundMouseMove);
+    this.canvas.addEventListener("pointerdown", this.boundPointerDown);
+    this.canvas.addEventListener("pointerup", this.boundPointerUp);
+    this.canvas.addEventListener("pointermove", this.boundPointerMove);
     this.canvas.addEventListener("wheel", this.boundWheel, { passive: false });
     this.canvas.addEventListener("contextmenu", this.boundContextMenu);
     window.addEventListener("keydown", this.boundKeyDown);
@@ -118,17 +121,17 @@ export class BabylonCameraController {
     return this.camera;
   }
 
-  private onMouseDown(e: MouseEvent): void {
+  private onPointerDown(e: PointerEvent): void {
     this.mouseDown[e.button] = true;
     this.lastMouseX = e.clientX;
     this.lastMouseY = e.clientY;
   }
 
-  private onMouseUp(e: MouseEvent): void {
+  private onPointerUp(e: PointerEvent): void {
     this.mouseDown[e.button] = false;
   }
 
-  private onMouseMove(e: MouseEvent): void {
+  private onPointerMove(e: PointerEvent): void {
     const dx = e.clientX - this.lastMouseX;
     const dy = e.clientY - this.lastMouseY;
     this.lastMouseX = e.clientX;
@@ -229,13 +232,19 @@ export class BabylonCameraController {
 
   /**
    * Get forward direction vector from current yaw/pitch.
+   *
+   * Babylon uses left-handed Y-up coordinates. Its FromEulerAngles(pitch, yaw, 0)
+   * rotates the camera such that positive pitch looks DOWN. The standard
+   * spherical-coordinate formula gives y = sin(pitch), which is positive when
+   * pitch > 0 — the opposite of where the camera actually faces. Negating
+   * the Y component aligns movement with the visual look direction.
    */
   private getForwardVector(): { x: number; y: number; z: number } {
     const pitchRad = this.pitch * (Math.PI / 180);
     const yawRad = this.yaw * (Math.PI / 180);
     return {
       x: Math.sin(yawRad) * Math.cos(pitchRad),
-      y: Math.sin(pitchRad),
+      y: -Math.sin(pitchRad),
       z: Math.cos(yawRad) * Math.cos(pitchRad),
     };
   }
@@ -262,60 +271,82 @@ export class BabylonCameraController {
 
   /**
    * Serialize camera state for engine switching.
+   *
+   * Converts from Babylon's left-handed coordinate system to the common
+   * right-handed format used by SerializedCameraState:
+   * - Position Z is negated (LH +Z forward → RH -Z forward)
+   * - Yaw and pitch are negated (rotation direction reverses with handedness)
    */
   serializeCameraState(): {
     position: { x: number; y: number; z: number };
     rotation: { x: number; y: number; z: number; w: number };
     mode: "fly" | "orbit";
+    yaw: number;
+    pitch: number;
   } {
     if (!this.camera) {
       return {
-        position: { x: 0, y: 5, z: -10 },
+        position: { x: 0, y: 5, z: 10 },
         rotation: { x: 0, y: 0, z: 0, w: 1 },
         mode: "fly",
+        yaw: 0,
+        pitch: -20,
       };
     }
 
     const pos = this.camera.position;
-    const rot = this.camera.rotationQuaternion ?? Quaternion.FromEulerAngles(
-      this.pitch * (Math.PI / 180),
-      this.yaw * (Math.PI / 180),
-      0,
-    );
+
+    // Convert to common RH convention: negate yaw, pitch, and position Z
+    const rhYaw = -this.yaw;
+    const rhPitch = -this.pitch;
 
     return {
-      position: { x: pos.x, y: pos.y, z: pos.z },
-      rotation: { x: rot.x, y: rot.y, z: rot.z, w: rot.w },
+      position: { x: pos.x, y: pos.y, z: -pos.z },
+      rotation: { x: 0, y: 0, z: 0, w: 1 }, // Kept for interface compat; yaw/pitch take precedence
       mode: this.currentMode,
+      yaw: rhYaw,
+      pitch: rhPitch,
     };
   }
 
   /**
    * Restore camera state from another engine.
+   *
+   * The incoming state is in common right-handed coordinates.
+   * Converts to Babylon's left-handed system:
+   * - Position Z is negated
+   * - Yaw and pitch are negated (if provided)
    */
   restoreCameraState(state: {
     position: { x: number; y: number; z: number };
     rotation: { x: number; y: number; z: number; w: number };
+    yaw?: number;
+    pitch?: number;
   }): void {
     if (!this.camera) return;
 
+    // Convert RH position to Babylon LH: negate Z
     this.camera.position = new Vector3(
       state.position.x,
       state.position.y,
-      state.position.z,
+      -state.position.z,
     );
 
-    // Convert quaternion back to yaw/pitch for our euler-based controls
-    const q = state.rotation;
-    // Extract pitch (x-rotation) and yaw (y-rotation) from quaternion
-    // Using standard quaternion-to-euler conversion
-    const sinp = 2 * (q.w * q.x - q.z * q.y);
-    this.pitch = (Math.abs(sinp) >= 1
-      ? Math.sign(sinp) * 90
-      : Math.asin(sinp) * (180 / Math.PI));
-    const siny = 2 * (q.w * q.y + q.x * q.z);
-    const cosy = 1 - 2 * (q.y * q.y + q.x * q.x);
-    this.yaw = Math.atan2(siny, cosy) * (180 / Math.PI);
+    if (state.yaw !== undefined && state.pitch !== undefined) {
+      // Euler angles provided — negate for LH convention
+      this.yaw = -state.yaw;
+      this.pitch = -state.pitch;
+    } else {
+      // Fallback: extract yaw/pitch from quaternion (legacy / no euler data)
+      const q = state.rotation;
+      const sinp = 2 * (q.w * q.x - q.z * q.y);
+      this.pitch = (Math.abs(sinp) >= 1
+        ? Math.sign(sinp) * 90
+        : Math.asin(sinp) * (180 / Math.PI));
+      const siny = 2 * (q.w * q.y + q.x * q.z);
+      const cosy = 1 - 2 * (q.y * q.y + q.x * q.x);
+      this.yaw = Math.atan2(siny, cosy) * (180 / Math.PI);
+    }
 
     this.updateCameraRotation();
   }
@@ -327,9 +358,9 @@ export class BabylonCameraController {
     }
 
     const canvas = this.canvas;
-    if (this.boundMouseDown) canvas.removeEventListener("mousedown", this.boundMouseDown);
-    if (this.boundMouseUp) canvas.removeEventListener("mouseup", this.boundMouseUp);
-    if (this.boundMouseMove) canvas.removeEventListener("mousemove", this.boundMouseMove);
+    if (this.boundPointerDown) canvas.removeEventListener("pointerdown", this.boundPointerDown);
+    if (this.boundPointerUp) canvas.removeEventListener("pointerup", this.boundPointerUp);
+    if (this.boundPointerMove) canvas.removeEventListener("pointermove", this.boundPointerMove);
     if (this.boundWheel) canvas.removeEventListener("wheel", this.boundWheel);
     if (this.boundContextMenu) canvas.removeEventListener("contextmenu", this.boundContextMenu);
     if (this.boundKeyDown) window.removeEventListener("keydown", this.boundKeyDown);

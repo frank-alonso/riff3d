@@ -273,7 +273,10 @@ export class PlayCanvasAdapter implements EngineAdapter {
 
   /**
    * Serialize the editor camera state for engine switching.
-   * Returns position, rotation (quaternion), and camera mode.
+   *
+   * PlayCanvas is right-handed Y-up, which matches the common
+   * SerializedCameraState convention — no conversion needed.
+   * Includes yaw/pitch from the CameraController for lossless transfer.
    */
   serializeCameraState(): SerializedCameraState {
     if (!this.editorCamera) {
@@ -286,16 +289,22 @@ export class PlayCanvasAdapter implements EngineAdapter {
 
     const pos = this.editorCamera.getLocalPosition();
     const rot = this.editorCamera.getLocalRotation();
+    const euler = this.cameraController?.getEulerAngles();
 
     return {
       position: { x: pos.x, y: pos.y, z: pos.z },
       rotation: { x: rot.x, y: rot.y, z: rot.z, w: rot.w },
       mode: this.getCameraMode(),
+      ...(euler ? { yaw: euler.yaw, pitch: euler.pitch } : {}),
     };
   }
 
   /**
    * Restore the editor camera state after engine switch.
+   *
+   * Updates both the entity transform AND the CameraController's
+   * internal yaw/pitch so the next update frame doesn't overwrite
+   * the restored rotation.
    */
   restoreCameraState(state: SerializedCameraState): void {
     if (!this.editorCamera) return;
@@ -305,12 +314,19 @@ export class PlayCanvasAdapter implements EngineAdapter {
       state.position.y,
       state.position.z,
     );
-    this.editorCamera.setLocalRotation(
-      state.rotation.x,
-      state.rotation.y,
-      state.rotation.z,
-      state.rotation.w,
-    );
+
+    // Prefer yaw/pitch (lossless) over quaternion if available
+    if (state.yaw !== undefined && state.pitch !== undefined) {
+      this.cameraController?.setEulerAngles(state.yaw, state.pitch);
+      this.editorCamera.setEulerAngles(state.pitch, state.yaw, 0);
+    } else {
+      this.editorCamera.setLocalRotation(
+        state.rotation.x,
+        state.rotation.y,
+        state.rotation.z,
+        state.rotation.w,
+      );
+    }
 
     if (state.mode !== this.getCameraMode()) {
       this.switchCameraMode(state.mode);

@@ -1,5 +1,6 @@
 import { Engine } from "@babylonjs/core/Engines/engine";
 import { Scene } from "@babylonjs/core/scene";
+import "@babylonjs/core/Culling/ray"; // Side-effect: registers Scene.pick() prototype methods
 import { Color4 } from "@babylonjs/core/Maths/math.color";
 import type { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import type { UniversalCamera } from "@babylonjs/core/Cameras/universalCamera";
@@ -239,9 +240,37 @@ export class BabylonAdapter implements EngineAdapter {
 
   /**
    * Destroy the Babylon.js engine and clean up all resources.
+   *
+   * Order matters:
+   * 1. Stop render loop FIRST to prevent callbacks during cleanup
+   * 2. Clear WebGL buffer (prevents stale frame during engine switch)
+   * 3. Dispose camera controller (unregisters scene callbacks + DOM events)
+   * 4. Destroy scene entities (meshes, lights, materials)
+   * 5. Dispose scene (clears all remaining Babylon objects)
+   * 6. Dispose engine (releases WebGL context)
+   * 7. Reset canvas dimensions (forces browser to drop old context)
    */
   dispose(): void {
-    // Clean up camera controller
+    // Stop render loop first — prevents stale callbacks from firing
+    // during disposal and from rendering over the next engine
+    if (this.engine) {
+      this.engine.stopRenderLoop();
+    }
+
+    // Clear the WebGL buffer before disposing the engine, so the canvas
+    // doesn't retain a stale Babylon frame while the next engine initializes.
+    // Must happen while the context is still alive (before engine.dispose).
+    if (this.canvas && typeof this.canvas.getContext === "function") {
+      const gl =
+        (this.canvas.getContext("webgl2") as WebGL2RenderingContext | null) ??
+        (this.canvas.getContext("webgl") as WebGLRenderingContext | null);
+      if (gl && !gl.isContextLost()) {
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      }
+    }
+
+    // Clean up camera controller (unregisters beforeRender + DOM events)
     this.cameraController?.dispose();
     this.cameraController = null;
     this.editorCamera = null;
@@ -255,7 +284,7 @@ export class BabylonAdapter implements EngineAdapter {
       this.scene = null;
     }
 
-    // Dispose engine
+    // Dispose engine (releases WebGL context)
     if (this.engine) {
       this.engine.dispose();
       this.engine = null;

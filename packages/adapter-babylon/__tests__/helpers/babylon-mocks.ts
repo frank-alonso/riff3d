@@ -405,6 +405,7 @@ export class MockArcRotateCamera {
 
 export class MockEngine {
   runRenderLoop = vi.fn();
+  stopRenderLoop = vi.fn();
   resize = vi.fn();
   dispose = vi.fn();
 

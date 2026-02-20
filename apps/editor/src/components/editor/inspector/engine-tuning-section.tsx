@@ -164,32 +164,31 @@ export function EngineTuningSection({ entityId }: EngineTuningSectionProps) {
   return (
     <div className="border-t border-[var(--border)]">
       {/* Collapsible header */}
-      <button
-        type="button"
-        onClick={() => setCollapsed(!collapsed)}
-        className="flex w-full items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-[var(--muted)]"
-      >
-        {collapsed ? (
-          <ChevronRight size={12} className="text-[var(--muted-foreground)]" />
-        ) : (
-          <ChevronDown size={12} className="text-[var(--muted-foreground)]" />
-        )}
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-          {sectionLabel}
-        </span>
-        <span className="text-[9px] text-[var(--muted-foreground)]">
-          ({ENGINE_LABELS[activeEngine]})
-        </span>
+      <div className="flex w-full items-center gap-2 px-3 py-2">
+        <button
+          type="button"
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex flex-1 items-center gap-2 text-left transition-colors hover:text-[var(--foreground)]"
+        >
+          {collapsed ? (
+            <ChevronRight size={12} className="text-[var(--muted-foreground)]" />
+          ) : (
+            <ChevronDown size={12} className="text-[var(--muted-foreground)]" />
+          )}
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+            {sectionLabel}
+          </span>
+          <span className="text-[9px] text-[var(--muted-foreground)]">
+            ({ENGINE_LABELS[activeEngine]})
+          </span>
+        </button>
 
         {/* Peek other engine toggle */}
         {!collapsed && (
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowOtherEngine(!showOtherEngine);
-            }}
-            className="ml-auto rounded p-0.5 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+            onClick={() => setShowOtherEngine(!showOtherEngine)}
+            className="rounded p-0.5 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
             title={
               showOtherEngine
                 ? `Hide ${ENGINE_LABELS[otherEngine]} tuning`
@@ -199,7 +198,7 @@ export function EngineTuningSection({ entityId }: EngineTuningSectionProps) {
             {showOtherEngine ? <EyeOff size={10} /> : <Eye size={10} />}
           </button>
         )}
-      </button>
+      </div>
 
       {/* Content */}
       {!collapsed && (

@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** All meaningful edits flow through a deterministic operation pipeline (IQL -> PatchOps -> ECSON -> Canonical IR -> Adapters), ensuring portability, reproducibility, and safe AI-driven manipulation.
-**Current focus:** Phase 4: Dual Adapter Validation
+**Current focus:** Phase 5: Collaboration
 
 ## Current Position
 
-Phase: 4 of 11 (Dual Adapter Validation)
-Plan: 4 of 5 in current phase
-Status: Executing Phase 4
-Last activity: 2026-02-20 -- Completed 04-04 (Conformance Testing)
+Phase: 5 of 11 (Collaboration)
+Plan: 0 of 5 in current phase
+Status: Ready to plan Phase 5
+Last activity: 2026-02-20 -- Phase 4 complete (PASS_WITH_CONDITIONS)
 
-Progress: [########--] 4/5 plans in phase
+Progress: [##########] 5/5 plans in Phase 4 (complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
-- Average duration: 9.5 min
-- Total execution time: 3.5 hours
+- Total plans completed: 27
+- Average duration: 9.1 min
+- Total execution time: 4.1 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: [########--] 4/5 plans in phase
 | 01 | 7 | 74 min | 10.6 min |
 | 02 | 8 | 100 min | 12.5 min |
 | 03 | 7 | 54 min | 7.7 min |
+| 04 | 5 | 28 min | 5.6 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (3 min), 03-04 (3 min), 03-05 (7 min), 03-06 (4 min), 03-07 (25 min)
-- Trend: Phase 3 review gate complete; 03-07 longer due to Codex review round-trips + human verification
+- Last 5 plans: 04-01 (10 min), 04-02 (6 min), 04-03 (5 min), 04-04 (7 min), 04-05 (review gate)
+- Trend: Phase 4 fastest phase yet; Babylon adapter and conformance testing completed efficiently
 
 *Updated after each plan completion*
 | Phase 03 P01 | 8 | 2 tasks | 11 files |
@@ -44,6 +45,7 @@ Progress: [########--] 4/5 plans in phase
 | Phase 04 P02 | 6 | 2 tasks | 12 files |
 | Phase 04 P03 | 5 | 2 tasks | 12 files |
 | Phase 04 P04 | 7 | 2 tasks | 16 files |
+| Phase 04 P05 | review | 1 task | 6 files |
 
 ## Accumulated Context
 
@@ -163,10 +165,10 @@ Recent decisions affecting current work:
 - ~~[Phase 3 - CF-P2-03] Migrate test document construction to use SceneDocumentSchema.parse() for contract validity~~ DONE in 03-02
 - ~~[Phase 3 - CF-P2-04] Split adapter into core/editor-tools subpath exports; add CI LoC budget enforcement~~ DONE in 03-03
 - ~~[Phase 3/4] Drag-preview ghost placement: when dragging an asset from the asset browser into the viewport, render a translucent ghost entity that follows the cursor using raycasting against scene geometry (ground plane fallback). Snap to surface normals, show placement position preview. Replace ghost with real entity on drop. Common editor convention (Unity placement ghost, Unreal drag proxy).~~ DONE in 03-05
-- [Phase 4 - CF-P3-01] Attach CI run URLs + exported test artifacts to evidence packets
+- [Phase 4 - CF-P3-01] Attach CI run URLs + exported test artifacts to evidence packets (partial — carried forward as CF-P4-03)
 - ~~[Phase 4 - CF-P3-02] Promote visual regression to required nightly/CI with per-fixture tolerance bands~~ DONE in 04-04
 - ~~[Phase 4 - CF-P3-03] Add small multi-seed property suite (3 seeds x 50 iterations) to PR CI~~ DONE in 04-04
-- [Phase 4/5 - CF-P3-04] Add mechanical mutation-boundary enforcement (no-restricted-imports or architecture guard)
+- [Phase 4/5 - CF-P3-04] Add mechanical mutation-boundary enforcement (no-restricted-imports or architecture guard) (carried forward as CF-P4-01)
 - [Phase 7 - CF-P3-05] Automate FPS/memory trend checks with explicit regression thresholds
 - [Phase 4] Fix infinite loading skeleton when navigating to editor from dashboard (direct URL works; dashboard->editor route triggers forever loading state)
 - [Phase 4] Wire drag-preview ghost to quick asset panel (bottom toolbar) — currently only works from left sidebar asset browser
@@ -176,6 +178,13 @@ Recent decisions affecting current work:
 - [Phase 4] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` when validating Babylon.js adapter -- ensure no web-only assumptions baked into IR.
 - [Phase 8] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` Section 7 when designing ejection adapter interface -- directory structures, no binary formats.
 - [Phase 8] Re-evaluate `.planning/research/TEMPLATE_DESIGN_PLAYBOOK.md` -- reconcile archetype specs with actual component registry, validate against built game runtime, update playtest process, finalize template backlog. Also review at Phase 7 (latency budgets) and Phase 10 (VR variants).
+- [Phase 5 - CF-P4-01] Mechanical mutation-boundary enforcement (no-restricted-imports + negative tests) — from Codex review F4-001/F4-003
+- [Phase 5 - CF-P4-02] Align CLAUDE.md exception contract with actual bypass points (add engine preference setter) — from Codex review F4-001
+- [Phase 5 - CF-P4-03] Attach CI run URLs/artifacts to evidence packets — from Codex review F4-004
+- [Phase 7 - CF-P4-04] Cross-engine drift trend monitoring (when performance dashboard built) — from Codex review
+- [Phase 5 - CF-P4-05] Camera position/rotation not synced when swapping engines — PlayCanvas defaults camera aiming downward on load, Babylon aims upward. Need to transfer camera state (position + rotation) correctly during engine switch so the viewpoint is preserved.
+- [Phase 5 - CF-P4-06] Babylon-first load sometimes fails to render PlayCanvas on switch — when the editor loads with Babylon as the selected engine, switching to PlayCanvas sometimes results in a blank viewport (PlayCanvas engine loads per dev console but scene not visible). Loading with PlayCanvas first and then switching works reliably. Likely a race condition in adapter initialization order.
+- [Phase 5 - CF-P4-07] Browser resize sometimes causes scene to stop rendering — resizing the browser window (e.g. opening dev console) can cause both engines to stop rendering. Partially fixed but still reproducible. Needs a robust canvas resize observer solution.
 
 ### Blockers/Concerns
 
@@ -184,6 +193,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 04-04-PLAN.md
-Resume file: .planning/phases/04-dual-adapter-validation/04-04-SUMMARY.md
-Next: Execute 04-05-PLAN.md (Phase 4 Review Gate)
+Stopped at: Phase 4 complete (PASS_WITH_CONDITIONS)
+Resume file: .planning/reviews/phase-4/PHASE_4_DECISION.md
+Next: Plan Phase 5 (Collaboration)
