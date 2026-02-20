@@ -126,13 +126,14 @@ Plans:
   2. A user can switch between PlayCanvas and Babylon.js rendering in the editor and see consistent scene representation
   3. Editing a property in the editor updates the active adapter incrementally (property-level delta) without rebuilding the entire scene
   4. Engine tuning sections in ECSON are respected by the target adapter and gracefully ignored by the other
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 04-01: Babylon.js adapter implementation
-- [ ] 04-02: Adapter incremental update system
-- [ ] 04-03: Conformance test suite and tolerance validation
-- [ ] 04-04: Phase 4 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
+- [ ] 04-01: Babylon.js adapter core + EngineAdapter/IRDelta extraction to canonical-ir (Wave 1)
+- [ ] 04-02: Incremental delta update system for both adapters (Wave 2)
+- [ ] 04-03: Engine switching UI, tuning inspector, and project-level engine persistence (Wave 2)
+- [ ] 04-04: Conformance test suite, visual regression with tolerance bands, property tests (Wave 3)
+- [ ] 04-05: Phase 4 Review (Pre-execution plan review + post-execution evidence audit + human verification → Gate decision) (Wave 4)
 
 ### Phase 5: Collaboration
 **Goal**: Two or more users can edit the same project simultaneously with real-time presence, conflict resolution, and independent undo stacks
