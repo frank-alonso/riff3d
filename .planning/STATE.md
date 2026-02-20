@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 2 of 11 (Closed-Loop Editor) -- IN PROGRESS
-Plan: 2 of 8 in current phase (02-01 complete, next: 02-02)
+Plan: 3 of 8 in current phase (02-02 complete, next: 02-03)
 Status: Executing
-Last activity: 2026-02-19 -- Completed 02-01 (Editor shell, auth, project management)
+Last activity: 2026-02-19 -- Completed 02-02 (3D viewport with PlayCanvas adapter)
 
-Progress: [#---------] 1/8 plans in phase
+Progress: [##--------] 2/8 plans in phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 12.9 min
-- Total execution time: 1.7 hours
+- Total plans completed: 9
+- Average duration: 12.7 min
+- Total execution time: 1.9 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 7 | 74 min | 10.6 min |
-| 02 | 1 | 29 min | 29 min |
+| 02 | 2 | 41 min | 20.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-05 (7 min), 01-06 (41 min), 01-07 (8 min), 02-01 (29 min)
-- Trend: 02-01 was large (auth + dashboard + editor shell + Turbopack fixes across 124 files)
+- Last 5 plans: 01-06 (41 min), 01-07 (8 min), 02-01 (29 min), 02-02 (12 min)
+- Trend: 02-02 was fast (adapter package + viewport integration, no external service setup needed)
 
 *Updated after each plan completion*
 
@@ -81,6 +81,11 @@ Recent decisions affecting current work:
 - [02-01]: Stripped .js extensions from 123 imports across all packages for Turbopack compatibility
 - [02-01]: Zustand vanilla store with subscribeWithSelector middleware, slice-based composition
 - [02-01]: Supabase SSR auth pattern: createBrowserClient for client, createServerClient for server, getUser() not getSession()
+- [02-02]: DOM-based camera controller instead of PlayCanvas extras (simpler than InputFrame translation layer)
+- [02-02]: Full scene rebuild on ECSON change (not incremental delta -- deferred for performance)
+- [02-02]: Direct ECSON construction for default scene (not PatchOps -- simpler for initial creation)
+- [02-02]: useSyncExternalStore for server-to-client project data transfer (React 19 lint compliance)
+- [02-02]: Script tag for ECSON transfer from server layout to client page
 
 ### Pending Todos
 
@@ -88,7 +93,7 @@ Recent decisions affecting current work:
 - [Phase 2 - CF-02] Add lossiness contract tests enumerating expected-stripped fields and asserting all others preserved
 - [Phase 2 - CF-03] Add lint rule or restricted API boundary + negative test for mutation-bypass enforcement
 - ~~[Phase 2 - CF-05] Remove unused eslint-disable directive at patchops/src/engine.ts:518~~ DONE in 02-01
-- [Phase 2/3 - CF-06] Document IR conventions in source code (coordinate system, normal maps, physics units, roughness, 1:N entity-to-node)
+- ~~[Phase 2/3 - CF-06] Document IR conventions in source code (coordinate system, normal maps, physics units, roughness, 1:N entity-to-node)~~ DONE in 02-02 (JSDoc in scene-builder.ts, adapter.ts)
 - [Phase 4/7 - CF-04] Add fixture coverage for non-portable glTF extensions when promoted to portable status
 - [Phase 4] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` when validating Babylon.js adapter -- ensure no web-only assumptions baked into IR.
 - [Phase 8] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` Section 7 when designing ejection adapter interface -- directory structures, no binary formats.
@@ -101,6 +106,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 02-01-PLAN.md
-Resume file: .planning/phases/02-closed-loop-editor/02-01-SUMMARY.md
-Next: Execute 02-02 (3D viewport with PlayCanvas adapter integration)
+Stopped at: Completed 02-02-PLAN.md
+Resume file: .planning/phases/02-closed-loop-editor/02-02-SUMMARY.md
+Next: Execute 02-03 (Entity selection and transform gizmos)

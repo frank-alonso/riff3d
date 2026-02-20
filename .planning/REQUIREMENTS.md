@@ -30,7 +30,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Editor Core
 
-- [ ] **EDIT-01**: 3D viewport with orbit/pan/zoom and WASD fly-camera
+- [x] **EDIT-01**: 3D viewport with orbit/pan/zoom and WASD fly-camera
 - [ ] **EDIT-02**: Transform gizmos (translate/rotate/scale) with configurable snap-to-grid
 - [ ] **EDIT-03**: Scene hierarchy tree view with drag-to-reparent, multi-select, search/filter
 - [ ] **EDIT-04**: Properties/inspector panel auto-generated from component schemas
@@ -43,15 +43,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Rendering & Scene
 
-- [ ] **RNDR-01**: PBR materials (color, metalness, roughness, emissive at minimum)
-- [ ] **RNDR-02**: Lighting (directional, point, spot + ambient/environment)
-- [ ] **RNDR-03**: Camera entities (perspective and orthographic)
+- [x] **RNDR-01**: PBR materials (color, metalness, roughness, emissive at minimum)
+- [x] **RNDR-02**: Lighting (directional, point, spot + ambient/environment)
+- [x] **RNDR-03**: Camera entities (perspective and orthographic)
 - [ ] **RNDR-04**: GLB/glTF import with textures, materials, and embedded animations
 - [ ] **RNDR-05**: Environment settings (skybox color/image, fog type/density, ambient light)
 
 ### Runtime & Adapters
 
-- [ ] **ADPT-01**: PlayCanvas adapter compiles Canonical IR to PlayCanvas runtime (primary web adapter)
+- [x] **ADPT-01**: PlayCanvas adapter compiles Canonical IR to PlayCanvas runtime (primary web adapter)
 - [ ] **ADPT-02**: Babylon.js adapter compiles Canonical IR to Babylon.js runtime (universality validation)
 - [ ] **ADPT-03**: Adapter incremental update (property-level deltas, not full recompile on every edit)
 - [ ] **ADPT-04**: Both adapters pass conformance tests for golden fixtures within defined tolerance
@@ -213,7 +213,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-03 | Phase 1: Contracts & Testing Spine | Complete |
 | TEST-04 | Phase 4: Dual Adapter Validation | Pending |
 | TEST-05 | Phase 1: Contracts & Testing Spine | Complete |
-| EDIT-01 | Phase 2: Closed-Loop Editor | Pending |
+| EDIT-01 | Phase 2: Closed-Loop Editor | Complete |
 | EDIT-02 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-03 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-04 | Phase 2: Closed-Loop Editor | Pending |
@@ -223,12 +223,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-08 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-09 | Phase 2: Closed-Loop Editor | Pending |
 | EDIT-10 | Phase 2: Closed-Loop Editor | Pending |
-| RNDR-01 | Phase 2: Closed-Loop Editor | Pending |
-| RNDR-02 | Phase 2: Closed-Loop Editor | Pending |
-| RNDR-03 | Phase 2: Closed-Loop Editor | Pending |
+| RNDR-01 | Phase 2: Closed-Loop Editor | Complete |
+| RNDR-02 | Phase 2: Closed-Loop Editor | Complete |
+| RNDR-03 | Phase 2: Closed-Loop Editor | Complete |
 | RNDR-04 | Phase 2: Closed-Loop Editor | Pending |
 | RNDR-05 | Phase 2: Closed-Loop Editor | Pending |
-| ADPT-01 | Phase 2: Closed-Loop Editor | Pending |
+| ADPT-01 | Phase 2: Closed-Loop Editor | Complete |
 | ADPT-02 | Phase 4: Dual Adapter Validation | Pending |
 | ADPT-03 | Phase 4: Dual Adapter Validation | Pending |
 | ADPT-04 | Phase 4: Dual Adapter Validation | Pending |
