@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildTransformsParentingFixture } from "../src/builders/transforms-parenting.js";
+import { buildTransformsParentingFixture } from "../src/builders/transforms-parenting";
 import referenceJson from "../src/reference/transforms-parenting.json" with { type: "json" };
 
 /**

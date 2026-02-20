@@ -1,5 +1,5 @@
 import type { SceneDocument } from "@riff3d/ecson";
-import { SceneBuilder } from "./builder.js";
+import { SceneBuilder } from "./builder";
 
 /**
  * Golden fixture: events and triggers.

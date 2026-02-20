@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { EngineTuningSchema } from "./engine-tuning.js";
+import { EngineTuningSchema } from "./engine-tuning";
 
 /**
  * A component instance attached to an entity.

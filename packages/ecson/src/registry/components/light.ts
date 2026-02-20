@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { registerComponent } from "../registry.js";
-import type { ComponentDefinition } from "../types.js";
+import { registerComponent } from "../registry";
+import type { ComponentDefinition } from "../types";
 
 const LightSchema = z.object({
   lightType: z.enum(["directional", "point", "spot"]).default("point"),

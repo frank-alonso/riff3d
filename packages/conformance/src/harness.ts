@@ -1,5 +1,5 @@
 import type { SceneDocument } from "@riff3d/ecson";
-import { testRoundTrip } from "./round-trip.js";
+import { testRoundTrip } from "./round-trip";
 
 // ---------------------------------------------------------------------------
 // Types

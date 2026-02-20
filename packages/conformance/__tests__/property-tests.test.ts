@@ -11,7 +11,7 @@ import {
   applyOp,
   applyOps,
 } from "@riff3d/patchops";
-import { normalizeForComparison } from "../src/round-trip.js";
+import { normalizeForComparison } from "../src/round-trip";
 
 // ---------------------------------------------------------------------------
 // Fixed seed for reproducibility in CI

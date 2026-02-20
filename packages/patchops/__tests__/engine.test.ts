@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import type { SceneDocument, Entity } from "@riff3d/ecson";
-import { applyOp, applyOps } from "../src/engine.js";
-import { CURRENT_PATCHOP_VERSION } from "../src/version.js";
-import type { PatchOp } from "../src/schemas.js";
+import { applyOp, applyOps } from "../src/engine";
+import { CURRENT_PATCHOP_VERSION } from "../src/version";
+import type { PatchOp } from "../src/schemas";
 
 /** Helper: create a minimal valid SceneDocument for testing. */
 function createTestDoc(): SceneDocument {

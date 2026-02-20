@@ -6,7 +6,7 @@ import {
   CURRENT_SCHEMA_VERSION,
 } from "@riff3d/ecson";
 import { applyOps, type PatchOp, CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
-import { normalizeForComparison } from "./round-trip.js";
+import { normalizeForComparison } from "./round-trip";
 
 // ---------------------------------------------------------------------------
 // ID generation for replay ops

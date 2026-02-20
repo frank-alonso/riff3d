@@ -7,8 +7,8 @@ import {
   type SceneDocument,
   type Entity,
 } from "@riff3d/ecson";
-import { compile } from "../src/compiler.js";
-import { decompile } from "../src/decompiler.js";
+import { compile } from "../src/compiler";
+import { decompile } from "../src/decompiler";
 
 // ---------------------------------------------------------------------------
 // Normalization for comparison

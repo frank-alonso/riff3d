@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CanonicalComponentSchema } from "./canonical-component.js";
+import { CanonicalComponentSchema } from "./canonical-component";
 
 /**
  * Explicit Vec3 for Canonical IR -- no defaults.

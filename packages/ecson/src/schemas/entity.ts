@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { TransformSchema } from "./transform.js";
-import { ComponentInstanceSchema } from "./component-instance.js";
-import { EngineTuningSchema } from "./engine-tuning.js";
+import { TransformSchema } from "./transform";
+import { ComponentInstanceSchema } from "./component-instance";
+import { EngineTuningSchema } from "./engine-tuning";
 
 /**
  * An entity in the scene graph.

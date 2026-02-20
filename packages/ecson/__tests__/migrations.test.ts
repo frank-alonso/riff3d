@@ -3,9 +3,9 @@ import {
   SceneDocumentSchema,
   CURRENT_SCHEMA_VERSION,
   type SceneDocument,
-} from "../src/schemas/index.js";
-import { migrateDocument } from "../src/migrations/migrate.js";
-import { createEmptyDocument, createEntity } from "../src/helpers.js";
+} from "../src/schemas/index";
+import { migrateDocument } from "../src/migrations/migrate";
+import { createEmptyDocument, createEntity } from "../src/helpers";
 
 // ---------------------------------------------------------------------------
 // migrateDocument

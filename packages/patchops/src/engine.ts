@@ -1,8 +1,8 @@
 import type { SceneDocument, Entity, ComponentInstance, AssetEntry } from "@riff3d/ecson";
 import { generateOpId } from "@riff3d/ecson";
-import { CURRENT_PATCHOP_VERSION } from "./version.js";
-import { validateOp } from "./validation.js";
-import type { PatchOp } from "./schemas.js";
+import { CURRENT_PATCHOP_VERSION } from "./version";
+import { validateOp } from "./validation";
+import type { PatchOp } from "./schemas";
 
 // ─── Deep clone utility (ES2022 doesn't have deepClone) ────
 

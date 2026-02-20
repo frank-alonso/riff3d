@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TransformSchema } from "@riff3d/ecson";
-import { PatchOpBase } from "../base.js";
+import { PatchOpBase } from "../base";
 
 export const CreateEntityOpSchema = z.object({
   ...PatchOpBase,

@@ -2,7 +2,7 @@ import {
   SceneDocumentSchema,
   CURRENT_SCHEMA_VERSION,
   type SceneDocument,
-} from "../schemas/index.js";
+} from "../schemas/index";
 
 /* eslint-disable no-var -- global augmentation for console in non-DOM lib */
 declare var console: { warn(...args: unknown[]): void };

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { VERSION } from "../src/index.js";
+import { VERSION } from "../src/index";
 
 describe("@riff3d/ecson", () => {
   it("exports a VERSION string", () => {

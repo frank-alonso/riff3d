@@ -5,8 +5,8 @@ import {
   listComponents,
   listComponentsByCategory,
   componentRegistry,
-} from "../src/index.js";
-import type { ComponentDefinition, EditorHint } from "../src/index.js";
+} from "../src/index";
+import type { ComponentDefinition, EditorHint } from "../src/index";
 
 // ---------------------------------------------------------------------------
 // Core 3D Components (9)

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PatchOpBase } from "../base.js";
+import { PatchOpBase } from "../base";
 
 export const SetPropertyOpSchema = z.object({
   ...PatchOpBase,

@@ -8,8 +8,8 @@ import {
   SceneDocumentSchema,
   CURRENT_SCHEMA_VERSION,
 } from "@riff3d/ecson";
-import { compile } from "../src/compiler.js";
-import { CanonicalSceneSchema, type CanonicalScene } from "../src/types/index.js";
+import { compile } from "../src/compiler";
+import { CanonicalSceneSchema, type CanonicalScene } from "../src/types/index";
 
 // ---------------------------------------------------------------------------
 // Helpers

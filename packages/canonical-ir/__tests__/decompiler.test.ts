@@ -8,8 +8,8 @@ import {
   type Entity,
   CURRENT_SCHEMA_VERSION,
 } from "@riff3d/ecson";
-import { compile } from "../src/compiler.js";
-import { decompile } from "../src/decompiler.js";
+import { compile } from "../src/compiler";
+import { decompile } from "../src/decompiler";
 
 // ---------------------------------------------------------------------------
 // Helpers

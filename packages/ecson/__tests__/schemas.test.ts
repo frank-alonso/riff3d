@@ -23,7 +23,7 @@ import {
   type EnvironmentSettings,
   type GameSettings,
   type EngineTuning,
-} from "../src/index.js";
+} from "../src/index";
 
 // ---------------------------------------------------------------------------
 // Helpers

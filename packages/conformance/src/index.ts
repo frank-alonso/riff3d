@@ -12,16 +12,16 @@ export {
   runConformanceSuite,
   type ConformanceResult,
   type FixtureResult,
-} from "./harness.js";
+} from "./harness";
 
 // Round-trip utilities
-export { testRoundTrip, normalizeForComparison } from "./round-trip.js";
+export { testRoundTrip, normalizeForComparison } from "./round-trip";
 
 // Replay determinism utilities
 export {
   testReplayDeterminism,
   generateOpsForFixture,
-} from "./replay.js";
+} from "./replay";
 
 // Performance benchmarks
 export {
@@ -32,4 +32,4 @@ export {
   PERFORMANCE_BUDGETS,
   type TimingResult,
   type OpBenchmarkResult,
-} from "./benchmarks.js";
+} from "./benchmarks";

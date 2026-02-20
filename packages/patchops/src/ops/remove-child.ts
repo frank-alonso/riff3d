@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PatchOpBase } from "../base.js";
+import { PatchOpBase } from "../base";
 
 export const RemoveChildOpSchema = z.object({
   ...PatchOpBase,

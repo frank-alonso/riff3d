@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PatchOpBase } from "../base.js";
+import { PatchOpBase } from "../base";
 
 /**
  * BatchOp contains an array of sub-ops that are applied atomically.

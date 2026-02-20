@@ -1,5 +1,5 @@
-import { CURRENT_PATCHOP_VERSION } from "../version.js";
-import { PatchOpSchema, type PatchOp } from "../schemas.js";
+import { CURRENT_PATCHOP_VERSION } from "../version";
+import { PatchOpSchema, type PatchOp } from "../schemas";
 
 declare const console: { warn(...args: unknown[]): void };
 

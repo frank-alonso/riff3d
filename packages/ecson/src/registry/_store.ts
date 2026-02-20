@@ -1,4 +1,4 @@
-import type { ComponentDefinition } from "./types.js";
+import type { ComponentDefinition } from "./types";
 
 /**
  * The component registry backing store.

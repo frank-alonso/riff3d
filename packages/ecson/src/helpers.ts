@@ -4,8 +4,8 @@ import {
   CURRENT_SCHEMA_VERSION,
   type SceneDocument,
   type Entity,
-} from "./schemas/index.js";
-import { generateEntityId } from "./ids.js";
+} from "./schemas/index";
+import { generateEntityId } from "./ids";
 
 /**
  * Create a valid empty SceneDocument with a root entity, no assets,

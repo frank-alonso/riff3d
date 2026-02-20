@@ -3,8 +3,8 @@ import {
   GLTF_ALLOWLIST,
   isAllowedExtension,
   getPortableExtensions,
-} from "../src/index.js";
-import type { GltfExtensionEntry } from "../src/index.js";
+} from "../src/index";
+import type { GltfExtensionEntry } from "../src/index";
 
 describe("glTF Extension Allowlist v0", () => {
   describe("GLTF_ALLOWLIST", () => {

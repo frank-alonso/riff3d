@@ -1,8 +1,8 @@
 // Origin
-export { OriginSchema, SafeModeConfigSchema, type Origin, type SafeModeConfig } from "./origin.js";
+export { OriginSchema, SafeModeConfigSchema, type Origin, type SafeModeConfig } from "./origin";
 
 // Version
-export { CURRENT_PATCHOP_VERSION } from "./version.js";
+export { CURRENT_PATCHOP_VERSION } from "./version";
 
 // Individual op schemas
 export {
@@ -38,16 +38,16 @@ export {
   type SetKeyframeValueOp,
   BatchOpSchema,
   type BatchOp,
-} from "./ops/index.js";
+} from "./ops/index";
 
 // Discriminated union
-export { PatchOpSchema, type PatchOp } from "./schemas.js";
+export { PatchOpSchema, type PatchOp } from "./schemas";
 
 // Engine
-export { applyOp, applyOps } from "./engine.js";
+export { applyOp, applyOps } from "./engine";
 
 // Validation
-export { validateOp, type ValidationResult } from "./validation.js";
+export { validateOp, type ValidationResult } from "./validation";
 
 // Migration
-export { migrateOp, MIGRATION_REGISTRY } from "./migrations/migrate-op.js";
+export { migrateOp, MIGRATION_REGISTRY } from "./migrations/migrate-op";

@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { CanonicalNodeSchema } from "./canonical-node.js";
-import { CanonicalAssetSchema } from "./canonical-asset.js";
-import { CanonicalWireSchema } from "./canonical-wire.js";
-import { CanonicalEnvironmentSchema } from "./canonical-environment.js";
+import { CanonicalNodeSchema } from "./canonical-node";
+import { CanonicalAssetSchema } from "./canonical-asset";
+import { CanonicalWireSchema } from "./canonical-wire";
+import { CanonicalEnvironmentSchema } from "./canonical-environment";
 
 /**
  * The root Canonical IR scene type.

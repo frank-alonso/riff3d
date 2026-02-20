@@ -6,7 +6,7 @@ export {
   listComponents,
   listComponentsByCategory,
   componentRegistry,
-} from "./registry.js";
+} from "./registry";
 
 // Types
 export type {
@@ -14,13 +14,13 @@ export type {
   EditorHint,
   ComponentEvent,
   ComponentAction,
-} from "./types.js";
+} from "./types";
 
 // glTF Extension Allowlist
 export {
   GLTF_ALLOWLIST,
   isAllowedExtension,
   getPortableExtensions,
-} from "./gltf-allowlist.js";
+} from "./gltf-allowlist";
 
-export type { GltfExtensionEntry } from "./gltf-allowlist.js";
+export type { GltfExtensionEntry } from "./gltf-allowlist";

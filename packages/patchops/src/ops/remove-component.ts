@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ComponentInstanceSchema } from "@riff3d/ecson";
-import { PatchOpBase } from "../base.js";
+import { PatchOpBase } from "../base";
 
 export const RemoveComponentOpSchema = z.object({
   ...PatchOpBase,

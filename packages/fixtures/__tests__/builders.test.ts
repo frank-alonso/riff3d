@@ -8,7 +8,7 @@ import {
   buildCharacterStubFixture,
   buildTimelineStubFixture,
   buildAdversarialFixture,
-} from "../src/builders/index.js";
+} from "../src/builders/index";
 
 // ---------------------------------------------------------------------------
 // Helpers

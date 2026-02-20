@@ -3,29 +3,29 @@
 export {
   CanonicalNodeSchema,
   type CanonicalNode,
-} from "./canonical-node.js";
+} from "./canonical-node";
 
 export {
   CanonicalComponentSchema,
   type CanonicalComponent,
-} from "./canonical-component.js";
+} from "./canonical-component";
 
 export {
   CanonicalAssetSchema,
   type CanonicalAsset,
-} from "./canonical-asset.js";
+} from "./canonical-asset";
 
 export {
   CanonicalWireSchema,
   type CanonicalWire,
-} from "./canonical-wire.js";
+} from "./canonical-wire";
 
 export {
   CanonicalEnvironmentSchema,
   type CanonicalEnvironment,
-} from "./canonical-environment.js";
+} from "./canonical-environment";
 
 export {
   CanonicalSceneSchema,
   type CanonicalScene,
-} from "./canonical-scene.js";
+} from "./canonical-scene";

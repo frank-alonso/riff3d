@@ -4,7 +4,7 @@ import {
   generateOpId,
   generateAssetId,
   generateWireId,
-} from "../src/index.js";
+} from "../src/index";
 
 describe("generateEntityId", () => {
   it("produces 16-character strings", () => {

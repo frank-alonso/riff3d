@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { ComponentDefinition } from "./types.js";
-import { componentRegistry } from "./_store.js";
+import type { ComponentDefinition } from "./types";
+import { componentRegistry } from "./_store";
 
 /**
  * Register a component definition.
@@ -68,6 +68,6 @@ export function listComponentsByCategory(
 
 // Import all components to trigger self-registration side effects.
 // This must come after the function declarations above.
-import "./components/index.js";
+import "./components/index";
 
 export { componentRegistry };

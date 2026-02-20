@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { migrateOp, MIGRATION_REGISTRY } from "../src/migrations/migrate-op.js";
-import { CURRENT_PATCHOP_VERSION } from "../src/version.js";
+import { migrateOp, MIGRATION_REGISTRY } from "../src/migrations/migrate-op";
+import { CURRENT_PATCHOP_VERSION } from "../src/version";
 
 describe("migrateOp", () => {
   it("current-version op passes through unchanged", () => {

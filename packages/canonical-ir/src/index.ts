@@ -1,7 +1,7 @@
 export const VERSION = "0.0.1";
 
 // All Canonical IR type schemas and types
-export * from "./types/index.js";
+export * from "./types/index";
 
 // Portable subset v0 definition
 export {
@@ -11,8 +11,8 @@ export {
   PORTABLE_MATERIAL_PROPERTIES,
   isPortableComponent,
   isPortableProperty,
-} from "./portable-subset.js";
+} from "./portable-subset";
 
 // Compiler and decompiler
-export { compile } from "./compiler.js";
-export { decompile } from "./decompiler.js";
+export { compile } from "./compiler";
+export { decompile } from "./decompiler";

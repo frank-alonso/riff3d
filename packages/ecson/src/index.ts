@@ -1,7 +1,7 @@
 export const VERSION = "0.0.1";
 
 // All ECSON schemas and types
-export * from "./schemas/index.js";
+export * from "./schemas/index";
 
 // ID generation
 export {
@@ -9,13 +9,13 @@ export {
   generateOpId,
   generateAssetId,
   generateWireId,
-} from "./ids.js";
+} from "./ids";
 
 // Migration infrastructure
-export { migrateDocument, type Migration } from "./migrations/migrate.js";
+export { migrateDocument, type Migration } from "./migrations/migrate";
 
 // Helper utilities
-export { createEmptyDocument, createEntity } from "./helpers.js";
+export { createEmptyDocument, createEntity } from "./helpers";
 
 // Component registry
 export {
@@ -25,7 +25,7 @@ export {
   listComponents,
   listComponentsByCategory,
   componentRegistry,
-} from "./registry/index.js";
+} from "./registry/index";
 
 export type {
   ComponentDefinition,
@@ -33,11 +33,11 @@ export type {
   ComponentEvent,
   ComponentAction,
   GltfExtensionEntry,
-} from "./registry/index.js";
+} from "./registry/index";
 
 // glTF Extension Allowlist
 export {
   GLTF_ALLOWLIST,
   isAllowedExtension,
   getPortableExtensions,
-} from "./registry/index.js";
+} from "./registry/index";

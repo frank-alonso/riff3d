@@ -13,8 +13,8 @@ import {
   CURRENT_PATCHOP_VERSION,
   applyOps,
 } from "@riff3d/patchops";
-import { testReplayDeterminism, generateOpsForFixture } from "../src/replay.js";
-import { normalizeForComparison } from "../src/round-trip.js";
+import { testReplayDeterminism, generateOpsForFixture } from "../src/replay";
+import { normalizeForComparison } from "../src/round-trip";
 
 // ---------------------------------------------------------------------------
 // Helpers

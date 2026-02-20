@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { Vec3Schema } from "./vec3.js";
-import { QuaternionSchema } from "./quaternion.js";
+import { Vec3Schema } from "./vec3";
+import { QuaternionSchema } from "./quaternion";
 
 export const TransformSchema = z.object({
   position: Vec3Schema.default({ x: 0, y: 0, z: 0 }),

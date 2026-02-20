@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import type { SceneDocument } from "@riff3d/ecson";
-import { applyOp } from "../src/engine.js";
-import { CURRENT_PATCHOP_VERSION } from "../src/version.js";
-import type { PatchOp } from "../src/schemas.js";
+import { applyOp } from "../src/engine";
+import { CURRENT_PATCHOP_VERSION } from "../src/version";
+import type { PatchOp } from "../src/schemas";
 
 function createTestDoc(): SceneDocument {
   const rootId = "root_001";

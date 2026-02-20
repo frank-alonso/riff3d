@@ -13,7 +13,7 @@ import {
   type CanonicalAsset,
   type CanonicalWire,
   type CanonicalEnvironment,
-} from "../src/types/index.js";
+} from "../src/types/index";
 import {
   PORTABLE_COMPONENT_TYPES,
   PORTABLE_LIGHT_TYPES,
@@ -21,7 +21,7 @@ import {
   PORTABLE_MATERIAL_PROPERTIES,
   isPortableComponent,
   isPortableProperty,
-} from "../src/portable-subset.js";
+} from "../src/portable-subset";
 
 // ---------------------------------------------------------------------------
 // CanonicalNode

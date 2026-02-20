@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { AssetEntrySchema } from "@riff3d/ecson";
-import { PatchOpBase } from "../base.js";
+import { PatchOpBase } from "../base";
 
 export const AddAssetOpSchema = z.object({
   ...PatchOpBase,

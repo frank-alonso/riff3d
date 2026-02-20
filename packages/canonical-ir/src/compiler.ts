@@ -16,7 +16,7 @@ import {
   type CanonicalAsset,
   type CanonicalWire,
   type CanonicalEnvironment,
-} from "./types/index.js";
+} from "./types/index";
 
 // ---------------------------------------------------------------------------
 // Compiler: ECSON SceneDocument -> Canonical IR

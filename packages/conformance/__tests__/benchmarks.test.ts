@@ -15,8 +15,8 @@ import {
   benchmarkOpApplication,
   getFixtureSize,
   PERFORMANCE_BUDGETS,
-} from "../src/benchmarks.js";
-import { generateOpsForFixture } from "../src/replay.js";
+} from "../src/benchmarks";
+import { generateOpsForFixture } from "../src/replay";
 import { type SceneDocument, SceneDocumentSchema, CURRENT_SCHEMA_VERSION } from "@riff3d/ecson";
 
 // ---------------------------------------------------------------------------

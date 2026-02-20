@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { EntitySchema } from "./entity.js";
-import { AssetEntrySchema } from "./asset.js";
-import { EventWireSchema } from "./wiring.js";
-import { EnvironmentSettingsSchema } from "./environment.js";
-import { GameSettingsSchema } from "./game-settings.js";
+import { EntitySchema } from "./entity";
+import { AssetEntrySchema } from "./asset";
+import { EventWireSchema } from "./wiring";
+import { EnvironmentSettingsSchema } from "./environment";
+import { GameSettingsSchema } from "./game-settings";
 
 /** Current schema version for new documents. */
 export const CURRENT_SCHEMA_VERSION = 1;

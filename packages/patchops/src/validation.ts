@@ -1,5 +1,5 @@
 import type { SceneDocument } from "@riff3d/ecson";
-import type { PatchOp } from "./schemas.js";
+import type { PatchOp } from "./schemas";
 
 export interface ValidationResult {
   valid: boolean;

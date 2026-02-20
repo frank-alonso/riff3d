@@ -12,4 +12,4 @@ export {
   buildCharacterStubFixture,
   buildTimelineStubFixture,
   buildAdversarialFixture,
-} from "./builders/index.js";
+} from "./builders/index";

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 /**
@@ -54,25 +55,36 @@ function EditorSkeleton() {
   );
 }
 
+interface ProjectData {
+  projectId: string;
+  projectName: string;
+  isOwner: boolean;
+  isPublic: boolean;
+}
+
 export default function EditorPage() {
-  // Read data attributes from the layout container
-  // This avoids prop drilling through Next.js page/layout boundary
-  if (typeof window === "undefined") return null;
+  const [projectData, setProjectData] = useState<ProjectData | null>(null);
 
-  const container = document.querySelector("[data-project-id]");
-  if (!container) return <EditorSkeleton />;
+  useEffect(() => {
+    const container = document.querySelector("[data-project-id]");
+    if (container) {
+      setProjectData({
+        projectId: container.getAttribute("data-project-id") ?? "",
+        projectName: container.getAttribute("data-project-name") ?? "Untitled",
+        isOwner: container.getAttribute("data-is-owner") === "true",
+        isPublic: container.getAttribute("data-is-public") === "true",
+      });
+    }
+  }, []);
 
-  const projectId = container.getAttribute("data-project-id") ?? "";
-  const projectName = container.getAttribute("data-project-name") ?? "Untitled";
-  const isOwner = container.getAttribute("data-is-owner") === "true";
-  const isPublic = container.getAttribute("data-is-public") === "true";
+  if (!projectData) return <EditorSkeleton />;
 
   return (
     <EditorShell
-      projectId={projectId}
-      projectName={projectName}
-      isOwner={isOwner}
-      isPublic={isPublic}
+      projectId={projectData.projectId}
+      projectName={projectData.projectName}
+      isOwner={projectData.isOwner}
+      isPublic={projectData.isPublic}
     />
   );
 }

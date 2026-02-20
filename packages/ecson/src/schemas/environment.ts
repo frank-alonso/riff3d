@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Vec3Schema } from "./vec3.js";
+import { Vec3Schema } from "./vec3";
 
 export const SkyboxTypeEnum = z.enum(["color", "image", "hdri"]);
 

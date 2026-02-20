@@ -20,7 +20,7 @@ import {
   RemoveKeyframeOpSchema,
   SetKeyframeValueOpSchema,
   BatchOpSchema,
-} from "../src/index.js";
+} from "../src/index";
 
 /** Helper to create a valid base op fields object. */
 function base(type: string) {

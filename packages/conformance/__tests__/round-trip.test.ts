@@ -8,8 +8,8 @@ import {
   buildTimelineStubFixture,
   buildAdversarialFixture,
 } from "@riff3d/fixtures";
-import { testRoundTrip } from "../src/round-trip.js";
-import { runConformanceSuite } from "../src/harness.js";
+import { testRoundTrip } from "../src/round-trip";
+import { runConformanceSuite } from "../src/harness";
 
 // ---------------------------------------------------------------------------
 // Per-fixture round-trip tests

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { OriginSchema } from "./origin.js";
-import { CURRENT_PATCHOP_VERSION } from "./version.js";
+import { OriginSchema } from "./origin";
+import { CURRENT_PATCHOP_VERSION } from "./version";
 
 /**
  * Shared base fields for every PatchOp.

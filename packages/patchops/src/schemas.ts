@@ -1,20 +1,20 @@
 import { z } from "zod";
-import { CreateEntityOpSchema } from "./ops/create-entity.js";
-import { DeleteEntityOpSchema } from "./ops/delete-entity.js";
-import { SetPropertyOpSchema } from "./ops/set-property.js";
-import { AddChildOpSchema } from "./ops/add-child.js";
-import { RemoveChildOpSchema } from "./ops/remove-child.js";
-import { ReparentOpSchema } from "./ops/reparent.js";
-import { AddComponentOpSchema } from "./ops/add-component.js";
-import { RemoveComponentOpSchema } from "./ops/remove-component.js";
-import { SetComponentPropertyOpSchema } from "./ops/set-component-property.js";
-import { AddAssetOpSchema } from "./ops/add-asset.js";
-import { RemoveAssetOpSchema } from "./ops/remove-asset.js";
-import { ReplaceAssetRefOpSchema } from "./ops/replace-asset-ref.js";
-import { AddKeyframeOpSchema } from "./ops/add-keyframe.js";
-import { RemoveKeyframeOpSchema } from "./ops/remove-keyframe.js";
-import { SetKeyframeValueOpSchema } from "./ops/set-keyframe-value.js";
-import { PatchOpBase } from "./base.js";
+import { CreateEntityOpSchema } from "./ops/create-entity";
+import { DeleteEntityOpSchema } from "./ops/delete-entity";
+import { SetPropertyOpSchema } from "./ops/set-property";
+import { AddChildOpSchema } from "./ops/add-child";
+import { RemoveChildOpSchema } from "./ops/remove-child";
+import { ReparentOpSchema } from "./ops/reparent";
+import { AddComponentOpSchema } from "./ops/add-component";
+import { RemoveComponentOpSchema } from "./ops/remove-component";
+import { SetComponentPropertyOpSchema } from "./ops/set-component-property";
+import { AddAssetOpSchema } from "./ops/add-asset";
+import { RemoveAssetOpSchema } from "./ops/remove-asset";
+import { ReplaceAssetRefOpSchema } from "./ops/replace-asset-ref";
+import { AddKeyframeOpSchema } from "./ops/add-keyframe";
+import { RemoveKeyframeOpSchema } from "./ops/remove-keyframe";
+import { SetKeyframeValueOpSchema } from "./ops/set-keyframe-value";
+import { PatchOpBase } from "./base";
 
 /**
  * All 15 non-recursive PatchOp types as a discriminated union on `type`.
