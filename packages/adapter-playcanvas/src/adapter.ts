@@ -39,6 +39,12 @@ export class PlayCanvasAdapter implements EngineAdapter {
   private canvas: HTMLCanvasElement | null = null;
 
   /**
+   * Whether the adapter is currently in play mode.
+   * When true, editor features (grid, gizmos, selection) are disabled.
+   */
+  private inPlayMode = false;
+
+  /**
    * Initialize the PlayCanvas application with the given canvas element.
    *
    * Sets up:
@@ -188,6 +194,49 @@ export class PlayCanvasAdapter implements EngineAdapter {
    */
   getCameraMode(): "fly" | "orbit" {
     return this.cameraController?.getMode() ?? "fly";
+  }
+
+  /**
+   * Enter or exit play mode.
+   *
+   * Play mode disables editor-specific features so the user sees the
+   * scene as it would appear at runtime:
+   * - `playing = true`: Set timeScale=1 (simulation runs)
+   * - `playing = false`: Set timeScale=0 (simulation frozen), re-enable
+   *   editor features
+   *
+   * Grid, gizmo, and selection toggling is handled externally by the
+   * viewport component via GizmoManager/SelectionManager/GridHandle
+   * references. This method controls only engine-level play state.
+   */
+  setPlayMode(playing: boolean): void {
+    if (!this.app) return;
+
+    this.inPlayMode = playing;
+
+    if (playing) {
+      // Enter runtime mode: time progresses
+      this.app.timeScale = 1;
+    } else {
+      // Exit runtime mode: freeze time (editor mode)
+      this.app.timeScale = 0;
+    }
+  }
+
+  /**
+   * Set the engine time scale.
+   * 0 = frozen (editor mode / paused), 1 = normal speed.
+   */
+  setTimeScale(scale: number): void {
+    if (!this.app) return;
+    this.app.timeScale = scale;
+  }
+
+  /**
+   * Check if the adapter is in play mode.
+   */
+  isInPlayMode(): boolean {
+    return this.inPlayMode;
   }
 
   /**
