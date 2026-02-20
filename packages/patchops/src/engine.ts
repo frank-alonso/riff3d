@@ -515,7 +515,6 @@ function applyRemoveKeyframe(
 
   // Remove empty track
   if (track !== undefined && track.keyframes.length === 0) {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete tracks[trackId];
   }
 
