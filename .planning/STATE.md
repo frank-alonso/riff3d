@@ -113,6 +113,7 @@ Recent decisions affecting current work:
 - ~~[Phase 2 - CF-03] Add lint rule or restricted API boundary + negative test for mutation-bypass enforcement~~ DONE in 02-05
 - ~~[Phase 2 - CF-05] Remove unused eslint-disable directive at patchops/src/engine.ts:518~~ DONE in 02-01
 - ~~[Phase 2/3 - CF-06] Document IR conventions in source code (coordinate system, normal maps, physics units, roughness, 1:N entity-to-node)~~ DONE in 02-02 (JSDoc in scene-builder.ts, adapter.ts)
+- [Phase 3/4] Drag-preview ghost placement: when dragging an asset from the asset browser into the viewport, render a translucent ghost entity that follows the cursor using raycasting against scene geometry (ground plane fallback). Snap to surface normals, show placement position preview. Replace ghost with real entity on drop. Common editor convention (Unity placement ghost, Unreal drag proxy).
 - [Phase 4/7 - CF-04] Add fixture coverage for non-portable glTF extensions when promoted to portable status
 - [Phase 4] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` when validating Babylon.js adapter -- ensure no web-only assumptions baked into IR.
 - [Phase 8] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` Section 7 when designing ejection adapter interface -- directory structures, no binary formats.
