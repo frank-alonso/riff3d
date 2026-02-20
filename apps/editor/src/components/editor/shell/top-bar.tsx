@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, Square, Save, User, Globe, LinkIcon, Loader2, AlertCircle } from "lucide-react";
+import { Save, User, Globe, LinkIcon, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useEditorStore } from "@/stores/hooks";
 import type { SaveStatus } from "@/stores/slices/save-slice";
+import { PlayControls } from "@/components/editor/playtest/play-controls";
 
 interface TopBarProps {
   projectId: string;
@@ -60,6 +61,8 @@ export function TopBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
   const saveStatus = useEditorStore((s) => s.saveStatus);
+  const isPlaying = useEditorStore((s) => s.isPlaying);
+  const isPaused = useEditorStore((s) => s.isPaused);
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -122,8 +125,15 @@ export function TopBar({
     toast.success("Link copied!");
   }
 
+  // Determine top bar background tint based on play state
+  const topBarBg = isPlaying
+    ? isPaused
+      ? "bg-amber-950/30 border-amber-700/40"
+      : "bg-cyan-950/30 border-cyan-700/40"
+    : "bg-[var(--card)] border-[var(--border)]";
+
   return (
-    <div className="flex h-10 items-center justify-between border-b border-[var(--border)] bg-[var(--card)] px-3">
+    <div className={`flex h-10 items-center justify-between border-b px-3 transition-colors duration-300 ${topBarBg}`}>
       {/* Left: Project name */}
       <div className="flex items-center gap-2">
         {editing && isOwner ? (
@@ -195,33 +205,8 @@ export function TopBar({
         )}
       </div>
 
-      {/* Center: Play controls (placeholder, non-functional until 02-07) */}
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          disabled
-          title="Play (coming soon)"
-          className="flex h-7 w-7 items-center justify-center rounded text-[var(--muted-foreground)] opacity-50"
-        >
-          <Play size={14} />
-        </button>
-        <button
-          type="button"
-          disabled
-          title="Pause (coming soon)"
-          className="flex h-7 w-7 items-center justify-center rounded text-[var(--muted-foreground)] opacity-50"
-        >
-          <Pause size={14} />
-        </button>
-        <button
-          type="button"
-          disabled
-          title="Stop (coming soon)"
-          className="flex h-7 w-7 items-center justify-center rounded text-[var(--muted-foreground)] opacity-50"
-        >
-          <Square size={14} />
-        </button>
-      </div>
+      {/* Center: Play controls */}
+      <PlayControls />
 
       {/* Right: Save status + User avatar */}
       <div className="flex items-center gap-3">

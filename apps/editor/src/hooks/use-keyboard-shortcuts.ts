@@ -19,7 +19,7 @@ import {
  * - W -> translate gizmo
  * - E -> rotate gizmo
  * - R -> scale gizmo
- * - Escape -> deselect all
+ * - Escape -> deselect all (or stop play mode)
  * - Delete / Backspace -> delete selected entities
  * - F -> focus camera on selected entity (placeholder for now)
  * - Ctrl+Z -> undo
@@ -29,10 +29,13 @@ import {
  * - Ctrl+D -> duplicate selected entities
  * - Ctrl+A -> select all entities
  * - Ctrl+S -> manual save (handled in use-auto-save, but preventDefault here)
+ * - Ctrl+P / F5 -> toggle play/stop
+ * - Space -> toggle pause/resume (only during play mode)
  *
  * Guards:
  * - Shortcuts don't fire when typing in input/textarea/select fields
  *   (react-hotkeys-hook default: enableOnFormTags is false)
+ * - Space shortcut only active during play mode to avoid conflicts
  *
  * Call this hook once in EditorShell to register all shortcuts.
  */
@@ -190,5 +193,27 @@ export function useKeyboardShortcuts(): void {
     // The useAutoSave hook subscribes to a manualSaveRequested flag.
     // We dispatch a custom event that the auto-save hook will listen to.
     window.dispatchEvent(new CustomEvent("riff3d:manual-save"));
+  }, { preventDefault: true });
+
+  // Ctrl+P / F5 -> toggle play/stop
+  useHotkeys("mod+p, f5", () => {
+    const { isPlaying, play, stop } = editorStore.getState();
+    if (isPlaying) {
+      stop();
+    } else {
+      play();
+    }
+  }, { preventDefault: true });
+
+  // Space -> toggle pause/resume (only during play mode)
+  useHotkeys("space", () => {
+    const { isPlaying, isPaused, pause, resume } = editorStore.getState();
+    if (!isPlaying) return;
+
+    if (isPaused) {
+      resume();
+    } else {
+      pause();
+    }
   }, { preventDefault: true });
 }
