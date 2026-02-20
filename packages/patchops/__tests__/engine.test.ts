@@ -1,44 +1,31 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import type { SceneDocument, Entity } from "@riff3d/ecson";
+import {
+  SceneDocumentSchema,
+  EntitySchema,
+  CURRENT_SCHEMA_VERSION,
+  type SceneDocument,
+  type Entity,
+} from "@riff3d/ecson";
 import { applyOp, applyOps } from "../src/engine";
 import { CURRENT_PATCHOP_VERSION } from "../src/version";
 import type { PatchOp } from "../src/schemas";
 
-/** Helper: create a minimal valid SceneDocument for testing. */
+/** Helper: create a minimal valid SceneDocument for testing via schema validation. */
 function createTestDoc(): SceneDocument {
   const rootId = "root_001";
-  return {
+  return SceneDocumentSchema.parse({
     id: "doc_001",
     name: "Test Scene",
-    schemaVersion: 1,
+    schemaVersion: CURRENT_SCHEMA_VERSION,
     rootEntityId: rootId,
     entities: {
       [rootId]: {
         id: rootId,
         name: "Root",
         parentId: null,
-        children: [],
-        components: [],
-        tags: [],
-        transform: {
-          position: { x: 0, y: 0, z: 0 },
-          rotation: { x: 0, y: 0, z: 0, w: 1 },
-          scale: { x: 1, y: 1, z: 1 },
-        },
-        visible: true,
-        locked: false,
       },
     },
-    assets: {},
-    wiring: [],
-    environment: {
-      skybox: { type: "color", color: "#87CEEB" },
-      fog: { type: "none" },
-      ambientLight: { color: "#404040", intensity: 1 },
-      gravity: { x: 0, y: -9.81, z: 0 },
-    },
-    metadata: {},
-  };
+  });
 }
 
 function makeOp(type: string, payload: Record<string, unknown>): PatchOp {
@@ -80,21 +67,11 @@ describe("applyOp", () => {
   describe("DeleteEntity", () => {
     it("removes entity from document and returns CreateEntity inverse", () => {
       // First create an entity
-      const entity: Entity = {
+      const entity: Entity = EntitySchema.parse({
         id: "ent_todelete",
         name: "ToDelete",
         parentId: "root_001",
-        children: [],
-        components: [],
-        tags: [],
-        transform: {
-          position: { x: 0, y: 0, z: 0 },
-          rotation: { x: 0, y: 0, z: 0, w: 1 },
-          scale: { x: 1, y: 1, z: 1 },
-        },
-        visible: true,
-        locked: false,
-      };
+      });
       doc.entities["ent_todelete"] = entity;
       doc.entities["root_001"]!.children.push("ent_todelete");
 
@@ -148,21 +125,11 @@ describe("applyOp", () => {
   describe("AddChild", () => {
     it("adds childId to parent's children array", () => {
       // First add a child entity
-      doc.entities["ent_child1"] = {
+      doc.entities["ent_child1"] = EntitySchema.parse({
         id: "ent_child1",
         name: "Child",
         parentId: "root_001",
-        children: [],
-        components: [],
-        tags: [],
-        transform: {
-          position: { x: 0, y: 0, z: 0 },
-          rotation: { x: 0, y: 0, z: 0, w: 1 },
-          scale: { x: 1, y: 1, z: 1 },
-        },
-        visible: true,
-        locked: false,
-      };
+      });
 
       const op = makeOp("AddChild", {
         parentId: "root_001",
@@ -177,21 +144,11 @@ describe("applyOp", () => {
 
     it("inserts at specified index", () => {
       doc.entities["root_001"]!.children = ["child_a", "child_b"];
-      doc.entities["ent_new"] = {
+      doc.entities["ent_new"] = EntitySchema.parse({
         id: "ent_new",
         name: "New",
         parentId: "root_001",
-        children: [],
-        components: [],
-        tags: [],
-        transform: {
-          position: { x: 0, y: 0, z: 0 },
-          rotation: { x: 0, y: 0, z: 0, w: 1 },
-          scale: { x: 1, y: 1, z: 1 },
-        },
-        visible: true,
-        locked: false,
-      };
+      });
 
       const op = makeOp("AddChild", {
         parentId: "root_001",
@@ -229,51 +186,22 @@ describe("applyOp", () => {
   describe("Reparent", () => {
     it("moves entity between parents", () => {
       // Setup: root -> parentA -> child, root -> parentB
-      doc.entities["parentA"] = {
+      doc.entities["parentA"] = EntitySchema.parse({
         id: "parentA",
         name: "ParentA",
         parentId: "root_001",
         children: ["child_x"],
-        components: [],
-        tags: [],
-        transform: {
-          position: { x: 0, y: 0, z: 0 },
-          rotation: { x: 0, y: 0, z: 0, w: 1 },
-          scale: { x: 1, y: 1, z: 1 },
-        },
-        visible: true,
-        locked: false,
-      };
-      doc.entities["parentB"] = {
+      });
+      doc.entities["parentB"] = EntitySchema.parse({
         id: "parentB",
         name: "ParentB",
         parentId: "root_001",
-        children: [],
-        components: [],
-        tags: [],
-        transform: {
-          position: { x: 0, y: 0, z: 0 },
-          rotation: { x: 0, y: 0, z: 0, w: 1 },
-          scale: { x: 1, y: 1, z: 1 },
-        },
-        visible: true,
-        locked: false,
-      };
-      doc.entities["child_x"] = {
+      });
+      doc.entities["child_x"] = EntitySchema.parse({
         id: "child_x",
         name: "ChildX",
         parentId: "parentA",
-        children: [],
-        components: [],
-        tags: [],
-        transform: {
-          position: { x: 0, y: 0, z: 0 },
-          rotation: { x: 0, y: 0, z: 0, w: 1 },
-          scale: { x: 1, y: 1, z: 1 },
-        },
-        visible: true,
-        locked: false,
-      };
+      });
 
       const op = makeOp("Reparent", {
         entityId: "child_x",

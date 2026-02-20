@@ -1,43 +1,29 @@
 import { describe, it, expect } from "vitest";
-import type { SceneDocument } from "@riff3d/ecson";
+import {
+  SceneDocumentSchema,
+  EntitySchema,
+  CURRENT_SCHEMA_VERSION,
+  type SceneDocument,
+} from "@riff3d/ecson";
 import { applyOp } from "../src/engine";
 import { CURRENT_PATCHOP_VERSION } from "../src/version";
 import type { PatchOp } from "../src/schemas";
 
 function createTestDoc(): SceneDocument {
   const rootId = "root_001";
-  return {
+  return SceneDocumentSchema.parse({
     id: "doc_001",
     name: "Test Scene",
-    schemaVersion: 1,
+    schemaVersion: CURRENT_SCHEMA_VERSION,
     rootEntityId: rootId,
     entities: {
       [rootId]: {
         id: rootId,
         name: "Root",
         parentId: null,
-        children: [],
-        components: [],
-        tags: [],
-        transform: {
-          position: { x: 0, y: 0, z: 0 },
-          rotation: { x: 0, y: 0, z: 0, w: 1 },
-          scale: { x: 1, y: 1, z: 1 },
-        },
-        visible: true,
-        locked: false,
       },
     },
-    assets: {},
-    wiring: [],
-    environment: {
-      skybox: { type: "color", color: "#87CEEB" },
-      fog: { type: "none" },
-      ambientLight: { color: "#404040", intensity: 1 },
-      gravity: { x: 0, y: -9.81, z: 0 },
-    },
-    metadata: {},
-  };
+  });
 }
 
 function makeOp(type: string, payload: Record<string, unknown>): PatchOp {
@@ -75,11 +61,10 @@ describe("apply-inverse identity (all 16 op types)", () => {
 
   it("DeleteEntity: apply then inverse restores document", () => {
     const doc = createTestDoc();
-    const entity = {
+    const entity = EntitySchema.parse({
       id: "ent_del",
       name: "ToDelete",
       parentId: "root_001",
-      children: [],
       components: [{ type: "Light", properties: { intensity: 1.0 } }],
       tags: ["test"],
       transform: {
@@ -87,9 +72,7 @@ describe("apply-inverse identity (all 16 op types)", () => {
         rotation: { x: 0, y: 0, z: 0, w: 1 },
         scale: { x: 1, y: 1, z: 1 },
       },
-      visible: true,
-      locked: false,
-    };
+    });
     doc.entities["ent_del"] = entity;
     doc.entities["root_001"]!.children.push("ent_del");
 
@@ -142,21 +125,11 @@ describe("apply-inverse identity (all 16 op types)", () => {
 
   it("AddChild: apply then inverse restores document", () => {
     const doc = createTestDoc();
-    doc.entities["child_1"] = {
+    doc.entities["child_1"] = EntitySchema.parse({
       id: "child_1",
       name: "Child",
       parentId: "root_001",
-      children: [],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
+    });
     const original = cloneDoc(doc);
 
     const op = makeOp("AddChild", {
@@ -172,21 +145,11 @@ describe("apply-inverse identity (all 16 op types)", () => {
 
   it("RemoveChild: apply then inverse restores document", () => {
     const doc = createTestDoc();
-    doc.entities["child_1"] = {
+    doc.entities["child_1"] = EntitySchema.parse({
       id: "child_1",
       name: "Child",
       parentId: "root_001",
-      children: [],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
+    });
     doc.entities["root_001"]!.children = ["child_1"];
     const original = cloneDoc(doc);
 
@@ -204,81 +167,33 @@ describe("apply-inverse identity (all 16 op types)", () => {
 
   it("Reparent: apply then inverse restores original parent AND sibling order", () => {
     const doc = createTestDoc();
-    doc.entities["parentA"] = {
+    doc.entities["parentA"] = EntitySchema.parse({
       id: "parentA",
       name: "ParentA",
       parentId: "root_001",
       children: ["child_x", "child_y"],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
-    doc.entities["parentB"] = {
+    });
+    doc.entities["parentB"] = EntitySchema.parse({
       id: "parentB",
       name: "ParentB",
       parentId: "root_001",
       children: ["child_z"],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
-    doc.entities["child_x"] = {
+    });
+    doc.entities["child_x"] = EntitySchema.parse({
       id: "child_x",
       name: "ChildX",
       parentId: "parentA",
-      children: [],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
-    doc.entities["child_y"] = {
+    });
+    doc.entities["child_y"] = EntitySchema.parse({
       id: "child_y",
       name: "ChildY",
       parentId: "parentA",
-      children: [],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
-    doc.entities["child_z"] = {
+    });
+    doc.entities["child_z"] = EntitySchema.parse({
       id: "child_z",
       name: "ChildZ",
       parentId: "parentB",
-      children: [],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
+    });
 
     const original = cloneDoc(doc);
 
@@ -522,51 +437,23 @@ describe("apply-inverse identity (all 16 op types)", () => {
 describe("validation", () => {
   it("Reparent rejects circular reparent (reparenting under own descendant)", () => {
     const doc = createTestDoc();
-    doc.entities["parentA"] = {
+    doc.entities["parentA"] = EntitySchema.parse({
       id: "parentA",
       name: "ParentA",
       parentId: "root_001",
       children: ["child_x"],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
-    doc.entities["child_x"] = {
+    });
+    doc.entities["child_x"] = EntitySchema.parse({
       id: "child_x",
       name: "ChildX",
       parentId: "parentA",
       children: ["grandchild"],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
-    doc.entities["grandchild"] = {
+    });
+    doc.entities["grandchild"] = EntitySchema.parse({
       id: "grandchild",
       name: "Grandchild",
       parentId: "child_x",
-      children: [],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
+    });
 
     // Try to reparent parentA under its grandchild -- should be rejected
     const op = makeOp("Reparent", {
@@ -581,36 +468,16 @@ describe("validation", () => {
 
   it("Reparent allows non-circular reparent", () => {
     const doc = createTestDoc();
-    doc.entities["sibling"] = {
+    doc.entities["sibling"] = EntitySchema.parse({
       id: "sibling",
       name: "Sibling",
       parentId: "root_001",
-      children: [],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
-    doc.entities["other"] = {
+    });
+    doc.entities["other"] = EntitySchema.parse({
       id: "other",
       name: "Other",
       parentId: "root_001",
-      children: [],
-      components: [],
-      tags: [],
-      transform: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0, w: 1 },
-        scale: { x: 1, y: 1, z: 1 },
-      },
-      visible: true,
-      locked: false,
-    };
+    });
     doc.entities["root_001"]!.children = ["sibling", "other"];
 
     const op = makeOp("Reparent", {
