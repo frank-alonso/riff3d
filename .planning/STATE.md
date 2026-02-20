@@ -135,6 +135,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 02-08-PLAN.md (Phase 2 complete)
-Resume file: .planning/phases/02-closed-loop-editor/02-08-SUMMARY.md
-Next: Phase 3 (Review Gate: Foundation)
+Stopped at: Phase 3 context gathered
+Resume file: .planning/phases/03-review-gate-foundation/03-CONTEXT.md
+Next: /gsd:plan-phase 3
