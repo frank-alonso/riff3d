@@ -109,6 +109,16 @@ export class PlayCanvasAdapter implements EngineAdapter {
     if (this.editorCamera?.camera) {
       this.editorCamera.camera.clearColor = getSkyboxColor(scene.environment);
     }
+
+    // Signal scene is ready for visual testing / screenshot capture
+    // Wait one frame for rendering to complete
+    if (this.app) {
+      this.app.once("frameend", () => {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("__sceneReady"));
+        }
+      });
+    }
   }
 
   /**

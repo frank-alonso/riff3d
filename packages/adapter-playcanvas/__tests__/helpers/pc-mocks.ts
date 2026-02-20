@@ -366,6 +366,10 @@ export class MockApplication {
   fire = vi.fn();
   on = vi.fn();
   off = vi.fn();
+  once = vi.fn((_event: string, callback: () => void) => {
+    // Immediately invoke callback to simulate frameend in tests
+    callback();
+  });
   drawLine = vi.fn();
   resizeCanvas = vi.fn();
   setCanvasFillMode = vi.fn();

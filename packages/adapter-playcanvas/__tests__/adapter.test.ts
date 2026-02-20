@@ -33,6 +33,7 @@ globalThis.HTMLCanvasElement = FakeHTMLCanvasElement as unknown as typeof HTMLCa
 globalThis.window = {
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
+  dispatchEvent: vi.fn(),
 } as unknown as Window & typeof globalThis;
 globalThis.document = {
   createElement: vi.fn((tag: string) => {

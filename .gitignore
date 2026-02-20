@@ -30,6 +30,10 @@ pnpm-debug.log*
 # testing
 coverage/
 
+# Playwright
+test-results/
+playwright-report/
+
 # vercel
 .vercel
 

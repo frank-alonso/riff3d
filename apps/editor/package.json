@@ -10,7 +10,10 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:integration": "vitest run __tests__/rls-integration.test.ts"
+    "test:integration": "vitest run __tests__/rls-integration.test.ts",
+    "test:e2e": "playwright test --project=e2e",
+    "test:visual": "playwright test --project=visual",
+    "test:visual:update": "playwright test --project=visual --update-snapshots"
   },
   "dependencies": {
     "@riff3d/adapter-playcanvas": "workspace:*",
@@ -30,6 +33,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
