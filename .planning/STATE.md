@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 4 of 11 (Dual Adapter Validation)
-Plan: 1 of 5 in current phase
+Plan: 2 of 5 in current phase
 Status: Executing Phase 4
-Last activity: 2026-02-20 -- Completed 04-01 (Babylon Adapter & Shared Interface)
+Last activity: 2026-02-20 -- Completed 04-02 (Incremental Delta Updates)
 
-Progress: [##--------] 1/5 plans in phase
+Progress: [####------] 2/5 plans in phase
 
 ## Performance Metrics
 
@@ -41,6 +41,7 @@ Progress: [##--------] 1/5 plans in phase
 | Phase 03 P06 | 4 | 2 tasks | 9 files |
 | Phase 03 P07 | 25 | 2 tasks | 6 files |
 | Phase 04 P01 | 10 | 2 tasks | 24 files |
+| Phase 04 P02 | 6 | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,9 @@ Recent decisions affecting current work:
 - [Phase 04]: [04-01]: twoSidedLighting is private in Babylon 8.52; backFaceCulling=false is sufficient for double-sided
 - [Phase 04]: [04-01]: Explicit per-module vi.mock() for Babylon sub-modules (vitest hoisting limitation)
 - [Phase 04]: [04-01]: applyDelta stubs fall back to full rebuild on both adapters (04-02 implements)
+- [Phase 04]: [04-02]: ComponentType:propertyPath encoding in IRDelta property string avoids patchops dependency in canonical-ir
+- [Phase 04]: [04-02]: computeDelta accepts PatchOpLike shape (type + payload) to keep canonical-ir independent of patchops
+- [Phase 04]: [04-02]: Viewport subscriber wiring deferred to 04-03 (lastDelta stored in scene-slice, 04-03 wires to adapter)
 
 ### Pending Todos
 
@@ -169,6 +173,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 04-01-PLAN.md
-Resume file: .planning/phases/04-dual-adapter-validation/04-01-SUMMARY.md
-Next: Execute 04-02-PLAN.md (Incremental Delta Updates)
+Stopped at: Completed 04-02-PLAN.md
+Resume file: .planning/phases/04-dual-adapter-validation/04-02-SUMMARY.md
+Next: Execute 04-03-PLAN.md (Viewport Engine Switching)
