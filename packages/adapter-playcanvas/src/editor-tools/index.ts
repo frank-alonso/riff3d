@@ -3,3 +3,4 @@ export { SelectionManager, type SelectionStoreApi, type SetSelectionCallback } f
 export { CameraController, createEditorCamera } from "./camera-controller";
 export { createGrid, GridHandle } from "./grid";
 export { importGlb, type GlbImportResult, type GlbHierarchyNode, type GlbMaterialInfo } from "./glb-loader";
+export { DragPreviewManager, type DragPreviewConfig } from "./drag-preview";

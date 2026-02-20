@@ -6,6 +6,7 @@ import {
   GizmoManager,
   SelectionManager,
   createGrid,
+  DragPreviewManager,
   type GridHandle,
 } from "@riff3d/adapter-playcanvas/editor-tools";
 import { compile } from "@riff3d/canonical-ir";
@@ -13,6 +14,7 @@ import { generateOpId } from "@riff3d/ecson";
 import type { PatchOp } from "@riff3d/patchops";
 import { CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
 import { editorStore } from "@/stores/editor-store";
+import { ASSET_DRAG_MIME, getStarterAsset } from "@/lib/asset-manager";
 import { useViewportAdapter } from "./viewport-provider";
 import { FloatingToolbar } from "./floating-toolbar";
 import { ViewportLoader } from "./viewport-loader";
@@ -69,6 +71,11 @@ export function ViewportCanvas() {
     let gridHandle: GridHandle | null = null;
     let windowResizeHandler: (() => void) | null = null;
     let requestAppHandler: (() => void) | null = null;
+    let dragPreviewManager: DragPreviewManager | null = null;
+    let dragEnterHandler: ((e: globalThis.DragEvent) => void) | null = null;
+    let dragOverHandler: ((e: globalThis.DragEvent) => void) | null = null;
+    let dragLeaveHandler: ((e: globalThis.DragEvent) => void) | null = null;
+    let dropHandler: ((e: globalThis.DragEvent) => void) | null = null;
 
     // Initialize adapter asynchronously
     void adapter.initialize(canvasRef.current).then(() => {
@@ -135,6 +142,109 @@ export function ViewportCanvas() {
 
       selectionManager = new SelectionManager(app, camera, entityMap, setSelection, editorStore);
       selectionManager.initialize();
+
+      // --- Initialize Drag Preview Manager ---
+      const canvasEl = canvasRef.current;
+      if (canvasEl) {
+        dragPreviewManager = new DragPreviewManager({
+          app,
+          camera,
+          canvas: canvasEl,
+          onDrop: (position, assetId) => {
+            const asset = getStarterAsset(assetId);
+            const doc = editorStore.getState().ecsonDoc;
+            if (!asset || !doc) return;
+
+            const parentId = doc.rootEntityId;
+            const ops = asset.createOps(parentId);
+            if (ops.length === 0) return;
+
+            // Find the new entity ID from the CreateEntity op
+            const createOp = ops.find((op) => op.type === "CreateEntity");
+            const newEntityId = createOp
+              ? (createOp.payload as { entityId: string }).entityId
+              : null;
+
+            // Add a SetProperty op to place the entity at the drop position
+            if (newEntityId) {
+              ops.push({
+                id: generateOpId(),
+                timestamp: Date.now(),
+                origin: "user",
+                version: CURRENT_PATCHOP_VERSION,
+                type: "SetProperty",
+                payload: {
+                  entityId: newEntityId,
+                  path: "transform.position",
+                  value: position,
+                  previousValue: { x: 0, y: 0, z: 0 },
+                },
+              } as PatchOp);
+            }
+
+            // Dispatch as BatchOp for atomic undo
+            const batchOp: PatchOp = {
+              id: generateOpId(),
+              timestamp: Date.now(),
+              origin: "user",
+              version: CURRENT_PATCHOP_VERSION,
+              type: "BatchOp",
+              payload: { ops },
+            };
+
+            editorStore.getState().dispatchOp(batchOp);
+
+            if (newEntityId) {
+              editorStore.getState().setSelection([newEntityId]);
+            }
+          },
+        });
+
+        // Wire DOM drag events to the DragPreviewManager
+        // The editor layer parses ASSET_DRAG_MIME; the adapter only handles the 3D ghost.
+        const dpm = dragPreviewManager;
+
+        dragEnterHandler = (e: globalThis.DragEvent) => {
+          if (!e.dataTransfer?.types.includes(ASSET_DRAG_MIME)) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+          const rect = canvasEl.getBoundingClientRect();
+          const assetId = e.dataTransfer.getData(ASSET_DRAG_MIME);
+          // On dragenter the getData may be empty due to browser security;
+          // store a placeholder and update on drop
+          dpm.startPreview(assetId || "__pending__", e.clientX - rect.left, e.clientY - rect.top);
+        };
+
+        dragOverHandler = (e: globalThis.DragEvent) => {
+          if (!e.dataTransfer?.types.includes(ASSET_DRAG_MIME)) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+          const rect = canvasEl.getBoundingClientRect();
+          dpm.updatePreview(e.clientX - rect.left, e.clientY - rect.top);
+        };
+
+        dragLeaveHandler = (e: globalThis.DragEvent) => {
+          // Only end preview if actually leaving the canvas (not entering a child)
+          if (e.relatedTarget && canvasEl.contains(e.relatedTarget as Node)) return;
+          dpm.endPreview();
+        };
+
+        dropHandler = (e: globalThis.DragEvent) => {
+          const assetId = e.dataTransfer?.getData(ASSET_DRAG_MIME);
+          if (!assetId) return;
+          e.preventDefault();
+          const rect = canvasEl.getBoundingClientRect();
+          // Restart preview with real asset ID if we had a placeholder
+          dpm.endPreview();
+          dpm.startPreview(assetId, e.clientX - rect.left, e.clientY - rect.top);
+          dpm.confirmDrop(e.clientX - rect.left, e.clientY - rect.top);
+        };
+
+        canvasEl.addEventListener("dragenter", dragEnterHandler);
+        canvasEl.addEventListener("dragover", dragOverHandler);
+        canvasEl.addEventListener("dragleave", dragLeaveHandler);
+        canvasEl.addEventListener("drop", dropHandler);
+      }
 
       setLoadingProgress(90);
 
@@ -205,6 +315,14 @@ export function ViewportCanvas() {
       if (requestAppHandler) {
         window.removeEventListener("riff3d:request-app", requestAppHandler);
       }
+      // Remove drag event listeners from canvas
+      if (canvasRef.current) {
+        if (dragEnterHandler) canvasRef.current.removeEventListener("dragenter", dragEnterHandler);
+        if (dragOverHandler) canvasRef.current.removeEventListener("dragover", dragOverHandler);
+        if (dragLeaveHandler) canvasRef.current.removeEventListener("dragleave", dragLeaveHandler);
+        if (dropHandler) canvasRef.current.removeEventListener("drop", dropHandler);
+      }
+      dragPreviewManager?.dispose();
       gizmoManager?.dispose();
       selectionManager?.dispose();
       gridHandle?.dispose();
