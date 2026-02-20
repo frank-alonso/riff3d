@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 3 of 11 (Review Gate: Foundation)
-Plan: 4 of 7 in current phase
+Plan: 6 of 7 in current phase
 Status: Executing Phase 3
-Last activity: 2026-02-20 -- Completed 03-04 (RLS policy structural and integration tests)
+Last activity: 2026-02-20 -- Completed 03-06 (E2E and visual regression testing)
 
-Progress: [####------] 3/7 plans in phase
+Progress: [########--] 5/7 plans in phase
 
 ## Performance Metrics
 
@@ -37,6 +37,7 @@ Progress: [####------] 3/7 plans in phase
 
 *Updated after each plan completion*
 | Phase 03 P01 | 8 | 2 tasks | 11 files |
+| Phase 03 P06 | 4 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,8 @@ Recent decisions affecting current work:
 - [03-04]: describe.skipIf pattern for integration tests -- skip when env vars missing, no test failures in CI
 - [03-04]: Service role client for test cleanup ensures no stale test data accumulates
 - [Phase 03]: [03-01]: globalThis stubs for DOM APIs (HTMLCanvasElement, window, document) instead of jsdom for adapter tests
+- [Phase 03]: __sceneReady signal in loadScene only (rebuildScene delegates to loadScene, avoiding double-fire)
+- [Phase 03]: Visual E2E tests non-blocking beta with generous thresholds (2% pixel, 0.3 color) for GPU variance
 
 ### Pending Todos
 
@@ -143,6 +146,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 03-01-PLAN.md
-Resume file: .planning/phases/03-review-gate-foundation/03-01-SUMMARY.md
-Next: Execute remaining Phase 3 plans (03-03, 03-05, 03-06, 03-07)
+Stopped at: Completed 03-06-PLAN.md
+Resume file: .planning/phases/03-review-gate-foundation/03-06-SUMMARY.md
+Next: Execute remaining Phase 3 plans (03-07)
