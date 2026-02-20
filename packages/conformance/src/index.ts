@@ -33,3 +33,13 @@ export {
   type TimingResult,
   type OpBenchmarkResult,
 } from "./benchmarks";
+
+// Tiered performance budgets
+export {
+  TIERED_BUDGETS,
+  SIMPLE_BUDGETS,
+  TIERED_PERFORMANCE_BUDGETS,
+  checkBudget,
+  type TieredBudget,
+  type SimpleBudget,
+} from "./budgets";
