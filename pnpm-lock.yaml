@@ -118,6 +118,19 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  packages/adapter-babylon:
+    dependencies:
+      '@babylonjs/core':
+        specifier: ~8.52.0
+        version: 8.52.0
+      '@riff3d/canonical-ir':
+        specifier: workspace:*
+        version: link:../canonical-ir
+    devDependencies:
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
   packages/adapter-playcanvas:
     dependencies:
       '@riff3d/canonical-ir':
@@ -289,6 +302,9 @@ packages:
   '@babel/types@7.29.0':
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
+
+  '@babylonjs/core@8.52.0':
+    resolution: {integrity: sha512-4W6I20Q+8llgWFX8TElJNUo6mKMZWanB/KR5HVIyGyveMikc8BXzIg+mExvJ+0PNUqHM07FcZfNMQSa5MZ/SuA==}
 
   '@emnapi/core@1.8.1':
     resolution: {integrity: sha512-AvT9QFpxK0Zd8J0jopedNm+w/2fIzvtPKPjqyw9jwvBaReTTqPBk9Hixaz7KbjimP+QNz605/XnjFcDAL2pqBg==}
@@ -3054,6 +3070,8 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
+
+  '@babylonjs/core@8.52.0': {}
 
   '@emnapi/core@1.8.1':
     dependencies:
