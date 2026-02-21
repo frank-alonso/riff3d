@@ -8,6 +8,7 @@ import {
   createGrid,
   DragPreviewManager,
   PresenceRenderer,
+  AvatarRenderer,
   LockRenderer,
   type GridHandle,
   type RemoteUserPresence,
@@ -23,6 +24,8 @@ import { editorStore } from "@/stores/editor-store";
 import { useEditorStore } from "@/stores/hooks";
 import { ASSET_DRAG_MIME, getStarterAsset } from "@/lib/asset-manager";
 import { getLockedEntities, type AwarenessLike } from "@/collaboration/lock-manager";
+import { AvatarController } from "@/collaboration/avatar-controller";
+import { updatePresence } from "@/collaboration/awareness-state";
 import { useViewportAdapter } from "./viewport-provider";
 import { FloatingToolbar } from "./floating-toolbar";
 import { ViewportLoader } from "./viewport-loader";
@@ -128,7 +131,10 @@ export function ViewportCanvas() {
     let requestAppHandler: (() => void) | null = null;
     let dragPreviewManager: DragPreviewManager | null = null;
     let presenceRenderer: PresenceRenderer | null = null;
+    let avatarRenderer: AvatarRenderer | null = null;
     let presenceUnsub: (() => void) | null = null;
+    let avatarController: AvatarController | null = null;
+    let avatarModeUnsub: (() => void) | null = null;
     let lockRenderer: LockRenderer | null = null;
     let lockUnsub: (() => void) | null = null;
     let dragEnterHandler: ((e: globalThis.DragEvent) => void) | null = null;
@@ -395,12 +401,18 @@ export function ViewportCanvas() {
           presenceRenderer = new PresenceRenderer(app, camera);
           presenceRenderer.start();
 
-          // Subscribe to collaborator presence changes to feed the renderer
+          // --- Initialize Avatar Renderer (05-05) ---
+          // Draws colored capsule avatars for remote users in avatar mode
+          avatarRenderer = new AvatarRenderer(app, camera);
+          avatarRenderer.start();
+
+          // Subscribe to collaborator presence changes to feed both renderers
           presenceUnsub = editorStore.subscribe(
             (state) => state.collaboratorPresence,
             (presenceMap) => {
-              if (!presenceRenderer || !presenceMap) {
+              if (!presenceMap) {
                 presenceRenderer?.update([]);
+                avatarRenderer?.update([]);
                 return;
               }
               const collaborators = editorStore.getState().collaborators;
@@ -418,9 +430,76 @@ export function ViewportCanvas() {
                   });
                 }
               }
-              presenceRenderer.update(remoteUsers);
+              // Both renderers receive the full list; each filters by mode internally
+              // PresenceRenderer renders mode=editor users (frustum cones)
+              // AvatarRenderer renders mode=avatar users (capsules)
+              presenceRenderer?.update(remoteUsers);
+              avatarRenderer?.update(remoteUsers);
             },
           );
+
+          // --- Initialize Avatar Controller (05-05) ---
+          // WASD ground-plane movement when local user enters avatar mode
+          const pcAdapterForAvatar = pcAdapter;
+          const cameraController = pcAdapterForAvatar.getCameraController();
+
+          if (canvasEl && cameraController) {
+            avatarController = new AvatarController(canvasEl, camera, app);
+
+            // Set up awareness broadcast callback for avatar position
+            avatarController.setBroadcastCallback((cameraState) => {
+              const awareness = editorStore.getState()._lockAwareness;
+              if (awareness) {
+                (awareness as { setLocalStateField: (k: string, v: unknown) => void })
+                  .setLocalStateField("camera", cameraState);
+              }
+            });
+
+            // Subscribe to avatar mode toggle
+            avatarModeUnsub = editorStore.subscribe(
+              (state) => state.isAvatarMode,
+              (isAvatarMode) => {
+                if (isAvatarMode) {
+                  // Enter avatar mode: disable normal camera, enable avatar controller
+                  cameraController.disable();
+                  avatarController?.enable();
+                  // Update awareness mode
+                  const awareness = editorStore.getState()._lockAwareness;
+                  if (awareness) {
+                    updatePresence(
+                      awareness as { setLocalStateField: (k: string, v: unknown) => void },
+                      { mode: "avatar" },
+                    );
+                  }
+                } else {
+                  // Exit avatar mode: disable avatar controller, enable normal camera
+                  avatarController?.disable();
+                  cameraController.enable();
+                  // Update awareness mode
+                  const awareness = editorStore.getState()._lockAwareness;
+                  if (awareness) {
+                    updatePresence(
+                      awareness as { setLocalStateField: (k: string, v: unknown) => void },
+                      { mode: "editor" },
+                    );
+                  }
+                }
+              },
+            );
+
+            // If avatar mode was already active when adapter initialized
+            if (editorStore.getState().isAvatarMode) {
+              cameraController.disable();
+              avatarController.enable();
+              const awareness = editorStore.getState()._lockAwareness;
+              if (awareness) {
+                updatePresence(
+                  awareness as { setLocalStateField: (k: string, v: unknown) => void },
+                  { mode: "avatar" },
+                );
+              }
+            }
+          }
 
           // Listen for app instance requests (used by GLB import)
           requestAppHandler = () => {
@@ -574,7 +653,10 @@ export function ViewportCanvas() {
       }
       dragPreviewManager?.dispose();
       presenceRenderer?.dispose();
+      avatarRenderer?.dispose();
       presenceUnsub?.();
+      avatarController?.dispose();
+      avatarModeUnsub?.();
       lockRenderer?.dispose();
       lockUnsub?.();
       gizmoManager?.dispose();
