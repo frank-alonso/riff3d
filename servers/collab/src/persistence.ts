@@ -21,9 +21,26 @@ export function createPersistenceExtension(
         .eq("project_id", documentName)
         .single();
 
-      if (error || !data?.ydoc_state) {
-        // No persisted Y.Doc state -- first collaborative session.
-        // The first client will initialize the Y.Doc from its ECSON.
+      if (error) {
+        // PGRST116 = "not found" (no rows matched) -- expected for first collab session
+        if (error.code === "PGRST116") {
+          return null;
+        }
+        // Any other DB error is unexpected -- log and throw to prevent
+        // Hocuspocus from initializing a blank Y.Doc that could overwrite
+        // persisted state on the next store() call.
+        console.error(
+          `[collab] DB error fetching Y.Doc for ${documentName}:`,
+          error.code,
+          error.message,
+        );
+        throw new Error(
+          `Failed to fetch collab document: ${error.code} ${error.message}`,
+        );
+      }
+
+      if (!data?.ydoc_state) {
+        // Row exists but no Y.Doc state -- treat as first session
         return null;
       }
 

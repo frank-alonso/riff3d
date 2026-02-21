@@ -165,6 +165,15 @@ export function syncToYDoc(
 
       // Sync wiring
       syncWiring(yDoc, ecsonDoc.wiring);
+
+      // Sync metadata
+      const yMetadata = yDoc.getMap("metadata");
+      for (const [key, value] of Object.entries(ecsonDoc.metadata)) {
+        const existing = yMetadata.get(key);
+        if (JSON.stringify(existing) !== JSON.stringify(value)) {
+          yMetadata.set(key, value);
+        }
+      }
     }
   }, ORIGIN_LOCAL);
 }
@@ -325,6 +334,7 @@ export function observeRemoteChanges(
   const yEntities = yDoc.getMap("entities");
   const yAssets = yDoc.getMap("assets");
   const yEnvironment = yDoc.getMap("environment");
+  const yMetadata = yDoc.getMap("metadata");
   const yWiring = yDoc.getArray("wiring");
 
   // Debounce to batch multiple Y.Doc events into a single ECSON rebuild.
@@ -374,6 +384,7 @@ export function observeRemoteChanges(
   yEntities.observeDeep(handleMapEvent);
   yAssets.observeDeep(handleMapEvent);
   yEnvironment.observeDeep(handleMapEvent);
+  yMetadata.observeDeep(handleMapEvent);
   yWiring.observe(handleArrayEvent);
 
   return () => {
@@ -383,6 +394,7 @@ export function observeRemoteChanges(
     yEntities.unobserveDeep(handleMapEvent);
     yAssets.unobserveDeep(handleMapEvent);
     yEnvironment.unobserveDeep(handleMapEvent);
+    yMetadata.unobserveDeep(handleMapEvent);
     yWiring.unobserve(handleArrayEvent);
   };
 }

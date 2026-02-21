@@ -450,16 +450,26 @@ describe("Sync Bridge", () => {
       expect(parsed.success).toBe(true);
     });
 
-    it("returns null for empty Y.Doc (fail-closed)", () => {
+    it("handles empty Y.Doc without throwing (fail-closed contract)", () => {
       const yDoc = new Y.Doc();
 
-      // Empty Y.Doc has no rootEntityId — fails schema validation
+      // Empty Y.Doc has empty string for id/rootEntityId from the default
+      // getMap().get() fallback. The ECSON schema allows empty strings,
+      // so an empty Y.Doc may produce a valid-but-empty SceneDocument
+      // (all maps empty, default values applied by Zod) OR null if
+      // validation fails. Either outcome satisfies the fail-closed contract:
+      // - Valid parse: returns a SceneDocument (no crash, no malformed state)
+      // - Invalid parse: returns null (fail-closed, callers preserve last-known-good)
       const result = yDocToEcson(yDoc);
-      // Empty string rootEntityId: schema requires non-empty? Actually
-      // the schema allows empty string. Let's just check it doesn't crash.
-      // The key contract is that well-formed docs return non-null and
-      // malformed docs return null.
-      expect(result).toBeDefined(); // does not throw
+
+      if (result === null) {
+        // Fail-closed: schema validation rejected the empty doc
+        expect(result).toBeNull();
+      } else {
+        // Schema accepted with defaults: verify it's a valid SceneDocument
+        const parsed = SceneDocumentSchema.safeParse(result);
+        expect(parsed.success).toBe(true);
+      }
     });
   });
 });

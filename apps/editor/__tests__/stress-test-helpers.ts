@@ -261,9 +261,33 @@ export function syncAll(docs: Y.Doc[]): void {
 }
 
 /**
+ * Canonicalize an ECSON document for deep comparison.
+ * Sorts entity keys and stringifies for deterministic comparison.
+ */
+function canonicalizeEcson(doc: SceneDocument): string {
+  const sortedEntities: Record<string, unknown> = {};
+  for (const id of Object.keys(doc.entities).sort()) {
+    sortedEntities[id] = doc.entities[id];
+  }
+  return JSON.stringify({
+    id: doc.id,
+    name: doc.name,
+    schemaVersion: doc.schemaVersion,
+    rootEntityId: doc.rootEntityId,
+    entities: sortedEntities,
+    assets: doc.assets,
+    wiring: doc.wiring,
+    environment: doc.environment,
+    metadata: doc.metadata,
+  });
+}
+
+/**
  * Check that all Y.Docs have converged to identical ECSON state.
- * Compares entity count and spot-checks key entity names.
- * Returns false if any doc fails ECSON reconstruction or if states diverge.
+ * Performs full deep comparison using canonicalized JSON serialization
+ * of the complete ECSON document (entities, assets, wiring, environment,
+ * metadata). Returns false if any doc fails ECSON reconstruction or if
+ * any field diverges across documents.
  */
 export function docsConverged(docs: Y.Doc[]): boolean {
   if (docs.length < 2) return true;
@@ -275,27 +299,10 @@ export function docsConverged(docs: Y.Doc[]): boolean {
     ecsons.push(ecson);
   }
 
-  const reference = ecsons[0]!;
-  const refEntityIds = Object.keys(reference.entities).sort();
+  const referenceCanonical = canonicalizeEcson(ecsons[0]!);
 
   for (let i = 1; i < ecsons.length; i++) {
-    const other = ecsons[i]!;
-    const otherEntityIds = Object.keys(other.entities).sort();
-
-    // Entity count must match
-    if (refEntityIds.length !== otherEntityIds.length) return false;
-
-    // Entity IDs must match
-    for (let j = 0; j < refEntityIds.length; j++) {
-      if (refEntityIds[j] !== otherEntityIds[j]) return false;
-    }
-
-    // Spot-check entity names match
-    for (const entityId of refEntityIds) {
-      if (reference.entities[entityId]!.name !== other.entities[entityId]!.name) {
-        return false;
-      }
-    }
+    if (canonicalizeEcson(ecsons[i]!) !== referenceCanonical) return false;
   }
 
   return true;

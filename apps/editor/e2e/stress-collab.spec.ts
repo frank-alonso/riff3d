@@ -216,12 +216,20 @@ test.describe("Stress Test: E2E Collaboration & Performance", () => {
     await canvas.waitFor({ state: "visible", timeout: 30_000 });
     await waitForSceneReady(page);
 
-    // Note: In a full test, we would programmatically create 200 entities
-    // through the UI or load a pre-seeded project. For the stress test
-    // evidence, we measure FPS with the default scene as baseline, then
-    // document the measurement approach for manual 200-entity validation.
+    // FPS measurement approach:
+    // - Headless Vitest stress tests (stress-test-collab.test.ts) verify
+    //   that the 200-entity scene compiles to valid Canonical IR and that
+    //   4-client CRDT convergence works on the full 201-entity scene.
+    // - This E2E test measures rendering FPS on the current editor scene.
+    //   The editor creates a default scene on project creation. For a full
+    //   200-entity FPS measurement, run this test against a pre-seeded
+    //   project or use the manual checklist (PHASE_6_MANUAL_CHECKLIST.md).
+    //
+    // The 30 FPS floor (CONTEXT.md locked decision) is asserted here.
+    // On native GPU hardware this will exercise real WebGL rendering.
+    // On WSL2/headless environments, FPS may be unreliable.
 
-    // Measure FPS: take median of 3 runs
+    // Measure FPS: take median of 3 runs (3-second windows per research)
     const fpsRuns: number[] = [];
     for (let run = 0; run < 3; run++) {
       const fps = await measureFps(page, 3000);
@@ -235,12 +243,13 @@ test.describe("Stress Test: E2E Collaboration & Performance", () => {
 
     console.log(`[FPS Median] ${medianFps.toFixed(1)} FPS`);
     console.log(
-      `[FPS Note] Measurement from default scene. 200-entity FPS validated ` +
-        `via headless Vitest stress tests (stress-test-collab.test.ts).`,
+      `[FPS Evidence] 200-entity scene compilation verified by headless ` +
+        `stress tests. E2E FPS measured on editor default scene. For full ` +
+        `200-entity FPS, see PHASE_6_MANUAL_CHECKLIST.md.`,
     );
 
-    // Assert FPS >= 25 (allowing noise margin below 30 FPS floor)
-    expect(medianFps).toBeGreaterThanOrEqual(25);
+    // Assert FPS >= 30 per CONTEXT.md locked decision (30 FPS floor)
+    expect(medianFps).toBeGreaterThanOrEqual(30);
 
     // Cleanup
     await page.goto("/dashboard");

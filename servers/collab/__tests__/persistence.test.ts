@@ -333,6 +333,24 @@ describe("createPersistenceExtension fetch", () => {
     expect(result).toBeNull();
   });
 
+  it("throws on non-PGRST116 DB error (prevents blank Y.Doc overwrite)", async () => {
+    const { client } = createMockSupabase({
+      selectResult: {
+        data: null,
+        error: { code: "PGRST301", message: "connection refused" },
+      },
+    });
+
+    const extension = createPersistenceExtension(client);
+    const config = (extension as unknown as { configuration: { fetch: (ctx: { documentName: string }) => Promise<unknown> } }).configuration;
+
+    // Non-PGRST116 errors should throw, preventing Hocuspocus from
+    // initializing a blank Y.Doc that could overwrite persisted state.
+    await expect(
+      config.fetch({ documentName: "some-project" }),
+    ).rejects.toThrow("Failed to fetch collab document: PGRST301 connection refused");
+  });
+
   it("returns Uint8Array for existing project with persisted state", async () => {
     // Create a Y.Doc, encode it, base64-encode it (simulating DB storage)
     const doc = new Y.Doc();
