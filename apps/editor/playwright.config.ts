@@ -33,6 +33,13 @@ export default defineConfig({
       // Visual regression is required CI (not non-blocking beta).
       // Per-fixture tolerance bands provide precise thresholds.
     },
+    {
+      name: "stress",
+      testMatch: /.*\.spec\.ts/,
+      // Stress tests are local-only evidence generators, gated behind
+      // STRESS_TEST env var. Not included in CI — run manually for
+      // review gate evidence packets.
+    },
   ],
   expect: {
     toHaveScreenshot: {
