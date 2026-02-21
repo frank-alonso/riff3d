@@ -54,6 +54,7 @@ export interface AvatarCameraHandle {
   setPosition(x: number, y: number, z: number): void;
   setEulerAngles(pitch: number, yaw: number, roll: number): void;
   getPosition(): { x: number; y: number; z: number };
+  getEulerAngles(): { x: number; y: number; z: number };
   getRotation(): { x: number; y: number; z: number; w: number };
   camera?: { fov: number };
 }
@@ -129,15 +130,12 @@ export class AvatarController {
     this.posX = pos.x;
     this.posZ = pos.z;
 
-    // Extract yaw from current camera rotation
-    // We keep the same yaw the user was looking at
-    // Simple extraction: use atan2 from the position relative to origin
-    // Actually, read from euler angles via the setEulerAngles convention
-    // The camera's euler angles are (pitch, yaw, 0), so we need to
-    // reverse-engineer from the camera's current rotation.
-    // For simplicity, keep yaw at 0 initially -- the user can mouse-look.
-    this.yaw = 0;
-    this.pitch = 0;
+    // Preserve the camera orientation the user was looking at when
+    // entering avatar mode. The euler convention is (pitch, yaw, roll)
+    // matching PlayCanvas setEulerAngles parameter order (CF-P5-02 fix).
+    const euler = this.cameraHandle.getEulerAngles();
+    this.yaw = euler.y;
+    this.pitch = euler.x;
 
     // Bind input handlers
     this.boundKeyDown = (e: KeyboardEvent) => this.onKeyDown(e);

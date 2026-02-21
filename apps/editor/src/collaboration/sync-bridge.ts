@@ -29,6 +29,14 @@ export const ORIGIN_LOCAL = "riff3d:local-edit";
 export const ORIGIN_INIT = "riff3d:init";
 
 /**
+ * Collab document shape version. Incremented when the Y.Doc structure
+ * changes (separate from the ECSON schemaVersion which tracks the
+ * document format). On load, old Y.Docs are migrated to the current
+ * shape version before reconstruction.
+ */
+export const COLLAB_SHAPE_VERSION = 1;
+
+/**
  * Initialize a Y.Doc from an ECSON SceneDocument.
  *
  * Called on the first collaborative session when the Y.Doc is empty.
@@ -45,6 +53,7 @@ export function initializeYDoc(yDoc: Y.Doc, ecsonDoc: SceneDocument): void {
     yMeta.set("name", ecsonDoc.name);
     yMeta.set("schemaVersion", ecsonDoc.schemaVersion);
     yMeta.set("rootEntityId", ecsonDoc.rootEntityId);
+    yMeta.set("_shapeVersion", COLLAB_SHAPE_VERSION);
 
     // Entities as nested Y.Maps (per-property granularity)
     const yEntities = yDoc.getMap("entities");
@@ -213,6 +222,30 @@ function syncWiring(
 }
 
 /**
+ * Migrate a Y.Doc from an older collab shape version to the target version.
+ *
+ * Version 0 (implicit -- no _shapeVersion field) is the pre-versioning shape.
+ * Migration from 0 -> 1 simply stamps the version field (no structural changes,
+ * since version 1 IS the current shape). This establishes the migration pattern
+ * for future shape changes without over-engineering.
+ */
+function migrateCollabShape(
+  yDoc: Y.Doc,
+  fromVersion: number,
+  toVersion: number,
+): void {
+  const yMeta = yDoc.getMap("meta");
+
+  // Version 0 -> 1: No structural changes. Just stamp the version field.
+  if (fromVersion < 1 && toVersion >= 1) {
+    yMeta.set("_shapeVersion", 1);
+  }
+
+  // Future migrations would chain here:
+  // if (fromVersion < 2 && toVersion >= 2) { ... }
+}
+
+/**
  * Reconstruct a full ECSON SceneDocument from Y.Doc state.
  *
  * Used when remote changes arrive to rebuild the ECSON from the
@@ -222,6 +255,14 @@ function syncWiring(
  */
 export function yDocToEcson(yDoc: Y.Doc): SceneDocument | null {
   const yMeta = yDoc.getMap("meta");
+
+  // Check and migrate collab shape version (CF-P5-04).
+  // Version 0 is implicit (no _shapeVersion field) -- pre-versioning docs.
+  const shapeVersion = (yMeta.get("_shapeVersion") as number) ?? 0;
+  if (shapeVersion < COLLAB_SHAPE_VERSION) {
+    migrateCollabShape(yDoc, shapeVersion, COLLAB_SHAPE_VERSION);
+  }
+
   const yEntities = yDoc.getMap("entities");
   const yAssets = yDoc.getMap("assets");
   const yEnvironment = yDoc.getMap("environment");
