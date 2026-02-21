@@ -146,14 +146,15 @@ Plans:
   3. A user can lock an entity (and its descendants) for exclusive editing, and other users see a visual lock indicator and cannot modify locked objects
   4. A user can walk around the 3D scene as an embodied avatar while editing, and other users see their avatar moving in real-time
   5. Each user has an independent undo stack -- undoing on one client does not undo another user's operations
-**Plans**: TBD
+**Plans**: 6 plans
 
 Plans:
-- [ ] 05-01: Yjs integration and shared operation log
-- [ ] 05-02: Presence, cursors, and awareness
-- [ ] 05-03: Object locking and conflict resolution
-- [ ] 05-04: Embodied avatar editing
-- [ ] 05-05: Phase 5 Review (Pre-execution plan review + post-execution evidence audit → Gate decision)
+- [ ] 05-01: Carry-forward viewport fixes + mechanical enforcement + CLAUDE.md alignment (Wave 1)
+- [ ] 05-02: Hocuspocus server + ECSON<->Y.Doc sync bridge + per-user undo + collab save (Wave 2)
+- [ ] 05-03: Presence awareness, collaborator bar, 2D hierarchy indicators, 3D frustum cones (Wave 3)
+- [ ] 05-04: Entity locking with hierarchical propagation, read-only inspector, viewport tint (Wave 3)
+- [ ] 05-05: Embodied avatar mode -- capsule mesh, WASD walk, toolbar toggle (Wave 4)
+- [ ] 05-06: Phase 5 Review (post-execution evidence audit + gate decision) (Wave 5)
 
 ### Phase 6: Review Gate: Core Platform
 **Goal**: Validate that collaboration, dual adapters, and the editor form a stable platform before adding the game layer on top. This is an **expanded-scope review** (per Phase Review Protocol) that also assesses cross-phase integration across Phases 4-5, cumulative debt from all prior PASS_WITH_CONDITIONS decisions, architecture drift, and carry-forward reconciliation.
@@ -346,8 +347,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. Contracts & Testing Spine | 7/7 | Complete    | 2026-02-19 |
 | 2. Closed-Loop Editor | 8/8 | Complete | 2026-02-20 |
 | 3. Review Gate: Foundation | 7/7 | Complete (PASS_WITH_CONDITIONS) | 2026-02-20 |
-| 4. Dual Adapter Validation | 0/4 | Not started | - |
-| 5. Collaboration | 0/5 | Not started | - |
+| 4. Dual Adapter Validation | 5/5 | Complete (PASS_WITH_CONDITIONS) | 2026-02-20 |
+| 5. Collaboration | 0/6 | Planning complete | - |
 | 6. Review Gate: Core Platform | 0/1 | Not started | - |
 | 7. Game Runtime & Behaviors | 0/6 | Not started | - |
 | 8. Templates, Party System & Ejection | 0/7 | Not started | - |
@@ -357,4 +358,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-20 — Phase 3 complete (PASS_WITH_CONDITIONS, all 7 plans done)*
+*Last updated: 2026-02-20 — Phase 5 planned (6 plans in 5 waves)*
