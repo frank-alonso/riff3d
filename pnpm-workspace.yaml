@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - servers/*
 
 catalog:
   '@fast-check/vitest': ^0.2.4
