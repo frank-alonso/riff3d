@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 6 of 11 (Review Gate: Core Platform)
-Plan: 1 of 3 in current phase
-Status: Executing Phase 6 carry-forward fixes
-Last activity: 2026-02-21 -- Completed 06-01 (carry-forward fixes: CF-P5-02, CF-P5-04, CF-P5-05)
+Plan: 2 of 3 in current phase
+Status: Executing Phase 6 stress testing
+Last activity: 2026-02-21 -- Completed 06-02 (stress testing: 4-client CRDT, 200-entity scene, E2E evidence)
 
-Progress: [###-------] 1/3 plans in Phase 6
+Progress: [######----] 2/3 plans in Phase 6
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 29
-- Average duration: 8.8 min
-- Total execution time: 4.3 hours
+- Total plans completed: 30
+- Average duration: 8.6 min
+- Total execution time: 4.4 hours
 
 **By Phase:**
 
@@ -32,11 +32,11 @@ Progress: [###-------] 1/3 plans in Phase 6
 | 03 | 7 | 54 min | 7.7 min |
 | 04 | 5 | 28 min | 5.6 min |
 | 05 | 6 | 40 min | 6.7 min |
-| 06 | 1 | 4 min | 4.0 min |
+| 06 | 2 | 9 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-03 (9 min), 05-04 (11 min), 05-05 (6 min), 05-06 (2 min), 06-01 (4 min)
-- Trend: Carry-forward fixes executed quickly; targeted bug fixes + test additions
+- Last 5 plans: 05-04 (11 min), 05-05 (6 min), 05-06 (2 min), 06-01 (4 min), 06-02 (5 min)
+- Trend: Review gate stress testing completed quickly; deterministic headless tests + E2E evidence generators
 
 *Updated after each plan completion*
 | Phase 03 P01 | 8 | 2 tasks | 11 files |
@@ -55,6 +55,7 @@ Progress: [###-------] 1/3 plans in Phase 6
 | Phase 05 P05 | 6 | 2 tasks | 8 files |
 | Phase 05 P06 | 2 | 1 task | 1 file |
 | Phase 06 P01 | 4 | 2 tasks | 7 files |
+| Phase 06 P02 | 5 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -189,6 +190,9 @@ Recent decisions affecting current work:
 - [Phase 06]: [06-01]: Collab shape version 0->1 migration stamps field only (no structural changes, establishes pattern)
 - [Phase 06]: [06-01]: @riff3d/ecson added as devDependency to collab-server for SceneDocumentSchema test validation
 - [Phase 06]: [06-01]: Exported syncEcsonToProject from persistence.ts for direct unit testing
+- [Phase 06]: [06-02]: 10 groups of 4 children = 50 total group entities for correct 201-entity scene count
+- [Phase 06]: [06-02]: Added "stress" project to playwright.config.ts for .spec.ts file matching alongside .e2e.ts and .visual.ts
+- [Phase 06]: [06-02]: E2E stress tests gated behind STRESS_TEST env var (local evidence, not CI-blocking)
 
 ### Pending Todos
 
@@ -235,6 +239,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 06-01-PLAN.md (carry-forward fixes)
-Resume file: .planning/phases/06-review-gate-core-platform/06-01-SUMMARY.md
-Next: Execute 06-02-PLAN.md (stress testing)
+Stopped at: Completed 06-02-PLAN.md (stress testing)
+Resume file: .planning/phases/06-review-gate-core-platform/06-02-SUMMARY.md
+Next: Execute 06-03-PLAN.md (evidence compilation and review gate)
