@@ -4,6 +4,12 @@ import type { CanonicalScene, IRDelta } from "@riff3d/canonical-ir";
 import type { PatchOp } from "@riff3d/patchops";
 import { compile, computeDelta } from "@riff3d/canonical-ir";
 import { applyOp } from "@riff3d/patchops";
+import {
+  isEntityLocked,
+  releaseLock,
+  getOpTargetEntityId,
+  type AwarenessLike,
+} from "@/collaboration/lock-manager";
 
 /**
  * Scene slice -- owns the ECSON document, Canonical IR, selection state,
@@ -24,6 +30,10 @@ import { applyOp } from "@riff3d/patchops";
  * callback (if set by CollaborationProvider) syncs the change to the Y.Doc.
  * When collaborating, undo/redo delegates to Y.UndoManager instead of
  * the PatchOps inverse stack.
+ *
+ * Entity locking (05-04): dispatchOp checks if the target entity is locked
+ * by another user before applying the op. setSelection auto-releases locks
+ * on previously-selected entities when selection changes during collaboration.
  */
 export interface SceneSlice {
   /** The current ECSON document (project file). Null before project loads. */
@@ -142,6 +152,22 @@ export const createSceneSlice: StateCreator<
     const { ecsonDoc, undoStack } = get();
     if (!ecsonDoc) {
       throw new Error("Cannot dispatch PatchOp: no ECSON document loaded");
+    }
+
+    // Lock guard (05-04): reject ops targeting entities locked by another user.
+    // This is a safety net -- the inspector should already be read-only for
+    // locked entities, but this prevents programmatic mutations too.
+    const awareness = fullState._lockAwareness as AwarenessLike | null;
+    if (awareness) {
+      const targetEntityId = getOpTargetEntityId(op as { type: string; payload: Record<string, unknown> });
+      if (targetEntityId) {
+        const lockInfo = isEntityLocked(targetEntityId, ecsonDoc, awareness, awareness.clientID);
+        if (lockInfo.locked && !lockInfo.lockedByMe) {
+          throw new Error(
+            `Cannot edit entity: locked by ${lockInfo.holder?.name ?? "another user"}`,
+          );
+        }
+      }
     }
 
     // applyOp mutates the doc in place and returns the inverse op
@@ -268,6 +294,29 @@ export const createSceneSlice: StateCreator<
   },
 
   setSelection: (ids: string[]) => {
+    // Auto-release locks on deselect (05-04): when selection changes in
+    // collaborative mode, release locks on previously-selected entities
+    // that are no longer selected and were locked by this user.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cross-slice read for lock awareness
+    const fullState = get() as any;
+    const awareness = fullState._lockAwareness as AwarenessLike | null;
+
+    if (awareness) {
+      const { ecsonDoc, selectedEntityIds: previousIds } = get();
+      if (ecsonDoc) {
+        const newSet = new Set(ids);
+        for (const prevId of previousIds) {
+          if (!newSet.has(prevId)) {
+            // Check if this user holds a lock on the deselected entity
+            const lockInfo = isEntityLocked(prevId, ecsonDoc, awareness, awareness.clientID);
+            if (lockInfo.locked && lockInfo.lockedByMe && !lockInfo.inherited) {
+              releaseLock(prevId, ecsonDoc, awareness);
+            }
+          }
+        }
+      }
+    }
+
     set({ selectedEntityIds: ids });
   },
 });

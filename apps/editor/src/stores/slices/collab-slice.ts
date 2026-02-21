@@ -1,5 +1,6 @@
 import type { StateCreator } from "zustand";
 import type * as Y from "yjs";
+import type { AwarenessLike } from "@/collaboration/lock-manager";
 
 /**
  * Collaboration state slice.
@@ -23,6 +24,20 @@ export interface Collaborator {
   color: string;
 }
 
+/**
+ * Presence state for a remote collaborator, keyed by user ID.
+ * Stores selection and camera state from Awareness.
+ */
+export interface CollaboratorPresence {
+  selection: string[];
+  camera?: {
+    position: { x: number; y: number; z: number };
+    rotation: { x: number; y: number; z: number; w: number };
+    fov: number;
+  };
+  mode?: "editor" | "avatar";
+}
+
 export interface CollabSlice {
   /** Whether the editor is in collaborative mode. */
   isCollaborating: boolean;
@@ -40,6 +55,13 @@ export interface CollabSlice {
   collabError: string | null;
 
   /**
+   * Detailed presence state per collaborator (keyed by user ID).
+   * Includes selection arrays and camera state from Awareness.
+   * Updated by the awareness hook or provider.
+   */
+  collaboratorPresence: Map<string, CollaboratorPresence> | null;
+
+  /**
    * Y.UndoManager for collaborative undo.
    * When set (collab active), undo/redo delegates to this instead
    * of the PatchOps inverse stack.
@@ -53,14 +75,26 @@ export interface CollabSlice {
    */
   onAfterDispatch: ((entityId?: string) => void) | null;
 
+  /**
+   * Awareness reference for lock checking in scene-slice.
+   * Set by CollaborationProvider when collaboration starts.
+   * Used by dispatchOp lock guard and setSelection auto-release.
+   * Prefixed with _ to indicate it is an internal cross-slice field.
+   */
+  _lockAwareness: AwarenessLike | null;
+
   /** Update collaboration state (partial). */
   setCollabState: (partial: Partial<Pick<CollabSlice,
     "isCollaborating" | "isConnected" | "isSynced" | "isOffline" |
-    "userColor" | "collabError" | "collabUndoManager" | "onAfterDispatch"
+    "userColor" | "collabError" | "collabUndoManager" | "onAfterDispatch" |
+    "_lockAwareness"
   >>) => void;
 
   /** Set the list of remote collaborators. */
   setCollaborators: (collaborators: Collaborator[]) => void;
+
+  /** Update detailed presence state for collaborators. */
+  setCollaboratorPresence: (presence: Map<string, CollaboratorPresence>) => void;
 }
 
 export const createCollabSlice: StateCreator<CollabSlice, [], [], CollabSlice> = (set) => ({
@@ -71,10 +105,14 @@ export const createCollabSlice: StateCreator<CollabSlice, [], [], CollabSlice> =
   userColor: "",
   collaborators: [],
   collabError: null,
+  collaboratorPresence: null,
   collabUndoManager: null,
   onAfterDispatch: null,
+  _lockAwareness: null,
 
   setCollabState: (partial) => set(partial),
 
   setCollaborators: (collaborators) => set({ collaborators }),
+
+  setCollaboratorPresence: (presence) => set({ collaboratorPresence: presence }),
 });

@@ -145,6 +145,8 @@ export function CollaborationProvider({
             isCollaborating: true,
             collabUndoManager: undoManager,
             onAfterDispatch: dispatchCallback,
+            // Expose awareness to scene-slice for lock guard and auto-release (05-04)
+            _lockAwareness: provider?.awareness ?? null,
           });
         },
 
@@ -222,6 +224,7 @@ export function CollaborationProvider({
         isOffline: false,
         collabUndoManager: null,
         onAfterDispatch: null,
+        _lockAwareness: null,
       });
 
       cleanupRef.current?.();
