@@ -9,7 +9,8 @@
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
-    "dev": "turbo run dev"
+    "dev": "turbo run dev",
+    "fulldev": "turbo run dev --filter=@riff3d/editor --filter=@riff3d/collab-server"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",

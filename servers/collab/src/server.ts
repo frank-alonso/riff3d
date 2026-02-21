@@ -15,19 +15,27 @@ import { createPersistenceExtension } from "./persistence";
  * - COLLAB_PORT: WebSocket server port (default 1234)
  * - EDITOR_ORIGIN: Allowed CORS origin (default http://localhost:3000)
  * - SUPABASE_URL: Supabase project URL (required)
- * - SUPABASE_SERVICE_ROLE_KEY: Supabase service role key (required)
+ * - SUPABASE_SECRET_KEY: Supabase secret key (sb_secret_...) or legacy service_role JWT (required)
  */
 export function createCollabServer(): Server {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseKey =
+    process.env.SUPABASE_SECRET_KEY ??
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     throw new Error(
-      "Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+      "Missing required environment variables: SUPABASE_URL, SUPABASE_SECRET_KEY",
     );
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  });
   const authHandler = createAuthHandler(supabase);
 
   const server = new Server({
