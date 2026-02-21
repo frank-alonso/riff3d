@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 5 of 11 (Collaboration)
-Plan: 3 of 6 in current phase
+Plan: 4 of 6 in current phase
 Status: Executing Phase 5
-Last activity: 2026-02-20 -- Completed 05-03 (presence and awareness UI)
+Last activity: 2026-02-20 -- Completed 05-04 (entity locking)
 
-Progress: [#####-----] 3/6 plans in Phase 5
+Progress: [#######---] 4/6 plans in Phase 5
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Progress: [#####-----] 3/6 plans in Phase 5
 | Phase 05 P01 | 5 | 2 tasks | 7 files |
 | Phase 05 P02 | 7 | 2 tasks | 18 files |
 | Phase 05 P03 | 9 | 2 tasks | 13 files |
+| Phase 05 P04 | 11 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -168,6 +169,11 @@ Recent decisions affecting current work:
 - [Phase 05]: [05-03]: collaboratorPresence Map in collab-slice for per-user selection/camera state from Awareness
 - [Phase 05]: [05-03]: Camera awareness updates throttled to 100ms to avoid flooding Awareness protocol
 - [Phase 05]: [05-03]: Remote change flash entries auto-clear after 2 seconds via per-entry timers
+- [Phase 05]: [05-04]: Locks stored in Yjs Awareness (ephemeral, auto-clear on disconnect) not Y.Doc
+- [Phase 05]: [05-04]: Cross-slice lock access via _lockAwareness field on collab-slice (avoids yjs import in scene-slice)
+- [Phase 05]: [05-04]: BFS descendant walk for hierarchical lock propagation (parent + all children)
+- [Phase 05]: [05-04]: AABB wireframe for viewport lock tint (non-destructive, immediate-mode drawLines pattern)
+- [Phase 05]: [05-04]: getOpTargetEntityId returns null for __environment__ (environment edits not lockable)
 
 ### Pending Todos
 
@@ -209,6 +215,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 05-03-PLAN.md
-Resume file: .planning/phases/05-collaboration/05-03-SUMMARY.md
-Next: Execute 05-04-PLAN.md (entity locking)
+Stopped at: Completed 05-04-PLAN.md
+Resume file: .planning/phases/05-collaboration/05-04-SUMMARY.md
+Next: Execute 05-05-PLAN.md (collaborative avatars)
