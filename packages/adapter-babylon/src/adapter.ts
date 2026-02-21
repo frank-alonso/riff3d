@@ -107,6 +107,7 @@ export class BabylonAdapter implements EngineAdapter {
 
     // Signal scene is ready for visual testing / screenshot capture
     if (typeof window !== "undefined") {
+      (window as unknown as Record<string, unknown>).__sceneAlreadyReady = true;
       window.dispatchEvent(new CustomEvent("__sceneReady"));
     }
   }
@@ -160,6 +161,14 @@ export class BabylonAdapter implements EngineAdapter {
    */
   getTypedEntityMap(): Map<string, TransformNode> {
     return this.entityMap;
+  }
+
+  /**
+   * Get the Babylon.js Engine instance.
+   * Used by E2E tests to pause the render loop for stable screenshots.
+   */
+  getEngine(): Engine | null {
+    return this.engine;
   }
 
   /**

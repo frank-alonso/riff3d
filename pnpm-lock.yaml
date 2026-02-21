@@ -59,6 +59,9 @@ importers:
       '@riff3d/ecson':
         specifier: workspace:*
         version: link:../../packages/ecson
+      '@riff3d/fixtures':
+        specifier: workspace:*
+        version: link:../../packages/fixtures
       '@riff3d/patchops':
         specifier: workspace:*
         version: link:../../packages/patchops

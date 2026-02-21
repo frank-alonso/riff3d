@@ -115,7 +115,7 @@ export function syncToYDoc(
       for (const [key, value] of Object.entries(ecsonDoc.environment)) {
         const existing = yEnvironment.get(key);
         if (JSON.stringify(existing) !== JSON.stringify(value)) {
-          yEnvironment.set(key, value);
+          yEnvironment.set(key, structuredClone(value));
         }
       }
     } else if (entityId) {
@@ -150,7 +150,7 @@ export function syncToYDoc(
       for (const [assetId, asset] of Object.entries(ecsonDoc.assets)) {
         const existing = yAssets.get(assetId);
         if (JSON.stringify(existing) !== JSON.stringify(asset)) {
-          yAssets.set(assetId, asset);
+          yAssets.set(assetId, structuredClone(asset));
         }
       }
 
@@ -159,7 +159,7 @@ export function syncToYDoc(
       for (const [key, value] of Object.entries(ecsonDoc.environment)) {
         const existing = yEnvironment.get(key);
         if (JSON.stringify(existing) !== JSON.stringify(value)) {
-          yEnvironment.set(key, value);
+          yEnvironment.set(key, structuredClone(value));
         }
       }
 
@@ -171,7 +171,7 @@ export function syncToYDoc(
       for (const [key, value] of Object.entries(ecsonDoc.metadata)) {
         const existing = yMetadata.get(key);
         if (JSON.stringify(existing) !== JSON.stringify(value)) {
-          yMetadata.set(key, value);
+          yMetadata.set(key, structuredClone(value));
         }
       }
     }
@@ -195,11 +195,17 @@ function syncEntity(
   }
   const yMap = yEntity as Y.Map<unknown>;
 
-  // Sync each top-level property
+  // Sync each top-level property.
+  // CRITICAL: structuredClone the value before storing in Y.Doc. Yjs stores
+  // plain objects by reference (ContentAny), but applyOp mutates entities
+  // in place. Without cloning, Y.Doc's stored reference and the ECSON entity
+  // point to the same object — subsequent in-place mutations silently corrupt
+  // the Y.Doc value, making the JSON.stringify comparison always return equal
+  // and preventing sync of the 2nd+ edit to remote peers.
   for (const [key, value] of Object.entries(entity)) {
     const existing = yMap.get(key);
     if (JSON.stringify(existing) !== JSON.stringify(value)) {
-      yMap.set(key, value);
+      yMap.set(key, structuredClone(value));
     }
   }
 

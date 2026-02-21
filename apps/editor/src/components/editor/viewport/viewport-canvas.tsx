@@ -210,6 +210,12 @@ export function ViewportCanvas() {
       setLoadingStage("Setting up editor tools...");
       setLoadingProgress(70);
 
+      // Expose engine objects on window for E2E visual regression tests.
+      // Tests use these to pause the render loop before screenshot capture.
+      if (activeEngine === "playcanvas" && adapter instanceof PlayCanvasAdapter) {
+        (window as unknown as Record<string, unknown>).__pcApp = adapter.getApp();
+      }
+
       // --- PlayCanvas-specific editor tools (gizmos, selection, grid, drag preview) ---
       if (activeEngine === "playcanvas" && adapter instanceof PlayCanvasAdapter) {
         const pcAdapter = adapter;
@@ -555,6 +561,9 @@ export function ViewportCanvas() {
 
         if (adapter instanceof BabylonAdapterClass) {
           const bjsAdapter = adapter;
+
+          // Expose Babylon engine on window for E2E test render loop control
+          (window as unknown as Record<string, unknown>).__bjsEngine = bjsAdapter.getEngine();
           const bjsScene = bjsAdapter.getScene();
           const bjsCanvas = bjsAdapter.getCanvas();
 
@@ -698,6 +707,10 @@ export function ViewportCanvas() {
       selectionManager?.dispose();
       babylonSelectionManager?.dispose();
       gridHandle?.dispose();
+      // Clean up window globals exposed for E2E tests
+      delete (window as unknown as Record<string, unknown>).__pcApp;
+      delete (window as unknown as Record<string, unknown>).__bjsEngine;
+      delete (window as unknown as Record<string, unknown>).__sceneAlreadyReady;
       if (adapter) {
         adapter.dispose();
         adapter = null;

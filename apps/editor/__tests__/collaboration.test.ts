@@ -21,6 +21,22 @@ import {
   observeRemoteChanges,
   ORIGIN_LOCAL,
 } from "../src/collaboration/sync-bridge";
+import { applyOp, CURRENT_PATCHOP_VERSION, type PatchOp } from "@riff3d/patchops";
+
+/** Build a minimal valid PatchOp with required base fields. */
+function makeOp(
+  type: PatchOp["type"],
+  payload: Record<string, unknown>,
+): PatchOp {
+  return {
+    id: `op_${Math.random().toString(36).slice(2, 10)}`,
+    type,
+    payload,
+    timestamp: Date.now(),
+    origin: "user",
+    version: CURRENT_PATCHOP_VERSION,
+  } as PatchOp;
+}
 import {
   acquireLock,
   releaseLock,
@@ -338,6 +354,113 @@ describe("Sync Bridge", () => {
 
       expect(result.assets["ast-2"]).toBeDefined();
       expect(result.assets["ast-2"].name).toBe("cube.glb");
+    });
+  });
+
+  describe("syncToYDoc after in-place mutation (regression: shared-ref bug)", () => {
+    it("detects second in-place edit after first syncToYDoc stored a reference", () => {
+      // This test exercises the exact bug path: applyOp mutates entities in place,
+      // and Yjs stores plain objects by reference (ContentAny). Without
+      // structuredClone in syncEntity, the second syncToYDoc sees the same object
+      // ref for both "existing" (from Y.Doc) and "value" (from ECSON), so
+      // JSON.stringify comparison returns equal and the write is silently skipped.
+      const doc = makeTestDoc();
+      const yDoc = new Y.Doc();
+      initializeYDoc(yDoc, doc);
+
+      // First edit: mutate ECSON in place (as applyOp does) and sync
+      const op1 = makeOp("SetProperty", { entityId: "child-a", path: "name", value: "Edit-1", previousValue: "Child A" });
+      applyOp(doc, op1);
+      syncToYDoc(yDoc, doc, "child-a");
+
+      const after1 = expectValidEcson(yDoc);
+      expect(after1.entities["child-a"].name).toBe("Edit-1");
+
+      // Second edit: mutate the SAME entity in place again and sync
+      const op2 = makeOp("SetProperty", { entityId: "child-a", path: "name", value: "Edit-2", previousValue: "Edit-1" });
+      applyOp(doc, op2);
+      syncToYDoc(yDoc, doc, "child-a");
+
+      const after2 = expectValidEcson(yDoc);
+      expect(after2.entities["child-a"].name).toBe("Edit-2");
+    });
+
+    it("propagates multiple sequential in-place edits to remote client", async () => {
+      // End-to-end: two Y.Docs, local applies ops in place + syncs, remote
+      // observer fires for BOTH the first and second edit.
+      const doc = makeTestDoc();
+      const localYDoc = new Y.Doc();
+      const remoteYDoc = new Y.Doc();
+
+      initializeYDoc(localYDoc, doc);
+      syncDocs(localYDoc, remoteYDoc);
+
+      // Track remote observer callbacks
+      const remoteEdits: string[] = [];
+      const unobserve = observeRemoteChanges(remoteYDoc, (ecson) => {
+        remoteEdits.push(ecson.entities["child-a"].name);
+      });
+
+      // First in-place edit + sync to Y.Doc + propagate to remote
+      const op1 = makeOp("SetProperty", { entityId: "child-a", path: "name", value: "First", previousValue: "Child A" });
+      applyOp(doc, op1);
+      syncToYDoc(localYDoc, doc, "child-a");
+      syncDocs(localYDoc, remoteYDoc);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Second in-place edit + sync + propagate
+      const op2 = makeOp("SetProperty", { entityId: "child-a", path: "name", value: "Second", previousValue: "First" });
+      applyOp(doc, op2);
+      syncToYDoc(localYDoc, doc, "child-a");
+      syncDocs(localYDoc, remoteYDoc);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Remote must have seen BOTH edits
+      expect(remoteEdits.length).toBeGreaterThanOrEqual(2);
+      expect(remoteEdits).toContain("First");
+      expect(remoteEdits).toContain("Second");
+
+      // Final state must be "Second"
+      const finalRemote = expectValidEcson(remoteYDoc);
+      expect(finalRemote.entities["child-a"].name).toBe("Second");
+
+      unobserve();
+    });
+
+    it("handles nested property in-place mutation (transform path)", () => {
+      // Tests deep path mutation — transform.position is a nested object
+      // that applyOp modifies via setByPath.
+      const doc = makeTestDoc();
+      const yDoc = new Y.Doc();
+      initializeYDoc(yDoc, doc);
+
+      // First edit: change position.x
+      const op1 = makeOp("SetProperty", {
+        entityId: "child-a",
+        path: "transform.position.x",
+        value: 5,
+        previousValue: 0,
+      });
+      applyOp(doc, op1);
+      syncToYDoc(yDoc, doc, "child-a");
+
+      const after1 = expectValidEcson(yDoc);
+      expect(after1.entities["child-a"].transform.position.x).toBe(5);
+
+      // Second edit: change position.x again
+      const op2 = makeOp("SetProperty", {
+        entityId: "child-a",
+        path: "transform.position.x",
+        value: 10,
+        previousValue: 5,
+      });
+      applyOp(doc, op2);
+      syncToYDoc(yDoc, doc, "child-a");
+
+      const after2 = expectValidEcson(yDoc);
+      expect(after2.entities["child-a"].transform.position.x).toBe(10);
     });
   });
 

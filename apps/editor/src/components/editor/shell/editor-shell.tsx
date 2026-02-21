@@ -158,6 +158,14 @@ export function EditorShell({
   // useMemo with ecsonDoc dependency: runs synchronously on first render when
   // ecsonDoc is available, loads project into store, and returns true.
   // Subsequent renders with same ecsonDoc return cached true.
+  // Expose the editor store on window for E2E test access (switchEngine, etc.)
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).__editorStore = editorStore;
+    return () => {
+      delete (window as unknown as Record<string, unknown>).__editorStore;
+    };
+  }, []);
+
   const projectReady = useMemo(() => {
     if (!ecsonDoc) return false;
 

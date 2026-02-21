@@ -126,7 +126,11 @@ export function CollaborationProvider({
             }
           }
 
-          // Set up remote change observer
+          // Set up remote change observer.
+          // Clean up any previous observer first — onSynced can fire multiple
+          // times (on reconnect), and stacking duplicate observers would cause
+          // orphaned listeners with stale closure state.
+          cleanupRef.current?.();
           const unobserve = observeRemoteChanges(yDoc, (ecson) => {
             // Remote changes: rebuild ECSON from Y.Doc and reload.
             // Only applies if validation passed (fail-closed).

@@ -11,38 +11,36 @@
  * Run: pnpm test:visual (requires dev server + Supabase with anonymous sign-ins enabled)
  * Update baselines: pnpm test:visual:update
  *
- * Screenshot timing relies on the __sceneReady CustomEvent dispatched
- * by the PlayCanvas adapter after loadScene completes one render frame.
+ * Screenshot timing relies on the __sceneAlreadyReady flag set by the
+ * PlayCanvas adapter after loadScene completes one render frame.
  */
 import { test, expect } from "@playwright/test";
-import { loginAsGuest } from "../helpers/auth";
 import { getToleranceBand } from "../fixtures/tolerance-bands";
 
 /**
  * Wait for the PlayCanvas adapter's __sceneReady signal.
- * Ensures the scene has been fully rendered before screenshot capture.
+ *
+ * Uses DOM polling for the __sceneAlreadyReady flag to avoid the race
+ * condition where the CustomEvent fires before page.evaluate() attaches
+ * a listener.
  */
 async function waitForSceneReady(page: import("@playwright/test").Page): Promise<void> {
+  await page.waitForFunction(
+    () => (window as unknown as Record<string, unknown>).__sceneAlreadyReady === true,
+    { timeout: 30_000 },
+  );
+}
+
+/**
+ * Pause the render loop so toHaveScreenshot() produces stable frames.
+ * Without this, the live WebGL render loop causes frame-to-frame jitter.
+ */
+async function pauseRenderLoop(page: import("@playwright/test").Page): Promise<void> {
   await page.evaluate(() => {
-    return new Promise<void>((resolve, reject) => {
-      if ((window as unknown as Record<string, unknown>).__sceneAlreadyReady) {
-        resolve();
-        return;
-      }
-
-      const timeout = setTimeout(() => {
-        reject(new Error("__sceneReady signal not received within 15s"));
-      }, 15_000);
-
-      window.addEventListener(
-        "__sceneReady",
-        () => {
-          clearTimeout(timeout);
-          resolve();
-        },
-        { once: true },
-      );
-    });
+    const app = (window as unknown as Record<string, { autoRender?: boolean }>).__pcApp;
+    if (app) {
+      app.autoRender = false;
+    }
   });
 }
 
@@ -61,31 +59,13 @@ const FIXTURES = [
 ] as const;
 
 test.describe("Visual baselines - golden fixture rendering", () => {
-  test.beforeEach(async ({ page }) => {
-    await loginAsGuest(page);
-  });
+  // No loginAsGuest needed — fixture routes serve builder-generated ECSON
+  // without hitting the database, so no authentication is required.
 
   for (const fixture of FIXTURES) {
     test(`baseline: ${fixture.name}`, async ({ page }) => {
-      // Navigate to the editor.
-      // The fixture loading strategy depends on available routes:
-      // 1. If a dev-only fixture route exists: /editor/fixture/[name]
-      // 2. Otherwise: create a project and load fixture data
-      //
-      // For Phase 3 beta, we attempt the fixture route first and
-      // fall back to a project-based approach.
-
-      const fixtureUrl = `/editor/fixture/${fixture.name}`;
-      const response = await page.goto(fixtureUrl);
-
-      if (!response || response.status() === 404) {
-        // Fixture route not available -- create a project instead
-        await page.goto("/dashboard");
-
-        await page.getByRole("button", { name: /new project/i }).click();
-        await page.getByLabel(/project name|name/i).fill(`Visual-${fixture.name}`);
-        await page.getByRole("button", { name: /create|submit/i }).click();
-      }
+      // Navigate to the fixture route
+      await page.goto(`/editor/fixture/${fixture.name}`);
 
       // Wait for the viewport canvas to appear
       const canvas = page.locator("canvas");
@@ -96,6 +76,9 @@ test.describe("Visual baselines - golden fixture rendering", () => {
 
       // Allow an extra frame for any post-render effects
       await page.waitForTimeout(500);
+
+      // Pause the render loop for stable screenshots
+      await pauseRenderLoop(page);
 
       // Capture screenshot of the canvas element
       // First run generates baselines; subsequent runs compare against them.

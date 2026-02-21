@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Transpile workspace packages that use source-based exports
-  transpilePackages: ["@riff3d/ecson"],
+  transpilePackages: ["@riff3d/ecson", "@riff3d/fixtures"],
 
   // Allow Supabase avatar images
   images: {

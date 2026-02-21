@@ -116,6 +116,7 @@ export class PlayCanvasAdapter implements EngineAdapter {
     if (this.app) {
       this.app.once("frameend", () => {
         if (typeof window !== "undefined") {
+          (window as unknown as Record<string, unknown>).__sceneAlreadyReady = true;
           window.dispatchEvent(new CustomEvent("__sceneReady"));
         }
       });

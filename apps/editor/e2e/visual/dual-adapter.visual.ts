@@ -25,42 +25,57 @@
  * editor store directly. There is no ?engine= query param handler.
  */
 import { test, expect } from "@playwright/test";
-import { loginAsGuest } from "../helpers/auth";
 import { getToleranceBand } from "../fixtures/tolerance-bands";
 
 /**
  * Wait for the adapter's __sceneReady signal.
- * Both PlayCanvas and Babylon adapters dispatch this CustomEvent
- * after loadScene completes rendering.
+ *
+ * Uses DOM polling for the __sceneAlreadyReady flag (set by adapters)
+ * to avoid the race condition where __sceneReady CustomEvent fires
+ * before page.evaluate() attaches the listener.
  */
 async function waitForSceneReady(
   page: import("@playwright/test").Page,
   timeout = 30_000,
 ): Promise<void> {
-  await page.evaluate((timeoutMs: number) => {
-    return new Promise<void>((resolve, reject) => {
-      // Check if already ready (e.g., from a previous load)
-      if ((window as unknown as Record<string, unknown>).__sceneAlreadyReady) {
-        resolve();
-        return;
+  await page.waitForFunction(
+    () => (window as unknown as Record<string, unknown>).__sceneAlreadyReady === true,
+    { timeout },
+  );
+}
+
+/**
+ * Pause the engine render loop so toHaveScreenshot() can produce
+ * stable (identical) frames. Without this, the live WebGL render loop
+ * produces slight differences every frame due to anti-aliasing jitter,
+ * floating-point non-determinism, and shadow sampling noise.
+ */
+async function pauseRenderLoop(page: import("@playwright/test").Page): Promise<void> {
+  await page.evaluate(() => {
+    const win = window as unknown as Record<string, unknown>;
+    // PlayCanvas: set autoRender to false
+    const store = win.__editorStore as
+      | { getState: () => { activeEngine?: string } }
+      | undefined;
+    const engine = store?.getState()?.activeEngine;
+
+    if (engine === "playcanvas" || !engine) {
+      // PlayCanvas adapter exposes app via riff3d:request-app event pattern,
+      // but we can also access it through the viewport adapter ref.
+      // Simplest: use autoRender flag on the pc.Application
+      const app = (win as Record<string, { autoRender?: boolean }>).__pcApp;
+      if (app) {
+        app.autoRender = false;
       }
-
-      const timer = setTimeout(() => {
-        reject(new Error("__sceneReady signal not received within timeout"));
-      }, timeoutMs);
-
-      window.addEventListener(
-        "__sceneReady",
-        () => {
-          clearTimeout(timer);
-          (window as unknown as Record<string, unknown>).__sceneAlreadyReady =
-            true;
-          resolve();
-        },
-        { once: true },
-      );
-    });
-  }, timeout);
+    }
+    if (engine === "babylon") {
+      // Babylon: stop the render loop on the engine
+      const bjsEngine = win.__bjsEngine as { stopRenderLoop?: () => void } | undefined;
+      if (bjsEngine?.stopRenderLoop) {
+        bjsEngine.stopRenderLoop();
+      }
+    }
+  });
 }
 
 /**
@@ -84,24 +99,14 @@ const VIEWPORT_WIDTH = 1280;
 const VIEWPORT_HEIGHT = 720;
 
 test.describe("Dual-adapter visual regression", () => {
-  test.beforeEach(async ({ page }) => {
-    await loginAsGuest(page);
-  });
+  // No loginAsGuest needed — fixture routes serve builder-generated ECSON
+  // without hitting the database, so no authentication is required.
 
   for (const fixture of FIXTURES) {
     for (const engine of ENGINES) {
       test(`${fixture} renders correctly on ${engine}`, async ({ page }) => {
-        // Navigate to fixture route (Phase 3 pattern)
-        const fixtureUrl = `/editor/fixture/${fixture}`;
-        const response = await page.goto(fixtureUrl);
-
-        // Fall back to project-based approach if fixture route unavailable
-        if (!response || response.status() === 404) {
-          await page.goto("/dashboard");
-          await page.getByRole("button", { name: /new project/i }).click();
-          await page.getByLabel(/project name|name/i).fill(`Visual-${fixture}-${engine}`);
-          await page.getByRole("button", { name: /create|submit/i }).click();
-        }
+        // Navigate to fixture route
+        await page.goto(`/editor/fixture/${fixture}`);
 
         // Wait for viewport canvas
         const canvas = page.locator("canvas");
@@ -112,11 +117,9 @@ test.describe("Dual-adapter visual regression", () => {
 
         // Switch engine if needed (Babylon is not the default)
         if (engine === "babylon") {
-          // Reset scene ready flags before switching
+          // Reset scene ready flag before switching
           await page.evaluate(() => {
-            const win = window as unknown as Record<string, unknown>;
-            win.__sceneReady = false;
-            win.__sceneAlreadyReady = false;
+            (window as unknown as Record<string, unknown>).__sceneAlreadyReady = false;
           });
 
           // Call switchEngine on the editor store
@@ -141,6 +144,9 @@ test.describe("Dual-adapter visual regression", () => {
 
         // Allow an extra frame for post-render effects
         await page.waitForTimeout(500);
+
+        // Pause the render loop so toHaveScreenshot() produces stable frames
+        await pauseRenderLoop(page);
 
         // Capture screenshot with per-fixture tolerance
         const tolerance = getToleranceBand(fixture);
