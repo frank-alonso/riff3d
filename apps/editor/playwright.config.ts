@@ -21,11 +21,22 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
     screenshot: "only-on-failure",
     trace: "on-first-retry",
+    launchOptions: {
+      args: [
+        "--use-gl=swiftshader",
+        "--disable-dev-shm-usage",
+        "--no-sandbox",
+      ],
+    },
   },
   projects: [
     {
       name: "e2e",
       testMatch: /.*\.e2e\.ts/,
+      // Retry once to handle Supabase anonymous signup rate limits (429).
+      // Each test run calls signInAnonymously() which hits POST /signup;
+      // rapid consecutive runs can exhaust the quota.
+      retries: 1,
     },
     {
       name: "visual",

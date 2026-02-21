@@ -101,7 +101,7 @@ test.describe("Golden-path editor lifecycle", () => {
 
     // 11. Cleanup: navigate to dashboard and delete the test project
     await page.goto("/dashboard");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Find and delete the test project
     const projectCard = page.locator(`text="${testProjectName}"`).first();

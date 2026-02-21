@@ -33,6 +33,7 @@ coverage/
 # Playwright
 test-results/
 playwright-report/
+.auth-state.json
 
 # vercel
 .vercel

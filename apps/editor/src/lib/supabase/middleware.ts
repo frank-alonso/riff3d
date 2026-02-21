@@ -40,9 +40,16 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Allow public routes through without auth
-  const publicRoutes = ["/login", "/auth/callback"];
-  if (publicRoutes.some((route) => pathname.startsWith(route))) {
+  // Allow public routes through without auth.
+  // "/" is included because the dashboard layout has its own auth check
+  // (redirect to /login if no user). Letting "/" through the middleware
+  // avoids a race condition where the auth cookie hasn't been flushed
+  // to the browser's cookie store after anonymous sign-in.
+  if (
+    pathname === "/" ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/auth/callback")
+  ) {
     return supabaseResponse;
   }
 

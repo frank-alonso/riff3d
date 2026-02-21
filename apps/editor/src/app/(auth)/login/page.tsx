@@ -35,7 +35,9 @@ function LoginForm() {
       return;
     }
 
-    // Anonymous auth completes immediately — redirect to dashboard
+    // Redirect after anonymous sign-in. The "/" route is in the middleware's
+    // public routes list, so this navigation succeeds even if the auth cookie
+    // hasn't fully flushed. The dashboard layout handles its own auth check.
     window.location.href = redirectTo;
   }
 
