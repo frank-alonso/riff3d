@@ -277,6 +277,9 @@ importers:
         specifier: ^13.6
         version: 13.6.29
     devDependencies:
+      '@riff3d/ecson':
+        specifier: workspace:*
+        version: link:../../packages/ecson
       '@types/node':
         specifier: ^22
         version: 22.19.11

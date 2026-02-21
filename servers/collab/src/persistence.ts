@@ -77,7 +77,7 @@ export function createPersistenceExtension(
  * - 'assets' Y.Map<assetId, assetJSON>
  * - 'environment' Y.Map
  */
-function syncEcsonToProject(
+export function syncEcsonToProject(
   supabase: SupabaseClient,
   projectId: string,
   state: Uint8Array,
