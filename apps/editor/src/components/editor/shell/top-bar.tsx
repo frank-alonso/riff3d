@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Save, User, Globe, LinkIcon, Loader2, AlertCircle } from "lucide-react";
+import { Save, User, Globe, LinkIcon, Loader2, AlertCircle, PersonStanding, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useEditorStore } from "@/stores/hooks";
@@ -65,6 +65,9 @@ export function TopBar({
   const saveStatus = useEditorStore((s) => s.saveStatus);
   const isPlaying = useEditorStore((s) => s.isPlaying);
   const isPaused = useEditorStore((s) => s.isPaused);
+  const isCollaborating = useEditorStore((s) => s.isCollaborating);
+  const isAvatarMode = useEditorStore((s) => s.isAvatarMode);
+  const toggleAvatarMode = useEditorStore((s) => s.toggleAvatarMode);
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -207,9 +210,26 @@ export function TopBar({
         )}
       </div>
 
-      {/* Center: Engine switcher + Play controls */}
+      {/* Center: Engine switcher + Avatar toggle + Play controls */}
       <div className="flex items-center gap-3">
         <EngineSwitcher />
+        {/* Avatar mode toggle -- only visible when collaborating, disabled during play */}
+        {isCollaborating && (
+          <button
+            type="button"
+            onClick={toggleAvatarMode}
+            disabled={isPlaying}
+            className={`flex items-center gap-1.5 rounded px-2 py-1 text-xs font-medium transition-colors ${
+              isAvatarMode
+                ? "bg-violet-600 text-white hover:bg-violet-700"
+                : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+            } ${isPlaying ? "cursor-not-allowed opacity-40" : ""}`}
+            title={isAvatarMode ? "Exit avatar mode" : "Enter avatar mode (walk around the scene)"}
+          >
+            {isAvatarMode ? <PersonStanding size={14} /> : <Eye size={14} />}
+            {isAvatarMode ? "Avatar" : "Walk"}
+          </button>
+        )}
         <PlayControls />
       </div>
 

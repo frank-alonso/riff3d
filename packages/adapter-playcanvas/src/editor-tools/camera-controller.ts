@@ -43,6 +43,13 @@ export class CameraController {
   private currentMode: "fly" | "orbit";
   private updateHandler: ((dt: number) => void) | null = null;
 
+  /**
+   * Whether the camera controller is enabled.
+   * When disabled (e.g. avatar mode), input events are ignored
+   * and the update loop does nothing.
+   */
+  private _enabled = true;
+
   // Fly mode state
   private flyYaw = 0;
   private flyPitch = -20;
@@ -118,6 +125,7 @@ export class CameraController {
   }
 
   private onMouseDown(e: MouseEvent): void {
+    if (!this._enabled) return;
     this.mouseDown[e.button] = true;
     this.altKey = e.altKey;
     this.lastMouseX = e.clientX;
@@ -125,10 +133,12 @@ export class CameraController {
   }
 
   private onMouseUp(e: MouseEvent): void {
+    if (!this._enabled) return;
     this.mouseDown[e.button] = false;
   }
 
   private onMouseMove(e: MouseEvent): void {
+    if (!this._enabled) return;
     const dx = e.clientX - this.lastMouseX;
     const dy = e.clientY - this.lastMouseY;
     this.lastMouseX = e.clientX;
@@ -165,6 +175,7 @@ export class CameraController {
   }
 
   private onWheel(e: WheelEvent): void {
+    if (!this._enabled) return;
     e.preventDefault();
     if (this.currentMode === "orbit") {
       const delta = e.deltaY > 0 ? 1 : -1;
@@ -174,16 +185,19 @@ export class CameraController {
   }
 
   private onKeyDown(e: KeyboardEvent): void {
+    if (!this._enabled) return;
     this.keys.add(e.key.toLowerCase());
     this.altKey = e.altKey;
   }
 
   private onKeyUp(e: KeyboardEvent): void {
+    if (!this._enabled) return;
     this.keys.delete(e.key.toLowerCase());
     this.altKey = e.altKey;
   }
 
   private onUpdate(dt: number): void {
+    if (!this._enabled) return;
     if (this.currentMode === "fly") {
       this.updateFlyMode(dt);
     } else {
@@ -306,6 +320,38 @@ export class CameraController {
     this.flyVelocity.set(0, 0, 0);
     this.orbitYaw = yaw;
     this.orbitPitch = pitch;
+  }
+
+  /**
+   * Enable the camera controller.
+   * Resumes processing input events and update loop.
+   */
+  enable(): void {
+    this._enabled = true;
+    // Clear stale input state
+    this.keys.clear();
+    this.mouseDown = [false, false, false];
+    this.flyVelocity.set(0, 0, 0);
+  }
+
+  /**
+   * Disable the camera controller.
+   * Input events are ignored and the update loop does nothing.
+   * Used when avatar mode takes over camera control.
+   */
+  disable(): void {
+    this._enabled = false;
+    // Clear input state so keys aren't stuck when re-enabled
+    this.keys.clear();
+    this.mouseDown = [false, false, false];
+    this.flyVelocity.set(0, 0, 0);
+  }
+
+  /**
+   * Check whether the camera controller is currently enabled.
+   */
+  isEnabled(): boolean {
+    return this._enabled;
   }
 
   /**

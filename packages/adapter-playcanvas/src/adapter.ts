@@ -208,6 +208,14 @@ export class PlayCanvasAdapter implements EngineAdapter {
   }
 
   /**
+   * Get the camera controller instance.
+   * Used by avatar controller to disable/enable during avatar mode.
+   */
+  getCameraController(): CameraController | null {
+    return this.cameraController;
+  }
+
+  /**
    * Enter or exit play mode.
    *
    * Play mode disables editor-specific features so the user sees the
