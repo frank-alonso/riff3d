@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 5 of 11 (Collaboration)
-Plan: 4 of 6 in current phase
+Plan: 5 of 6 in current phase
 Status: Executing Phase 5
-Last activity: 2026-02-20 -- Completed 05-04 (entity locking)
+Last activity: 2026-02-20 -- Completed 05-05 (collaborative avatars)
 
-Progress: [#######---] 4/6 plans in Phase 5
+Progress: [########--] 5/6 plans in Phase 5
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [#######---] 4/6 plans in Phase 5
 | Phase 05 P02 | 7 | 2 tasks | 18 files |
 | Phase 05 P03 | 9 | 2 tasks | 13 files |
 | Phase 05 P04 | 11 | 2 tasks | 10 files |
+| Phase 05 P05 | 6 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -174,6 +175,10 @@ Recent decisions affecting current work:
 - [Phase 05]: [05-04]: BFS descendant walk for hierarchical lock propagation (parent + all children)
 - [Phase 05]: [05-04]: AABB wireframe for viewport lock tint (non-destructive, immediate-mode drawLines pattern)
 - [Phase 05]: [05-04]: getOpTargetEntityId returns null for __environment__ (environment edits not lockable)
+- [Phase 05]: [05-05]: CameraController enable/disable pattern for avatar mode handoff (not dispose/recreate)
+- [Phase 05]: [05-05]: AvatarController in editor layer with minimal interface types to avoid PlayCanvas dependency
+- [Phase 05]: [05-05]: Dual-renderer pattern: PresenceRenderer + AvatarRenderer both receive full user list, filter by mode internally
+- [Phase 05]: [05-05]: Pointer lock for FPS mouse look in avatar mode; ESC to exit, click to re-lock
 
 ### Pending Todos
 
@@ -215,6 +220,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 05-04-PLAN.md
-Resume file: .planning/phases/05-collaboration/05-04-SUMMARY.md
-Next: Execute 05-05-PLAN.md (collaborative avatars)
+Stopped at: Completed 05-05-PLAN.md
+Resume file: .planning/phases/05-collaboration/05-05-SUMMARY.md
+Next: Execute 05-06-PLAN.md (review gate)
