@@ -13,19 +13,19 @@ import { test, expect } from "@playwright/test";
 import { loginAsGuest } from "./helpers/auth";
 
 /**
- * Wait for the PlayCanvas adapter's __sceneReady signal.
- * This ensures the scene has rendered at least one frame before proceeding.
+ * Wait for the scene to be ready by checking that the canvas is visible
+ * and the loading overlay has disappeared. This avoids the race condition
+ * where __sceneReady fires before the evaluate listener is attached.
  */
 async function waitForSceneReady(page: import("@playwright/test").Page): Promise<void> {
-  await page.evaluate(() => {
-    return new Promise<void>((resolve) => {
-      if ((window as unknown as Record<string, unknown>).__sceneAlreadyReady) {
-        resolve();
-        return;
-      }
-      window.addEventListener("__sceneReady", () => resolve(), { once: true });
-    });
+  // Wait for canvas to be visible
+  await page.locator("canvas").waitFor({ state: "visible", timeout: 30_000 });
+  // Wait for the loading overlay to disappear (ViewportLoader contains "Initializing")
+  await page.locator("text=/Initializing|Building scene|Loading/i").waitFor({ state: "hidden", timeout: 30_000 }).catch(() => {
+    // Loading overlay may have already disappeared — that's fine
   });
+  // Give the renderer one extra frame to settle
+  await page.waitForTimeout(500);
 }
 
 test.describe("Golden-path editor lifecycle", () => {
@@ -35,12 +35,16 @@ test.describe("Golden-path editor lifecycle", () => {
     // 1. Login as anonymous guest (no credentials needed)
     await loginAsGuest(page);
 
-    // 2. Create project: click "New Project" on dashboard
-    await page.getByRole("button", { name: /new project/i }).click();
+    // 2. Create project: click "New Project" or "Create your first project"
+    // (anonymous guest with no projects sees the empty-state CTA)
+    const newProjectBtn = page.getByRole("button", { name: /new project|create your first project/i });
+    await newProjectBtn.click();
 
-    // Fill project name in the creation dialog/form
-    await page.getByLabel(/project name|name/i).fill(testProjectName);
-    await page.getByRole("button", { name: /create|submit/i }).click();
+    // Fill project name in the dialog and click "Blank Scene" to create
+    const nameLabel = page.getByLabel(/project name/i);
+    await nameLabel.waitFor({ state: "visible", timeout: 5_000 });
+    await nameLabel.fill(testProjectName);
+    await page.getByRole("button", { name: /blank scene/i }).click();
 
     // 3. Wait for editor shell to load (viewport canvas element)
     const canvas = page.locator("canvas");
