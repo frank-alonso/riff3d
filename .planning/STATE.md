@@ -248,6 +248,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Phase 6 COMPLETE (gate decision: PASS_WITH_CONDITIONS)
-Resume file: .planning/reviews/phase-6/PHASE_6_DECISION.md
+Stopped at: Phase 7 context gathered
+Resume file: .planning/phases/07-game-runtime-behaviors/07-CONTEXT.md
 Next: Plan Phase 7 (Game Runtime & Behaviors)
