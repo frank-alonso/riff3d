@@ -58,11 +58,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Collaboration
 
-- [ ] **COLLAB-01**: Shared operation log backed by Yjs CRDTs for real-time co-editing
+- [x] **COLLAB-01**: Shared operation log backed by Yjs CRDTs for real-time co-editing
 - [ ] **COLLAB-02**: Multiplayer cursors and presence (colored cursors with user names, both 2D overlay and 3D viewport)
 - [ ] **COLLAB-03**: Object-level locking with hierarchical lock propagation (locking parent locks descendants)
 - [ ] **COLLAB-04**: Embodied avatar editing (walk around 3D scene as avatar while editing)
-- [ ] **COLLAB-05**: Conflict resolution strategy (LWW per property initially, upgradeable to OT)
+- [x] **COLLAB-05**: Conflict resolution strategy (LWW per property initially, upgradeable to OT)
 
 ### Game Logic & Templates
 
@@ -232,11 +232,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADPT-02 | Phase 4: Dual Adapter Validation | Complete |
 | ADPT-03 | Phase 4: Dual Adapter Validation | Complete |
 | ADPT-04 | Phase 4: Dual Adapter Validation | Complete |
-| COLLAB-01 | Phase 5: Collaboration | Pending |
+| COLLAB-01 | Phase 5: Collaboration | Complete |
 | COLLAB-02 | Phase 5: Collaboration | Pending |
 | COLLAB-03 | Phase 5: Collaboration | Pending |
 | COLLAB-04 | Phase 5: Collaboration | Pending |
-| COLLAB-05 | Phase 5: Collaboration | Pending |
+| COLLAB-05 | Phase 5: Collaboration | Complete |
 | GAME-01 | Phase 7: Game Runtime & Behaviors | Pending |
 | GAME-02 | Phase 7: Game Runtime & Behaviors | Pending |
 | GAME-03 | Phase 7: Game Runtime & Behaviors | Pending |

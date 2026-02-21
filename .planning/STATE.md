@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 5 of 11 (Collaboration)
-Plan: 1 of 6 in current phase
+Plan: 2 of 6 in current phase
 Status: Executing Phase 5
-Last activity: 2026-02-20 -- Completed 05-01 (carry-forward bug fixes and enforcement)
+Last activity: 2026-02-20 -- Completed 05-02 (Yjs CRDT document binding)
 
-Progress: [##--------] 1/6 plans in Phase 5
+Progress: [####------] 2/6 plans in Phase 5
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Progress: [##--------] 1/6 plans in Phase 5
 | Phase 04 P04 | 7 | 2 tasks | 16 files |
 | Phase 04 P05 | review | 1 task | 6 files |
 | Phase 05 P01 | 5 | 2 tasks | 7 files |
+| Phase 05 P02 | 7 | 2 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -153,6 +154,12 @@ Recent decisions affecting current work:
 - [Phase 04]: [04-04]: Spot light inner cone tolerance (0.15 color delta) explicitly documented as acceptable Babylon approximation difference
 - [Phase 04]: [04-04]: Cross-engine visual comparison is advisory only (not CI blocking); per-engine baselines are required
 - [Phase 04]: [04-04]: Multi-seed property tests use seeds 42, 123, 456 x 50 iterations for CI-reproducible coverage
+- [Phase 05]: [05-02]: Nested Y.Maps per entity for per-property CRDT merge (COLLAB-05)
+- [Phase 05]: [05-02]: Origin tagging (ORIGIN_LOCAL/ORIGIN_INIT) prevents infinite ECSON<->Y.Doc sync loops
+- [Phase 05]: [05-02]: Y.UndoManager with captureTimeout:0 and trackedOrigins for per-user undo
+- [Phase 05]: [05-02]: Hocuspocus dual-write persistence: Y.Doc binary + decoded ECSON to projects table
+- [Phase 05]: [05-02]: Auto-save skipped in collab mode; Hocuspocus handles persistence server-side
+- [Phase 05]: [05-02]: CollaborationProvider conditionally wraps editor when NEXT_PUBLIC_COLLAB_URL set
 - [Phase 05]: rAF+50ms timeout between adapter dispose/initialize for GPU context release during engine switch
 - [Phase 05]: ESLint no-restricted-imports on adapter packages enforces Architecture Rule #3 mechanically
 - [Phase 05]: switchEngine() added as third approved PatchOps bypass point in CLAUDE.md exception contract
@@ -197,6 +204,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 05-01-PLAN.md
-Resume file: .planning/phases/05-collaboration/05-01-SUMMARY.md
-Next: Execute 05-02-PLAN.md (Yjs CRDT document binding)
+Stopped at: Completed 05-02-PLAN.md
+Resume file: .planning/phases/05-collaboration/05-02-SUMMARY.md
+Next: Execute 05-03-PLAN.md (presence UI)
