@@ -90,6 +90,9 @@ export function ViewportCanvas() {
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
+    // Capture refs for use in cleanup (React lint rule: refs may change by cleanup time)
+    const canvasEl = canvasRef.current;
+
     // Increment switch counter to invalidate any in-flight initialization
     const currentSwitch = ++switchCounter.current;
 
@@ -464,10 +467,12 @@ export function ViewportCanvas() {
 
     void initAdapter();
 
-    // Cleanup function: disposes adapter and removes all subscriptions
+    // Cleanup function: disposes adapter and removes all subscriptions.
+    // Uses switchCounter via currentSwitch (captured above) + increment
+    // to invalidate stale async callbacks.
     return () => {
       // Invalidate any in-flight async callbacks
-      switchCounter.current++;
+      switchCounter.current = currentSwitch + 1;
 
       docUnsub?.();
       cameraModeUnsub?.();
@@ -480,11 +485,11 @@ export function ViewportCanvas() {
         window.removeEventListener("riff3d:request-app", requestAppHandler);
       }
       // Remove drag event listeners from canvas
-      if (canvasRef.current) {
-        if (dragEnterHandler) canvasRef.current.removeEventListener("dragenter", dragEnterHandler);
-        if (dragOverHandler) canvasRef.current.removeEventListener("dragover", dragOverHandler);
-        if (dragLeaveHandler) canvasRef.current.removeEventListener("dragleave", dragLeaveHandler);
-        if (dropHandler) canvasRef.current.removeEventListener("drop", dropHandler);
+      if (canvasEl) {
+        if (dragEnterHandler) canvasEl.removeEventListener("dragenter", dragEnterHandler);
+        if (dragOverHandler) canvasEl.removeEventListener("dragover", dragOverHandler);
+        if (dragLeaveHandler) canvasEl.removeEventListener("dragleave", dragLeaveHandler);
+        if (dropHandler) canvasEl.removeEventListener("drop", dropHandler);
       }
       dragPreviewManager?.dispose();
       gizmoManager?.dispose();
@@ -497,7 +502,7 @@ export function ViewportCanvas() {
       }
       adapterRef.current = null;
     };
-  }, [activeEngine, createAdapter, adapterRef]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeEngine, createAdapter, adapterRef]);
 
   return (
     <div

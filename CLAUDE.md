@@ -16,10 +16,11 @@ Riff3D is a web-based 3D engine/editor foundation with a **contract-first, opera
 
 ### Approved Architectural Exceptions
 
-1. **System-level state replacement bypasses PatchOps** (Approved: Phase 2, 2026-02-20)
-   - **Scope:** `loadProject()` and playtest `stop()` restore operations that replace the entire ECSON document.
-   - **Rationale:** These are system-level state management operations (loading a project from database, restoring a pre-play snapshot), not user edits. There is no meaningful PatchOp for "replace entire document." The undo stack is also reset/restored in these operations, so PatchOp tracking is not applicable.
-   - **Constraint:** Only `loadProject()` and playtest `stop()` may bypass PatchOps. All other ECSON mutations must go through `dispatchOp()`.
+1. **System-level state replacement bypasses PatchOps** (Approved: Phase 2, 2026-02-20; updated Phase 5, 2026-02-20)
+   - **Scope:** `loadProject()`, playtest `stop()` restore, and `switchEngine()` engine preference setter (`metadata.preferredEngine`).
+   - **Rationale:** These are system-level state management operations, not user edits. `loadProject()` replaces the entire ECSON document from the database. Playtest `stop()` restores a pre-play snapshot. `switchEngine()` persists the user's engine preference as metadata -- not a scene edit, not undoable. The undo stack is reset/restored in load/playtest operations, so PatchOp tracking is not applicable.
+   - **Constraint:** Only `loadProject()`, playtest `stop()`, and `switchEngine()` may bypass PatchOps. All other ECSON mutations must go through `dispatchOp()`.
+   - **Bypass points in code:** `scene-slice.ts:loadProject()`, `playtest-slice.ts:stop()`, `engine-slice.ts:switchEngine()`.
    - **Precedent:** Unity, Godot, and Unreal editors all bypass their undo systems for play mode snapshot/restore.
 
 2. **Adapter package LoC budget applies to core module only** (Approved: Phase 2, 2026-02-20)

@@ -13,7 +13,6 @@ import { describe, expect, vi, afterEach } from "vitest";
 import { test, fc } from "@fast-check/vitest";
 import {
   createPlayCanvasMockModule,
-  MockEntity,
 } from "./helpers/pc-mocks";
 
 // ─── DOM stubs ──────────────────────────────────────────────────────────────

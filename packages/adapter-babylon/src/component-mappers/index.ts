@@ -1,6 +1,6 @@
 import type { Scene } from "@babylonjs/core/scene";
 import type { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import type { CanonicalComponent, CanonicalNode } from "@riff3d/canonical-ir";
+import type { CanonicalNode } from "@riff3d/canonical-ir";
 import { applyMeshRenderer } from "./mesh-renderer";
 import { applyLight } from "./light";
 import { applyCamera } from "./camera";
