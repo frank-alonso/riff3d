@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** All meaningful edits flow through a deterministic operation pipeline (IQL -> PatchOps -> ECSON -> Canonical IR -> Adapters), ensuring portability, reproducibility, and safe AI-driven manipulation.
-**Current focus:** Phase 5: Collaboration
+**Current focus:** Phase 5: Collaboration (review gate)
 
 ## Current Position
 
 Phase: 5 of 11 (Collaboration)
-Plan: 5 of 6 in current phase
-Status: Executing Phase 5
-Last activity: 2026-02-20 -- Completed 05-05 (collaborative avatars)
+Plan: 6 of 6 in current phase
+Status: Phase 5 evidence compiled -- awaiting Codex post-execution review and gate decision
+Last activity: 2026-02-21 -- Completed 05-06 (evidence packet)
 
-Progress: [########--] 5/6 plans in Phase 5
+Progress: [##########] 6/6 plans in Phase 5
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27
-- Average duration: 9.1 min
-- Total execution time: 4.1 hours
+- Total plans completed: 28
+- Average duration: 9.0 min
+- Total execution time: 4.2 hours
 
 **By Phase:**
 
@@ -31,10 +31,11 @@ Progress: [########--] 5/6 plans in Phase 5
 | 02 | 8 | 100 min | 12.5 min |
 | 03 | 7 | 54 min | 7.7 min |
 | 04 | 5 | 28 min | 5.6 min |
+| 05 | 6 | 40 min | 6.7 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (10 min), 04-02 (6 min), 04-03 (5 min), 04-04 (7 min), 04-05 (review gate)
-- Trend: Phase 4 fastest phase yet; Babylon adapter and conformance testing completed efficiently
+- Last 5 plans: 05-02 (7 min), 05-03 (9 min), 05-04 (11 min), 05-05 (6 min), 05-06 (2 min)
+- Trend: Phase 5 consistent 6.7 min/plan avg; collaboration infrastructure built efficiently
 
 *Updated after each plan completion*
 | Phase 03 P01 | 8 | 2 tasks | 11 files |
@@ -51,6 +52,7 @@ Progress: [########--] 5/6 plans in Phase 5
 | Phase 05 P03 | 9 | 2 tasks | 13 files |
 | Phase 05 P04 | 11 | 2 tasks | 10 files |
 | Phase 05 P05 | 6 | 2 tasks | 8 files |
+| Phase 05 P06 | 2 | 1 task | 1 file |
 
 ## Accumulated Context
 
@@ -179,6 +181,8 @@ Recent decisions affecting current work:
 - [Phase 05]: [05-05]: AvatarController in editor layer with minimal interface types to avoid PlayCanvas dependency
 - [Phase 05]: [05-05]: Dual-renderer pattern: PresenceRenderer + AvatarRenderer both receive full user list, filter by mode internally
 - [Phase 05]: [05-05]: Pointer lock for FPS mouse look in avatar mode; ESC to exit, click to re-lock
+- [Phase 05]: [05-06]: React 19 ref lint errors classified as Phase 6 carry-forwards (functional but strict mode violations)
+- [Phase 05]: [05-06]: Human verification of success criteria deferred to Codex review process (infrastructure verified programmatically)
 
 ### Pending Todos
 
@@ -205,13 +209,16 @@ Recent decisions affecting current work:
 - [Phase 4] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` when validating Babylon.js adapter -- ensure no web-only assumptions baked into IR.
 - [Phase 8] Consult `FUTURE_ENGINE_CONSIDERATIONS.md` Section 7 when designing ejection adapter interface -- directory structures, no binary formats.
 - [Phase 8] Re-evaluate `.planning/research/TEMPLATE_DESIGN_PLAYBOOK.md` -- reconcile archetype specs with actual component registry, validate against built game runtime, update playtest process, finalize template backlog. Also review at Phase 7 (latency budgets) and Phase 10 (VR variants).
-- [Phase 5 - CF-P4-01] Mechanical mutation-boundary enforcement (no-restricted-imports + negative tests) — from Codex review F4-001/F4-003
-- [Phase 5 - CF-P4-02] Align CLAUDE.md exception contract with actual bypass points (add engine preference setter) — from Codex review F4-001
-- [Phase 5 - CF-P4-03] Attach CI run URLs/artifacts to evidence packets — from Codex review F4-004
+- ~~[Phase 5 - CF-P4-01] Mechanical mutation-boundary enforcement (no-restricted-imports + negative tests) — from Codex review F4-001/F4-003~~ DONE in 05-01
+- ~~[Phase 5 - CF-P4-02] Align CLAUDE.md exception contract with actual bypass points (add engine preference setter) — from Codex review F4-001~~ DONE in 05-01
+- ~~[Phase 5 - CF-P4-03] Attach CI run URLs/artifacts to evidence packets — from Codex review F4-004~~ DONE in 05-01
 - [Phase 7 - CF-P4-04] Cross-engine drift trend monitoring (when performance dashboard built) — from Codex review
-- [Phase 5 - CF-P4-05] Camera position/rotation not synced when swapping engines — PlayCanvas defaults camera aiming downward on load, Babylon aims upward. Need to transfer camera state (position + rotation) correctly during engine switch so the viewpoint is preserved.
-- [Phase 5 - CF-P4-06] Babylon-first load sometimes fails to render PlayCanvas on switch — when the editor loads with Babylon as the selected engine, switching to PlayCanvas sometimes results in a blank viewport (PlayCanvas engine loads per dev console but scene not visible). Loading with PlayCanvas first and then switching works reliably. Likely a race condition in adapter initialization order.
-- [Phase 5 - CF-P4-07] Browser resize sometimes causes scene to stop rendering — resizing the browser window (e.g. opening dev console) can cause both engines to stop rendering. Partially fixed but still reproducible. Needs a robust canvas resize observer solution.
+- ~~[Phase 5 - CF-P4-05] Camera position/rotation not synced when swapping engines~~ DONE in 05-01
+- ~~[Phase 5 - CF-P4-06] Babylon-first load sometimes fails to render PlayCanvas on switch~~ DONE in 05-01
+- ~~[Phase 5 - CF-P4-07] Browser resize sometimes causes scene to stop rendering~~ DONE in 05-01
+- [Phase 6 - CF-P5-01] React 19 ref lint errors in use-awareness.ts and provider.tsx (11 errors, functional but violates strict mode)
+- [Phase 6 - CF-P5-02] Avatar yaw initialization resets to 0 instead of preserving camera orientation on mode entry
+- [Phase 6+ - CF-P5-03] editor-shell.tsx set-state-in-effect pre-existing lint error (from Phase 2)
 
 ### Blockers/Concerns
 
@@ -219,7 +226,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-20
-Stopped at: Completed 05-05-PLAN.md
-Resume file: .planning/phases/05-collaboration/05-05-SUMMARY.md
-Next: Execute 05-06-PLAN.md (review gate)
+Last session: 2026-02-21
+Stopped at: Completed 05-06-PLAN.md (evidence packet compiled)
+Resume file: .planning/phases/05-collaboration/05-06-SUMMARY.md
+Next: Codex post-execution review (./scripts/codex-review.sh post-review 5) then gate decision

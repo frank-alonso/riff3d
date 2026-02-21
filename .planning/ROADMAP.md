@@ -149,12 +149,12 @@ Plans:
 **Plans**: 6 plans
 
 Plans:
-- [ ] 05-01: Carry-forward viewport fixes + mechanical enforcement + CLAUDE.md alignment (Wave 1)
-- [ ] 05-02: Hocuspocus server + ECSON<->Y.Doc sync bridge + per-user undo + collab save (Wave 2)
-- [ ] 05-03: Presence awareness, collaborator bar, 2D hierarchy indicators, 3D frustum cones (Wave 3)
-- [ ] 05-04: Entity locking with hierarchical propagation, read-only inspector, viewport tint (Wave 3)
-- [ ] 05-05: Embodied avatar mode -- capsule mesh, WASD walk, toolbar toggle (Wave 4)
-- [ ] 05-06: Phase 5 Review (post-execution evidence audit + gate decision) (Wave 5)
+- [x] 05-01: Carry-forward viewport fixes + mechanical enforcement + CLAUDE.md alignment (Wave 1)
+- [x] 05-02: Hocuspocus server + ECSON<->Y.Doc sync bridge + per-user undo + collab save (Wave 2)
+- [x] 05-03: Presence awareness, collaborator bar, 2D hierarchy indicators, 3D frustum cones (Wave 3)
+- [x] 05-04: Entity locking with hierarchical propagation, read-only inspector, viewport tint (Wave 3)
+- [x] 05-05: Embodied avatar mode -- capsule mesh, WASD walk, toolbar toggle (Wave 4)
+- [x] 05-06: Phase 5 Review (post-execution evidence audit + gate decision) (Wave 5)
 
 ### Phase 6: Review Gate: Core Platform
 **Goal**: Validate that collaboration, dual adapters, and the editor form a stable platform before adding the game layer on top. This is an **expanded-scope review** (per Phase Review Protocol) that also assesses cross-phase integration across Phases 4-5, cumulative debt from all prior PASS_WITH_CONDITIONS decisions, architecture drift, and carry-forward reconciliation.
