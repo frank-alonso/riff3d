@@ -228,7 +228,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-21
-Stopped at: Phase 5 gate PASS
-Resume file: .planning/reviews/phase-5/PHASE_5_FINAL_REVIEW.md
-Next: Phase 6 planning (next milestone phase)
+Last session: 2026-02-22
+Stopped at: Phase 6 context gathered
+Resume file: .planning/phases/06-review-gate-core-platform/06-CONTEXT.md
+Next: Phase 6 planning (/gsd:plan-phase 6)
