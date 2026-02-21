@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** All meaningful edits flow through a deterministic operation pipeline (IQL -> PatchOps -> ECSON -> Canonical IR -> Adapters), ensuring portability, reproducibility, and safe AI-driven manipulation.
-**Current focus:** Phase 5: Collaboration (review gate)
+**Current focus:** Phase 6: Review Gate: Core Platform
 
 ## Current Position
 
-Phase: 5 of 11 (Collaboration) -- COMPLETE
-Plan: 6 of 6 in current phase
-Status: Phase 5 PASSED Codex review gate. Ready for Phase 6.
-Last activity: 2026-02-21 -- Phase 5 gate PASS (2 follow-up recommendations, 0 blockers)
+Phase: 6 of 11 (Review Gate: Core Platform)
+Plan: 1 of 3 in current phase
+Status: Executing Phase 6 carry-forward fixes
+Last activity: 2026-02-21 -- Completed 06-01 (carry-forward fixes: CF-P5-02, CF-P5-04, CF-P5-05)
 
-Progress: [##########] 6/6 plans in Phase 5
+Progress: [###-------] 1/3 plans in Phase 6
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 28
-- Average duration: 9.0 min
-- Total execution time: 4.2 hours
+- Total plans completed: 29
+- Average duration: 8.8 min
+- Total execution time: 4.3 hours
 
 **By Phase:**
 
@@ -32,10 +32,11 @@ Progress: [##########] 6/6 plans in Phase 5
 | 03 | 7 | 54 min | 7.7 min |
 | 04 | 5 | 28 min | 5.6 min |
 | 05 | 6 | 40 min | 6.7 min |
+| 06 | 1 | 4 min | 4.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (7 min), 05-03 (9 min), 05-04 (11 min), 05-05 (6 min), 05-06 (2 min)
-- Trend: Phase 5 consistent 6.7 min/plan avg; collaboration infrastructure built efficiently
+- Last 5 plans: 05-03 (9 min), 05-04 (11 min), 05-05 (6 min), 05-06 (2 min), 06-01 (4 min)
+- Trend: Carry-forward fixes executed quickly; targeted bug fixes + test additions
 
 *Updated after each plan completion*
 | Phase 03 P01 | 8 | 2 tasks | 11 files |
@@ -53,6 +54,7 @@ Progress: [##########] 6/6 plans in Phase 5
 | Phase 05 P04 | 11 | 2 tasks | 10 files |
 | Phase 05 P05 | 6 | 2 tasks | 8 files |
 | Phase 05 P06 | 2 | 1 task | 1 file |
+| Phase 06 P01 | 4 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -183,6 +185,10 @@ Recent decisions affecting current work:
 - [Phase 05]: [05-05]: Pointer lock for FPS mouse look in avatar mode; ESC to exit, click to re-lock
 - [Phase 05]: [05-06]: React 19 ref lint errors classified as Phase 6 carry-forwards (functional but strict mode violations)
 - [Phase 05]: [05-06]: Human verification of success criteria deferred to Codex review process (infrastructure verified programmatically)
+- [Phase 06]: [06-01]: Added getEulerAngles() to AvatarCameraHandle interface for yaw/pitch initialization from camera orientation
+- [Phase 06]: [06-01]: Collab shape version 0->1 migration stamps field only (no structural changes, establishes pattern)
+- [Phase 06]: [06-01]: @riff3d/ecson added as devDependency to collab-server for SceneDocumentSchema test validation
+- [Phase 06]: [06-01]: Exported syncEcsonToProject from persistence.ts for direct unit testing
 
 ### Pending Todos
 
@@ -217,10 +223,10 @@ Recent decisions affecting current work:
 - ~~[Phase 5 - CF-P4-06] Babylon-first load sometimes fails to render PlayCanvas on switch~~ DONE in 05-01
 - ~~[Phase 5 - CF-P4-07] Browser resize sometimes causes scene to stop rendering~~ DONE in 05-01
 - ~~[Phase 6 - CF-P5-01] React 19 ref lint errors in use-awareness.ts and provider.tsx (11 errors, functional but violates strict mode)~~ RESOLVED in review fixes
-- [Phase 6 - CF-P5-02] Avatar yaw initialization resets to 0 instead of preserving camera orientation on mode entry
+- ~~[Phase 6 - CF-P5-02] Avatar yaw initialization resets to 0 instead of preserving camera orientation on mode entry~~ DONE in 06-01
 - ~~[Phase 6+ - CF-P5-03] editor-shell.tsx set-state-in-effect pre-existing lint error (from Phase 2)~~ RESOLVED in review fixes (useMemo pattern)
-- [Phase 6+ - CF-P5-04] Add collab-doc shape versioning/migration metadata (separate from ECSON schema version) — Codex recommendation
-- [Phase 6+ - CF-P5-05] Add server-side unit tests for collab persistence decode/re-encode — Codex recommendation
+- ~~[Phase 6+ - CF-P5-04] Add collab-doc shape versioning/migration metadata (separate from ECSON schema version) — Codex recommendation~~ DONE in 06-01
+- ~~[Phase 6+ - CF-P5-05] Add server-side unit tests for collab persistence decode/re-encode — Codex recommendation~~ DONE in 06-01
 
 ### Blockers/Concerns
 
@@ -228,7 +234,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-review-gate-core-platform/06-CONTEXT.md
-Next: Phase 6 planning (/gsd:plan-phase 6)
+Last session: 2026-02-21
+Stopped at: Completed 06-01-PLAN.md (carry-forward fixes)
+Resume file: .planning/phases/06-review-gate-core-platform/06-01-SUMMARY.md
+Next: Execute 06-02-PLAN.md (stress testing)
