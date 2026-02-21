@@ -13,7 +13,6 @@ import * as Y from "yjs";
 import {
   SceneDocumentSchema,
   type SceneDocument,
-  type Entity,
   type ComponentInstance,
 } from "@riff3d/ecson";
 import { yDocToEcson } from "../src/collaboration/sync-bridge";

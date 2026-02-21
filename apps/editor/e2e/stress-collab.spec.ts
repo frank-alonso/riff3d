@@ -81,7 +81,7 @@ async function measureFps(
 async function logEnvironmentMetadata(page: Page): Promise<void> {
   const metadata = await page.evaluate(() => ({
     userAgent: navigator.userAgent,
-    platform: navigator.platform,
+    platform: (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.userAgent,
     devicePixelRatio: window.devicePixelRatio,
     viewport: {
       width: window.innerWidth,
