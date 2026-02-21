@@ -193,6 +193,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Phase 4 complete (PASS_WITH_CONDITIONS)
-Resume file: .planning/reviews/phase-4/PHASE_4_DECISION.md
+Stopped at: Phase 5 context gathered
+Resume file: .planning/phases/05-collaboration/05-CONTEXT.md
 Next: Plan Phase 5 (Collaboration)
