@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 5 of 11 (Collaboration)
-Plan: 0 of 5 in current phase
-Status: Ready to plan Phase 5
-Last activity: 2026-02-20 -- Phase 4 complete (PASS_WITH_CONDITIONS)
+Plan: 1 of 6 in current phase
+Status: Executing Phase 5
+Last activity: 2026-02-20 -- Completed 05-01 (carry-forward bug fixes and enforcement)
 
-Progress: [##########] 5/5 plans in Phase 4 (complete)
+Progress: [##--------] 1/6 plans in Phase 5
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Progress: [##########] 5/5 plans in Phase 4 (complete)
 | Phase 04 P03 | 5 | 2 tasks | 12 files |
 | Phase 04 P04 | 7 | 2 tasks | 16 files |
 | Phase 04 P05 | review | 1 task | 6 files |
+| Phase 05 P01 | 5 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -152,6 +153,9 @@ Recent decisions affecting current work:
 - [Phase 04]: [04-04]: Spot light inner cone tolerance (0.15 color delta) explicitly documented as acceptable Babylon approximation difference
 - [Phase 04]: [04-04]: Cross-engine visual comparison is advisory only (not CI blocking); per-engine baselines are required
 - [Phase 04]: [04-04]: Multi-seed property tests use seeds 42, 123, 456 x 50 iterations for CI-reproducible coverage
+- [Phase 05]: rAF+50ms timeout between adapter dispose/initialize for GPU context release during engine switch
+- [Phase 05]: ESLint no-restricted-imports on adapter packages enforces Architecture Rule #3 mechanically
+- [Phase 05]: switchEngine() added as third approved PatchOps bypass point in CLAUDE.md exception contract
 
 ### Pending Todos
 
@@ -193,6 +197,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-collaboration/05-CONTEXT.md
-Next: Plan Phase 5 (Collaboration)
+Stopped at: Completed 05-01-PLAN.md
+Resume file: .planning/phases/05-collaboration/05-01-SUMMARY.md
+Next: Execute 05-02-PLAN.md (Yjs CRDT document binding)

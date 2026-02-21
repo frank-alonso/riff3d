@@ -348,7 +348,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 2. Closed-Loop Editor | 8/8 | Complete | 2026-02-20 |
 | 3. Review Gate: Foundation | 7/7 | Complete (PASS_WITH_CONDITIONS) | 2026-02-20 |
 | 4. Dual Adapter Validation | 5/5 | Complete (PASS_WITH_CONDITIONS) | 2026-02-20 |
-| 5. Collaboration | 0/6 | Planning complete | - |
+| 5. Collaboration | 1/6 | In Progress | - |
 | 6. Review Gate: Core Platform | 0/1 | Not started | - |
 | 7. Game Runtime & Behaviors | 0/6 | Not started | - |
 | 8. Templates, Party System & Ejection | 0/7 | Not started | - |
