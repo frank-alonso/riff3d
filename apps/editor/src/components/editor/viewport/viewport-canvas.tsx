@@ -94,9 +94,10 @@ export function ViewportCanvas() {
     const currentSwitch = ++switchCounter.current;
 
     // Serialize camera state from the previous adapter before disposing
-    if (adapterRef.current) {
-      pendingCameraState.current = adapterRef.current.serializeCameraState();
-      adapterRef.current.dispose();
+    const previousAdapter = adapterRef.current;
+    if (previousAdapter) {
+      pendingCameraState.current = previousAdapter.serializeCameraState();
+      previousAdapter.dispose();
       adapterRef.current = null;
     }
 
@@ -126,8 +127,28 @@ export function ViewportCanvas() {
     let adapter: EngineAdapter | null = null;
     let babylonSelectionManager: BabylonSelectionManagerType | null = null;
 
-    // Initialize adapter asynchronously
-    void createAdapter(activeEngine).then(async (newAdapter) => {
+    // Initialize adapter asynchronously.
+    // A small delay between dispose and initialize allows the GPU context
+    // to fully release, preventing the Babylon-first race condition (CF-P4-06)
+    // where switching from Babylon to PlayCanvas would sometimes fail to render.
+    const initAdapter = async () => {
+      // Wait one frame + 50ms for the previous engine's GPU context to release.
+      // This is essential when switching from Babylon (which holds a WebGL context
+      // via Engine) to PlayCanvas -- without the delay, PlayCanvas may fail to
+      // acquire the context and render a blank viewport.
+      if (previousAdapter) {
+        await new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            setTimeout(resolve, 50);
+          });
+        });
+      }
+
+      // Stale check after delay
+      if (currentSwitch !== switchCounter.current) return;
+
+      const newAdapter = await createAdapter(activeEngine);
+
       // Stale check: if another switch happened while we were creating,
       // dispose this adapter and bail out
       if (currentSwitch !== switchCounter.current) {
@@ -405,10 +426,17 @@ export function ViewportCanvas() {
       }
 
       // Set up ResizeObserver for container resize -> adapter.resize()
+      // Uses requestAnimationFrame batching to avoid excessive redraws
+      // when the browser fires multiple resize events rapidly (CF-P4-07).
       if (containerRef.current && adapter) {
         const a = adapter;
+        let resizeRafId: number | null = null;
         resizeObserver = new ResizeObserver(() => {
-          a.resize();
+          if (resizeRafId !== null) cancelAnimationFrame(resizeRafId);
+          resizeRafId = requestAnimationFrame(() => {
+            resizeRafId = null;
+            a.resize();
+          });
         });
         resizeObserver.observe(containerRef.current);
       }
@@ -416,8 +444,13 @@ export function ViewportCanvas() {
       // Backup: window resize catches dev-tools open/close
       if (adapter) {
         const a = adapter;
+        let windowRafId: number | null = null;
         const onWindowResize = () => {
-          requestAnimationFrame(() => a.resize());
+          if (windowRafId !== null) cancelAnimationFrame(windowRafId);
+          windowRafId = requestAnimationFrame(() => {
+            windowRafId = null;
+            a.resize();
+          });
         };
         window.addEventListener("resize", onWindowResize);
         windowResizeHandler = onWindowResize;
@@ -427,7 +460,9 @@ export function ViewportCanvas() {
       setLoadingStage(null);
       setLoadingProgress(100);
       editorStore.getState().setEngineSwitching(false);
-    });
+    };
+
+    void initAdapter();
 
     // Cleanup function: disposes adapter and removes all subscriptions
     return () => {
