@@ -7,7 +7,10 @@ import {
   SelectionManager,
   createGrid,
   DragPreviewManager,
+  PresenceRenderer,
+  LockRenderer,
   type GridHandle,
+  type RemoteUserPresence,
 } from "@riff3d/adapter-playcanvas/editor-tools";
 import type { BabylonAdapter } from "@riff3d/adapter-babylon";
 import type { BabylonSelectionManager as BabylonSelectionManagerType } from "@riff3d/adapter-babylon";
@@ -19,6 +22,7 @@ import { CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
 import { editorStore } from "@/stores/editor-store";
 import { useEditorStore } from "@/stores/hooks";
 import { ASSET_DRAG_MIME, getStarterAsset } from "@/lib/asset-manager";
+import { getLockedEntities, type AwarenessLike } from "@/collaboration/lock-manager";
 import { useViewportAdapter } from "./viewport-provider";
 import { FloatingToolbar } from "./floating-toolbar";
 import { ViewportLoader } from "./viewport-loader";
@@ -123,6 +127,10 @@ export function ViewportCanvas() {
     let windowResizeHandler: (() => void) | null = null;
     let requestAppHandler: (() => void) | null = null;
     let dragPreviewManager: DragPreviewManager | null = null;
+    let presenceRenderer: PresenceRenderer | null = null;
+    let presenceUnsub: (() => void) | null = null;
+    let lockRenderer: LockRenderer | null = null;
+    let lockUnsub: (() => void) | null = null;
     let dragEnterHandler: ((e: globalThis.DragEvent) => void) | null = null;
     let dragOverHandler: ((e: globalThis.DragEvent) => void) | null = null;
     let dragLeaveHandler: ((e: globalThis.DragEvent) => void) | null = null;
@@ -342,6 +350,78 @@ export function ViewportCanvas() {
             canvasEl.addEventListener("drop", dropHandler);
           }
 
+          // --- Initialize Lock Renderer (05-04) ---
+          // Draws colored wireframe bounding boxes around locked entities
+          lockRenderer = new LockRenderer(app, entityMap);
+
+          // Subscribe to awareness lock changes by polling _lockAwareness
+          // from collab-slice. The lock renderer updates every frame, so
+          // we just need to update the lock map when awareness changes.
+          const updateLockVisuals = () => {
+            const awareness = editorStore.getState()._lockAwareness as AwarenessLike | null;
+            if (!awareness || !lockRenderer) {
+              lockRenderer?.updateLocks(new Map());
+              return;
+            }
+            const locked = getLockedEntities(awareness, awareness.clientID);
+            const visuals = new Map<string, { color: string }>();
+            for (const [eid, entry] of locked) {
+              // Only show wireframes for entities locked by OTHER users
+              if (!entry.lockedByMe) {
+                visuals.set(eid, { color: entry.holder.color });
+              }
+            }
+            lockRenderer.updateLocks(visuals);
+          };
+
+          // Subscribe to collab state changes to update lock visuals
+          lockUnsub = editorStore.subscribe(
+            (state) => state._lockAwareness,
+            () => {
+              updateLockVisuals();
+              // Also register awareness change listener
+              const awareness = editorStore.getState()._lockAwareness as AwarenessLike | null;
+              if (awareness) {
+                awareness.on("change", updateLockVisuals);
+              }
+            },
+          );
+
+          // Initial check
+          updateLockVisuals();
+
+          // --- Initialize Presence Renderer (05-03) ---
+          // Draws frustum cones with floating name labels for remote users
+          presenceRenderer = new PresenceRenderer(app, camera);
+          presenceRenderer.start();
+
+          // Subscribe to collaborator presence changes to feed the renderer
+          presenceUnsub = editorStore.subscribe(
+            (state) => state.collaboratorPresence,
+            (presenceMap) => {
+              if (!presenceRenderer || !presenceMap) {
+                presenceRenderer?.update([]);
+                return;
+              }
+              const collaborators = editorStore.getState().collaborators;
+              const remoteUsers: RemoteUserPresence[] = [];
+              for (const collab of collaborators) {
+                const presence = presenceMap.get(collab.id);
+                if (presence?.camera) {
+                  remoteUsers.push({
+                    name: collab.name,
+                    color: collab.color,
+                    position: presence.camera.position,
+                    rotation: presence.camera.rotation,
+                    fov: presence.camera.fov,
+                    mode: presence.mode ?? "editor",
+                  });
+                }
+              }
+              presenceRenderer.update(remoteUsers);
+            },
+          );
+
           // Listen for app instance requests (used by GLB import)
           requestAppHandler = () => {
             window.dispatchEvent(
@@ -407,6 +487,7 @@ export function ViewportCanvas() {
             const newEntityMap = adapter.getTypedEntityMap();
             gizmoManager?.updateEntityMap(newEntityMap);
             selectionManager?.updateEntityMap(newEntityMap);
+            lockRenderer?.updateEntityMap(newEntityMap);
           } else if (babylonSelectionManager) {
             // Dynamic import -- check if adapter has getTypedEntityMap
             const bjsAdapter = adapter as BabylonAdapter;
@@ -492,6 +573,10 @@ export function ViewportCanvas() {
         if (dropHandler) canvasEl.removeEventListener("drop", dropHandler);
       }
       dragPreviewManager?.dispose();
+      presenceRenderer?.dispose();
+      presenceUnsub?.();
+      lockRenderer?.dispose();
+      lockUnsub?.();
       gizmoManager?.dispose();
       selectionManager?.dispose();
       babylonSelectionManager?.dispose();

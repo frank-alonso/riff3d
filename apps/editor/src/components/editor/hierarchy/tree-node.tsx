@@ -154,6 +154,49 @@ export function TreeNode({
         <span className="min-w-0 flex-1 truncate">{node.data.name}</span>
       )}
 
+      {/* Lock indicator: locked by another user (05-04) */}
+      {lockInfo.locked && !lockInfo.lockedByMe && (
+        <span title={`Locked by ${lockInfo.holder?.name ?? "another user"}${lockInfo.inherited ? " (inherited)" : ""}`}>
+          <Lock
+            className={`h-3 w-3 shrink-0 ${lockInfo.inherited ? "opacity-40" : ""}`}
+            style={{ color: lockInfo.holder?.color ?? "#888" }}
+          />
+        </span>
+      )}
+
+      {/* Lock indicator: locked by self -- click to unlock (05-04) */}
+      {lockInfo.locked && lockInfo.lockedByMe && (
+        <button
+          type="button"
+          className="shrink-0 rounded p-0.5 hover:bg-neutral-600/50"
+          title="Click to unlock"
+          onClick={(e) => {
+            e.stopPropagation();
+            unlockEntity(node.data.id);
+          }}
+        >
+          <Unlock
+            className={`h-3 w-3 ${lockInfo.inherited ? "opacity-40" : ""}`}
+            style={{ color: lockInfo.holder?.color ?? "#3b82f6" }}
+          />
+        </button>
+      )}
+
+      {/* Lock button on hover: visible only in collab mode when not locked by others */}
+      {isCollaborating && !lockInfo.locked && (
+        <button
+          type="button"
+          className="shrink-0 rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-neutral-600/50"
+          title="Lock entity for exclusive editing"
+          onClick={(e) => {
+            e.stopPropagation();
+            lockEntity(node.data.id);
+          }}
+        >
+          <Lock className="h-3 w-3 text-neutral-500" />
+        </button>
+      )}
+
       {/* Presence chips: show which remote users have this entity selected */}
       {visibleChips.length > 0 && (
         <div className="flex shrink-0 items-center gap-0.5">
