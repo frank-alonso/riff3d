@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useCollaboration } from "../provider";
 import { getRemotePresences, type PresenceState } from "../awareness-state";
@@ -25,6 +25,9 @@ export function useAwareness(): {
   updateCamera: (camera: PresenceState["camera"]) => void;
 } {
   const collab = useCollaboration();
+  const [remoteUsers, setRemoteUsers] = useState<Map<number, PresenceState>>(
+    () => new Map(),
+  );
   const remoteUsersRef = useRef<Map<number, PresenceState>>(new Map());
   const previousClientIdsRef = useRef<Set<number>>(new Set());
   const cameraThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -66,6 +69,7 @@ export function useAwareness(): {
 
       previousClientIdsRef.current = currentIds;
       remoteUsersRef.current = currentRemotes;
+      setRemoteUsers(currentRemotes);
 
       // Update collab-slice collaborators array and detailed presence
       const collaborators: Array<{ id: string; name: string; color: string }> = [];
@@ -107,7 +111,7 @@ export function useAwareness(): {
       if (!collab?.awareness) return;
       collab.awareness.setLocalStateField("selection", entityIds);
     },
-    [collab?.awareness],
+    [collab],
   );
 
   const updateCamera = useCallback(
@@ -120,11 +124,11 @@ export function useAwareness(): {
         cameraThrottleRef.current = null;
       }, 100);
     },
-    [collab?.awareness],
+    [collab],
   );
 
   return {
-    remoteUsers: remoteUsersRef.current,
+    remoteUsers,
     updateSelection,
     updateCamera,
   };

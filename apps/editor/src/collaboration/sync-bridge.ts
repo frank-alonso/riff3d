@@ -20,7 +20,7 @@
  *   Remote changes arrive with the remote client's origin (their clientID).
  */
 import * as Y from "yjs";
-import type { SceneDocument } from "@riff3d/ecson";
+import { SceneDocumentSchema, type SceneDocument } from "@riff3d/ecson";
 
 /** Transaction origin tag for local edits (prevents feedback loops). */
 export const ORIGIN_LOCAL = "riff3d:local-edit";
@@ -68,6 +68,12 @@ export function initializeYDoc(yDoc: Y.Doc, ecsonDoc: SceneDocument): void {
       yEnvironment.set(key, value);
     }
 
+    // Wiring (event wires between entities)
+    const yWiring = yDoc.getArray("wiring");
+    for (const wire of ecsonDoc.wiring) {
+      yWiring.push([wire]);
+    }
+
     // Metadata
     const yMetadata = yDoc.getMap("metadata");
     for (const [key, value] of Object.entries(ecsonDoc.metadata)) {
@@ -94,7 +100,16 @@ export function syncToYDoc(
   yDoc.transact(() => {
     const yEntities = yDoc.getMap("entities");
 
-    if (entityId) {
+    if (entityId === "__environment__") {
+      // Environment edits use a virtual entityId -- sync environment Y.Map
+      const yEnvironment = yDoc.getMap("environment");
+      for (const [key, value] of Object.entries(ecsonDoc.environment)) {
+        const existing = yEnvironment.get(key);
+        if (JSON.stringify(existing) !== JSON.stringify(value)) {
+          yEnvironment.set(key, value);
+        }
+      }
+    } else if (entityId) {
       // Single entity sync
       const entity = ecsonDoc.entities[entityId];
       if (entity) {
@@ -138,6 +153,9 @@ export function syncToYDoc(
           yEnvironment.set(key, value);
         }
       }
+
+      // Sync wiring
+      syncWiring(yDoc, ecsonDoc.wiring);
     }
   }, ORIGIN_LOCAL);
 }
@@ -176,10 +194,30 @@ function syncEntity(
 }
 
 /**
+ * Sync wiring array from ECSON to Y.Doc.
+ * Replaces the entire Y.Array content with the current wiring state.
+ */
+function syncWiring(
+  yDoc: Y.Doc,
+  wiring: ReadonlyArray<Record<string, unknown>>,
+): void {
+  const yWiring = yDoc.getArray("wiring");
+  const currentJson = JSON.stringify(yWiring.toJSON());
+  const targetJson = JSON.stringify(wiring);
+  if (currentJson !== targetJson) {
+    yWiring.delete(0, yWiring.length);
+    for (const wire of wiring) {
+      yWiring.push([wire]);
+    }
+  }
+}
+
+/**
  * Reconstruct a full ECSON SceneDocument from Y.Doc state.
  *
  * Used when remote changes arrive to rebuild the ECSON from the
- * authoritative Y.Doc state.
+ * authoritative Y.Doc state. Validates the result against the
+ * SceneDocumentSchema to prevent malformed state from propagating.
  */
 export function yDocToEcson(yDoc: Y.Doc): SceneDocument {
   const yMeta = yDoc.getMap("meta");
@@ -187,6 +225,7 @@ export function yDocToEcson(yDoc: Y.Doc): SceneDocument {
   const yAssets = yDoc.getMap("assets");
   const yEnvironment = yDoc.getMap("environment");
   const yMetadata = yDoc.getMap("metadata");
+  const yWiring = yDoc.getArray("wiring");
 
   // Reconstruct entities from nested Y.Maps
   const entities: Record<string, Record<string, unknown>> = {};
@@ -199,20 +238,32 @@ export function yDocToEcson(yDoc: Y.Doc): SceneDocument {
     }
   }
 
-  // Cast through unknown because Y.Doc reconstruction produces
-  // Record<string, Record<string, unknown>> for entities, which is
-  // structurally compatible at runtime but not assignable in strict TS.
-  return {
+  const raw = {
     id: (yMeta.get("id") as string) || "",
     name: (yMeta.get("name") as string) || "",
     schemaVersion: (yMeta.get("schemaVersion") as number) || 1,
     rootEntityId: (yMeta.get("rootEntityId") as string) || "",
     entities,
-    assets: yAssets.toJSON() as Record<string, SceneDocument["assets"][string]>,
-    wiring: [],
-    environment: yEnvironment.toJSON() as SceneDocument["environment"],
-    metadata: yMetadata.toJSON() as Record<string, unknown>,
-  } as unknown as SceneDocument;
+    assets: yAssets.toJSON(),
+    wiring: yWiring.toJSON(),
+    environment: yEnvironment.toJSON(),
+    metadata: yMetadata.toJSON(),
+  };
+
+  // Validate against ECSON schema to prevent malformed Y.Doc state
+  // from propagating. safeParse to fail closed without throwing.
+  const result = SceneDocumentSchema.safeParse(raw);
+  if (result.success) {
+    return result.data;
+  }
+
+  // Log validation error for diagnostics but return a best-effort cast.
+  // This allows the editor to keep functioning while flagging the issue.
+  console.error(
+    "[sync-bridge] Y.Doc→ECSON validation failed:",
+    result.error.issues,
+  );
+  return raw as unknown as SceneDocument;
 }
 
 /**
@@ -232,6 +283,7 @@ export function observeRemoteChanges(
   const yEntities = yDoc.getMap("entities");
   const yAssets = yDoc.getMap("assets");
   const yEnvironment = yDoc.getMap("environment");
+  const yWiring = yDoc.getArray("wiring");
 
   // Debounce to batch multiple Y.Doc events into a single ECSON rebuild.
   // Remote changes can arrive as multiple rapid Y.Doc events (e.g., a
@@ -250,8 +302,7 @@ export function observeRemoteChanges(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Y.observeDeep callback type
-  function handleEvent(_events: Y.YEvent<any>[], transaction: Y.Transaction): void {
-    // Skip local and init origins to prevent feedback loops
+  function handleMapEvent(_events: Y.YEvent<any>[], transaction: Y.Transaction): void {
     if (
       transaction.origin === ORIGIN_LOCAL ||
       transaction.origin === ORIGIN_INIT
@@ -261,16 +312,31 @@ export function observeRemoteChanges(
     scheduleRebuild();
   }
 
-  yEntities.observeDeep(handleEvent);
-  yAssets.observeDeep(handleEvent);
-  yEnvironment.observeDeep(handleEvent);
+  function handleArrayEvent(
+    _event: Y.YArrayEvent<unknown>,
+    transaction: Y.Transaction,
+  ): void {
+    if (
+      transaction.origin === ORIGIN_LOCAL ||
+      transaction.origin === ORIGIN_INIT
+    ) {
+      return;
+    }
+    scheduleRebuild();
+  }
+
+  yEntities.observeDeep(handleMapEvent);
+  yAssets.observeDeep(handleMapEvent);
+  yEnvironment.observeDeep(handleMapEvent);
+  yWiring.observe(handleArrayEvent);
 
   return () => {
     if (debounceTimer !== null) {
       clearTimeout(debounceTimer);
     }
-    yEntities.unobserveDeep(handleEvent);
-    yAssets.unobserveDeep(handleEvent);
-    yEnvironment.unobserveDeep(handleEvent);
+    yEntities.unobserveDeep(handleMapEvent);
+    yAssets.unobserveDeep(handleMapEvent);
+    yEnvironment.unobserveDeep(handleMapEvent);
+    yWiring.unobserve(handleArrayEvent);
   };
 }

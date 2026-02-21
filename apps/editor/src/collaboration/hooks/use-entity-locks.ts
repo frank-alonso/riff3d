@@ -43,11 +43,10 @@ export function useEntityLocks(): {
   const awarenessRef = useRef<AwarenessLike | null>(null);
 
   const awareness = collab?.awareness as AwarenessLike | null;
-  awarenessRef.current = awareness;
-
   const isCollaborating = !!awareness;
 
   useEffect(() => {
+    awarenessRef.current = awareness;
     if (!awareness) return;
 
     function handleAwarenessChange(): void {

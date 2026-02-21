@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 import { HocuspocusProvider } from "@hocuspocus/provider";
@@ -61,6 +62,12 @@ export function CollaborationProvider({
   const providerRef = useRef<HocuspocusProvider | null>(null);
   const undoManagerRef = useRef<Y.UndoManager | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const [contextValue, setContextValue] = useState<CollabContextValue>({
+    provider: null,
+    yDoc: new Y.Doc(),
+    awareness: null,
+    undoManager: null,
+  });
 
   useEffect(() => {
     const yDoc = new Y.Doc();
@@ -122,15 +129,22 @@ export function CollaborationProvider({
           const yEntitiesMap = yDoc.getMap("entities");
           const yAssetsMap = yDoc.getMap("assets");
           const yEnvironmentMap = yDoc.getMap("environment");
+          const yWiringArray = yDoc.getArray("wiring");
 
           const undoManager = new Y.UndoManager(
-            [yEntitiesMap, yAssetsMap, yEnvironmentMap],
+            [yEntitiesMap, yAssetsMap, yEnvironmentMap, yWiringArray],
             {
               trackedOrigins: new Set([ORIGIN_LOCAL]),
               captureTimeout: 0,
             },
           );
           undoManagerRef.current = undoManager;
+          setContextValue({
+            provider: provider,
+            yDoc,
+            awareness: provider?.awareness ?? null,
+            undoManager,
+          });
 
           // Register the onAfterDispatch callback to sync PatchOps to Y.Doc
           const dispatchCallback = (entityId?: string) => {
@@ -238,18 +252,18 @@ export function CollaborationProvider({
 
       yDocRef.current?.destroy();
       yDocRef.current = null;
+
+      setContextValue({
+        provider: null,
+        yDoc: new Y.Doc(),
+        awareness: null,
+        undoManager: null,
+      });
     };
   }, [projectId]);
 
   return (
-    <CollabContext
-      value={{
-        provider: providerRef.current,
-        yDoc: yDocRef.current ?? new Y.Doc(),
-        awareness: providerRef.current?.awareness ?? null,
-        undoManager: undoManagerRef.current,
-      }}
-    >
+    <CollabContext value={contextValue}>
       {children}
     </CollabContext>
   );

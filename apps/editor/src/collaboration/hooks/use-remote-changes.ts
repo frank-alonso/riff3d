@@ -148,13 +148,14 @@ export function useRemoteChanges(): Map<string, RemoteChangeEntry[]> {
 
     yEntities.observeDeep(handleEntityChanges);
 
+    const timers = timersRef.current;
     return () => {
       yEntities.unobserveDeep(handleEntityChanges);
       // Clear all timers
-      for (const timer of timersRef.current.values()) {
+      for (const timer of timers.values()) {
         clearTimeout(timer);
       }
-      timersRef.current.clear();
+      timers.clear();
     };
   }, [collab?.awareness, collab?.yDoc, addChange]);
 

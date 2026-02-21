@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { DragEvent } from "react";
 import dynamic from "next/dynamic";
 import { Group, Panel, Separator, useDefaultLayout } from "react-resizable-panels";
@@ -68,7 +68,7 @@ export function EditorShell({
   const activePanel = useEditorStore((s) => s.activePanel);
   const inspectorVisible = useEditorStore((s) => s.inspectorVisible);
   const isPlaying = useEditorStore((s) => s.isPlaying);
-  const hasLoadedProject = useRef(false);
+
 
   /**
    * Peekable panel state for play mode.
@@ -126,31 +126,29 @@ export function EditorShell({
   // ViewportCanvas is NOT rendered until this is true, preventing a race
   // condition where the viewport starts initializing with the default engine
   // before the preferred engine is applied from ECSON metadata.
-  const [projectReady, setProjectReady] = useState(false);
+  //
+  // useMemo with ecsonDoc dependency: runs synchronously on first render when
+  // ecsonDoc is available, loads project into store, and returns true.
+  // Subsequent renders with same ecsonDoc return cached true.
+  const projectReady = useMemo(() => {
+    if (!ecsonDoc) return false;
 
-  // Load project into store on mount and set read-only mode for non-owners.
-  // Also reads the preferred engine from ECSON metadata and switches if needed.
-  useEffect(() => {
-    if (ecsonDoc && !hasLoadedProject.current) {
-      hasLoadedProject.current = true;
-      editorStore.getState().setReadOnly(!isOwner);
-      editorStore.getState().loadProject(ecsonDoc);
+    editorStore.getState().setReadOnly(!isOwner);
+    editorStore.getState().loadProject(ecsonDoc);
 
-      // Read engine preference from ECSON metadata (per locked decision:
-      // engine choice is a project-level setting stored with the project).
-      const preferred = ecsonDoc.metadata?.preferredEngine;
-      if (preferred === "babylon" || preferred === "playcanvas") {
-        const currentEngine = editorStore.getState().activeEngine;
-        if (preferred !== currentEngine) {
-          editorStore.getState().switchEngine(preferred);
-        }
+    // Read engine preference from ECSON metadata (per locked decision:
+    // engine choice is a project-level setting stored with the project).
+    const preferred = ecsonDoc.metadata?.preferredEngine;
+    if (preferred === "babylon" || preferred === "playcanvas") {
+      const currentEngine = editorStore.getState().activeEngine;
+      if (preferred !== currentEngine) {
+        editorStore.getState().switchEngine(preferred);
       }
-
-      // Signal that the store is ready — viewport can now render with the
-      // correct activeEngine from the start (no race condition).
-      setProjectReady(true);
     }
-  }, [ecsonDoc, isOwner]);
+
+    return true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-time initialization
+  }, [ecsonDoc]);
 
   // Persist panel layouts to localStorage
   const layoutProps = useDefaultLayout({

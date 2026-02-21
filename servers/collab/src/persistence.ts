@@ -89,6 +89,8 @@ function syncEcsonToProject(
   const yEntities = doc.getMap("entities");
   const yAssets = doc.getMap("assets");
   const yEnvironment = doc.getMap("environment");
+  const yWiring = doc.getArray("wiring");
+  const yMetadata = doc.getMap("metadata");
 
   // Reconstruct entities from nested Y.Maps
   const entities: Record<string, unknown> = {};
@@ -108,8 +110,9 @@ function syncEcsonToProject(
     rootEntityId: yMeta.get("rootEntityId") as string,
     entities,
     assets: yAssets.toJSON(),
+    wiring: yWiring.toJSON(),
     environment: yEnvironment.toJSON(),
-    metadata: {},
+    metadata: yMetadata.toJSON(),
   };
 
   // Only update if we have valid data
