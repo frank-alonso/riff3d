@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-19)
 
 **Core value:** All meaningful edits flow through a deterministic operation pipeline (IQL -> PatchOps -> ECSON -> Canonical IR -> Adapters), ensuring portability, reproducibility, and safe AI-driven manipulation.
-**Current focus:** Phase 6: Review Gate: Core Platform
+**Current focus:** Phase 7: Game Runtime & Behaviors (next to plan)
 
 ## Current Position
 
-Phase: 6 of 11 (Review Gate: Core Platform)
-Plan: 2 of 3 in current phase
-Status: Executing Phase 6 stress testing
-Last activity: 2026-02-21 -- Completed 06-02 (stress testing: 4-client CRDT, 200-entity scene, E2E evidence)
+Phase: 6 of 11 COMPLETE (Review Gate: Core Platform — PASS_WITH_CONDITIONS)
+Plan: 3 of 3 in current phase
+Status: Phase 6 complete, ready to plan Phase 7
+Last activity: 2026-02-21 -- Finalized Phase 6 (presence bug fixes, gate decision, human verification)
 
-Progress: [######----] 2/3 plans in Phase 6
+Progress: [##########] 3/3 plans in Phase 6
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 30
-- Average duration: 8.6 min
-- Total execution time: 4.4 hours
+- Total plans completed: 31
+- Average duration: 8.5 min
+- Total execution time: 4.5 hours
 
 **By Phase:**
 
@@ -32,11 +32,11 @@ Progress: [######----] 2/3 plans in Phase 6
 | 03 | 7 | 54 min | 7.7 min |
 | 04 | 5 | 28 min | 5.6 min |
 | 05 | 6 | 40 min | 6.7 min |
-| 06 | 2 | 9 min | 4.5 min |
+| 06 | 3 | 14 min | 4.7 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-04 (11 min), 05-05 (6 min), 05-06 (2 min), 06-01 (4 min), 06-02 (5 min)
-- Trend: Review gate stress testing completed quickly; deterministic headless tests + E2E evidence generators
+- Last 5 plans: 05-05 (6 min), 05-06 (2 min), 06-01 (4 min), 06-02 (5 min), 06-03 (5 min)
+- Trend: Review gate completed; presence bugs fixed during human verification, gate PASS_WITH_CONDITIONS
 
 *Updated after each plan completion*
 | Phase 03 P01 | 8 | 2 tasks | 11 files |
@@ -56,6 +56,7 @@ Progress: [######----] 2/3 plans in Phase 6
 | Phase 05 P06 | 2 | 1 task | 1 file |
 | Phase 06 P01 | 4 | 2 tasks | 7 files |
 | Phase 06 P02 | 5 | 2 tasks | 4 files |
+| Phase 06 P03 | 5 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -193,6 +194,10 @@ Recent decisions affecting current work:
 - [Phase 06]: [06-02]: 10 groups of 4 children = 50 total group entities for correct 201-entity scene count
 - [Phase 06]: [06-02]: Added "stress" project to playwright.config.ts for .spec.ts file matching alongside .e2e.ts and .visual.ts
 - [Phase 06]: [06-02]: E2E stress tests gated behind STRESS_TEST env var (local evidence, not CI-blocking)
+- [Phase 06]: [06-03]: Collaborator presence keyed by awareness clientID (not user.id) — each tab is a distinct collaborator
+- [Phase 06]: [06-03]: React Strict Mode ghost prevention via aborted flag in async connect() + awareness.setLocalState(null) in cleanup
+- [Phase 06]: [06-03]: Inspector remote change flash reads event.changes.keys for correct property attribution (not path-length heuristic)
+- [Phase 06]: [06-03]: Local user included in hierarchy presence and collaborator bar (userName added to collab-slice)
 
 ### Pending Todos
 
@@ -231,6 +236,10 @@ Recent decisions affecting current work:
 - ~~[Phase 6+ - CF-P5-03] editor-shell.tsx set-state-in-effect pre-existing lint error (from Phase 2)~~ RESOLVED in review fixes (useMemo pattern)
 - ~~[Phase 6+ - CF-P5-04] Add collab-doc shape versioning/migration metadata (separate from ECSON schema version) — Codex recommendation~~ DONE in 06-01
 - ~~[Phase 6+ - CF-P5-05] Add server-side unit tests for collab persistence decode/re-encode — Codex recommendation~~ DONE in 06-01
+- [Phase 7 - CF-P6-01] Evaluate deeper Y.Map nesting for per-component-property CRDT merge
+- [Phase 7 - CF-P6-02] Add metadata observer to sync-bridge observeRemoteChanges
+- [Phase 7 - CF-P6-03] Add gameSettings sync when field is first used
+- [Phase 7 - CF-P6-04] Multi-account write access (collaborator invite/permission model)
 
 ### Blockers/Concerns
 
@@ -239,6 +248,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 06-02-PLAN.md (stress testing)
-Resume file: .planning/phases/06-review-gate-core-platform/06-02-SUMMARY.md
-Next: Execute 06-03-PLAN.md (evidence compilation and review gate)
+Stopped at: Phase 6 COMPLETE (gate decision: PASS_WITH_CONDITIONS)
+Resume file: .planning/reviews/phase-6/PHASE_6_DECISION.md
+Next: Plan Phase 7 (Game Runtime & Behaviors)

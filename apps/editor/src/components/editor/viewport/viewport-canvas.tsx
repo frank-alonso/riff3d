@@ -137,6 +137,7 @@ export function ViewportCanvas() {
     let avatarModeUnsub: (() => void) | null = null;
     let lockRenderer: LockRenderer | null = null;
     let lockUnsub: (() => void) | null = null;
+    let cameraBroadcastHandler: (() => void) | null = null;
     let dragEnterHandler: ((e: globalThis.DragEvent) => void) | null = null;
     let dragOverHandler: ((e: globalThis.DragEvent) => void) | null = null;
     let dragLeaveHandler: ((e: globalThis.DragEvent) => void) | null = null;
@@ -438,6 +439,36 @@ export function ViewportCanvas() {
             },
           );
 
+          // --- Camera broadcast for editor mode (presence rendering) ---
+          // Periodically broadcast the editor camera's position/rotation to
+          // awareness so remote clients can render frustum cones and labels.
+          // Throttled to ~100ms (10 Hz) to avoid flooding the awareness protocol.
+          // Avatar mode broadcasts via AvatarController instead, so this only
+          // runs when NOT in avatar mode.
+          let lastCameraBroadcast = 0;
+          const CAMERA_BROADCAST_MS = 100;
+          cameraBroadcastHandler = () => {
+            if (editorStore.getState().isAvatarMode) return;
+            const now = Date.now();
+            if (now - lastCameraBroadcast < CAMERA_BROADCAST_MS) return;
+            lastCameraBroadcast = now;
+
+            const awareness = editorStore.getState()._lockAwareness;
+            if (!awareness) return;
+
+            const pos = camera.getPosition();
+            const rot = camera.getRotation();
+            const fov = camera.camera?.fov ?? 60;
+
+            (awareness as { setLocalStateField: (k: string, v: unknown) => void })
+              .setLocalStateField("camera", {
+                position: { x: pos.x, y: pos.y, z: pos.z },
+                rotation: { x: rot.x, y: rot.y, z: rot.z, w: rot.w },
+                fov,
+              });
+          };
+          app.on("update", cameraBroadcastHandler);
+
           // --- Initialize Avatar Controller (05-05) ---
           // WASD ground-plane movement when local user enters avatar mode
           const pcAdapterForAvatar = pcAdapter;
@@ -652,6 +683,10 @@ export function ViewportCanvas() {
         if (dropHandler) canvasEl.removeEventListener("drop", dropHandler);
       }
       dragPreviewManager?.dispose();
+      // Remove camera broadcast before adapter dispose (app won't exist after)
+      if (cameraBroadcastHandler && adapter instanceof PlayCanvasAdapter) {
+        adapter.getApp()?.off("update", cameraBroadcastHandler);
+      }
       presenceRenderer?.dispose();
       avatarRenderer?.dispose();
       presenceUnsub?.();

@@ -127,16 +127,27 @@ export function useRemoteChanges(): Map<string, RemoteChangeEntry[]> {
         }
       }
 
-      // Walk events to find which entities and properties changed
+      // Walk events to find which entities and properties changed.
+      // Y.Doc structure: yEntities (Y.Map) -> entityId (Y.Map) -> property keys.
+      // observeDeep event paths relative to yEntities:
+      //   path=[]           -> top-level: entity added/deleted
+      //   path=[entityId]   -> entity Y.Map key changed (e.g. "components", "transform")
+      //   path=[entityId, prop, ...] -> deep nested change within a property
       for (const event of events) {
-        // Deep events on Y.Map: path tells us entity -> property
         const path = event.path;
-        if (path.length >= 1) {
-          // path[0] = entityId, path[1] (if exists) = property name
+        if (path.length >= 2) {
+          // Deep nested change within an entity property
           const entityId = String(path[0]);
-          const property = path.length >= 2 ? String(path[1]) : "entity";
-
+          const property = String(path[1]);
           addChange(entityId, property, changeColor, changeName);
+        } else if (path.length === 1) {
+          // Entity Y.Map property change -- read actual keys from event
+          const entityId = String(path[0]);
+          if (event.changes?.keys) {
+            for (const [propertyKey] of event.changes.keys) {
+              addChange(entityId, propertyKey, changeColor, changeName);
+            }
+          }
         } else if (event.changes?.keys) {
           // Top-level entity map change (add/delete entity)
           for (const [entityId] of event.changes.keys) {

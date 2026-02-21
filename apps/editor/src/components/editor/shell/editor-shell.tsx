@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DragEvent } from "react";
 import dynamic from "next/dynamic";
 import { Group, Panel, Separator, useDefaultLayout } from "react-resizable-panels";
@@ -19,11 +19,39 @@ import { AssetBrowser } from "@/components/editor/assets/asset-browser";
 import { AssetStrip } from "@/components/editor/assets/asset-strip";
 import { ASSET_DRAG_MIME, getStarterAsset } from "@/lib/asset-manager";
 import { CollaborationProvider } from "@/collaboration/provider";
+import { useAwareness } from "@/collaboration/hooks/use-awareness";
 import { OfflineBanner } from "@/components/editor/collaboration/offline-banner";
 import { generateOpId } from "@riff3d/ecson";
 import type { SceneDocument } from "@riff3d/ecson";
 import { CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
 import type { PatchOp } from "@riff3d/patchops";
+
+/**
+ * Mounts the useAwareness hook to activate presence sync.
+ * Sets up: join/leave toasts, collaboratorPresence Map updates,
+ * selection/camera broadcasting. Must be inside CollaborationProvider.
+ *
+ * Also subscribes to local selection changes and broadcasts them
+ * to remote clients via Awareness, enabling hierarchy presence
+ * borders and inspector highlights.
+ */
+function AwarenessSync(): null {
+  const { updateSelection } = useAwareness();
+
+  // Broadcast local selection changes to awareness so remote clients
+  // can render hierarchy borders and presence chips.
+  useEffect(() => {
+    const unsub = editorStore.subscribe(
+      (state) => state.selectedEntityIds,
+      (ids) => updateSelection(ids),
+    );
+    // Broadcast current selection immediately (may already have a selection)
+    updateSelection(editorStore.getState().selectedEntityIds);
+    return unsub;
+  }, [updateSelection]);
+
+  return null;
+}
 
 /**
  * Dynamically import ViewportCanvas with ssr: false.
@@ -353,6 +381,7 @@ export function EditorShell({
   if (collabEnabled) {
     return (
       <CollaborationProvider projectId={projectId}>
+        <AwarenessSync />
         {editorContent}
       </CollaborationProvider>
     );

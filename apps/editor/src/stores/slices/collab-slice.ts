@@ -49,6 +49,8 @@ export interface CollabSlice {
   isOffline: boolean;
   /** This user's assigned presence color. */
   userColor: string;
+  /** This user's display name (for local presence indicators). */
+  userName: string;
   /** List of other users in the session. */
   collaborators: Collaborator[];
   /** Error message from collaboration (auth failure, etc.). */
@@ -86,7 +88,7 @@ export interface CollabSlice {
   /** Update collaboration state (partial). */
   setCollabState: (partial: Partial<Pick<CollabSlice,
     "isCollaborating" | "isConnected" | "isSynced" | "isOffline" |
-    "userColor" | "collabError" | "collabUndoManager" | "onAfterDispatch" |
+    "userColor" | "userName" | "collabError" | "collabUndoManager" | "onAfterDispatch" |
     "_lockAwareness"
   >>) => void;
 
@@ -103,6 +105,7 @@ export const createCollabSlice: StateCreator<CollabSlice, [], [], CollabSlice> =
   isSynced: false,
   isOffline: false,
   userColor: "",
+  userName: "",
   collaborators: [],
   collabError: null,
   collaboratorPresence: null,

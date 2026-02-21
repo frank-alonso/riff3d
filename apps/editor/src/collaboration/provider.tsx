@@ -19,7 +19,8 @@ import {
   observeRemoteChanges,
   ORIGIN_LOCAL,
 } from "./sync-bridge";
-import type { PresenceState } from "./awareness-state";
+import { updatePresence } from "./awareness-state";
+import { assignUserColor } from "./presence-colors";
 
 /**
  * Context value exposed by CollaborationProvider.
@@ -75,11 +76,16 @@ export function CollaborationProvider({
 
     const supabase = createClient();
     let provider: HocuspocusProvider | null = null;
+    // Staleness flag: set to true by cleanup to abort any in-flight
+    // connect(). Prevents React Strict Mode double-mount from leaking
+    // an orphaned provider whose awareness entry never gets cleared.
+    let aborted = false;
 
     async function connect(): Promise<void> {
       const {
         data: { session },
       } = await supabase.auth.getSession();
+      if (aborted) return;
       if (!session) {
         editorStore.getState().setCollabState({
           collabError: "No active session -- collaboration requires authentication",
@@ -88,7 +94,7 @@ export function CollaborationProvider({
       }
 
       const collabUrl = process.env.NEXT_PUBLIC_COLLAB_URL;
-      if (!collabUrl) return;
+      if (!collabUrl || aborted) return;
 
       provider = new HocuspocusProvider({
         url: collabUrl,
@@ -144,12 +150,10 @@ export function CollaborationProvider({
             },
           );
           undoManagerRef.current = undoManager;
-          setContextValue({
-            provider: provider,
-            yDoc,
-            awareness: provider?.awareness ?? null,
+          setContextValue((prev) => ({
+            ...prev,
             undoManager,
-          });
+          }));
 
           // Register the onAfterDispatch callback to sync PatchOps to Y.Doc
           const dispatchCallback = (entityId?: string) => {
@@ -167,6 +171,23 @@ export function CollaborationProvider({
             // Expose awareness to scene-slice for lock guard and auto-release (05-04)
             _lockAwareness: provider?.awareness ?? null,
           });
+
+          // Set local user's presence in Awareness so other clients can see us.
+          // Without this, onAwarenessUpdate sees no `user` field and skips us.
+          if (provider?.awareness) {
+            const displayName =
+              (session.user.user_metadata?.name as string | undefined) ??
+              session.user.email ??
+              "Anonymous";
+            const color = assignUserColor(yDoc.clientID);
+            editorStore.getState().setCollabState({ userColor: color, userName: displayName });
+            updatePresence(provider.awareness, {
+              user: { id: session.user.id, name: displayName, color },
+              selection: [],
+              mode: "editor",
+              locks: [],
+            });
+          }
         },
 
         onStatus({ status }) {
@@ -198,32 +219,33 @@ export function CollaborationProvider({
           });
         },
 
-        onAwarenessUpdate() {
-          // Update collaborators list from awareness states
-          if (!provider) return;
-          const states = provider.awareness?.getStates();
-          if (!states) return;
-
-          const collaborators: Array<{ id: string; name: string; color: string }> = [];
-          const localClientId = yDoc.clientID;
-
-          for (const [clientId, state] of states) {
-            if (clientId === localClientId) continue;
-            const presence = state as Partial<PresenceState>;
-            if (presence.user) {
-              collaborators.push({
-                id: presence.user.id,
-                name: presence.user.name,
-                color: presence.user.color,
-              });
-            }
-          }
-
-          editorStore.getState().setCollaborators(collaborators);
-        },
+        // NOTE: Collaborator list is managed by useAwareness hook (via AwarenessSync).
+        // Do NOT add an onAwarenessUpdate handler here — it causes double-counting
+        // and the hook also handles collaboratorPresence which this callback doesn't.
       });
 
+      // If cleanup ran while we were awaiting getSession(), the effect
+      // is stale. Destroy the just-created provider and bail out to
+      // avoid orphaned awareness entries (React Strict Mode ghost fix).
+      if (aborted) {
+        provider.awareness?.setLocalState(null);
+        provider.destroy();
+        return;
+      }
+
       providerRef.current = provider;
+
+      // Expose awareness in context IMMEDIATELY after provider creation.
+      // This lets useAwareness attach its listener before awareness sync
+      // completes, so it catches "change" events for already-present users.
+      // (onSynced fires after Y.Doc sync, but awareness protocol syncs
+      // on its own timeline and may complete before or after.)
+      setContextValue({
+        provider,
+        yDoc,
+        awareness: provider.awareness ?? null,
+        undoManager: null, // set in onSynced once created
+      });
 
       editorStore.getState().setCollabState({
         isCollaborating: true,
@@ -235,6 +257,9 @@ export function CollaborationProvider({
     void connect();
 
     return () => {
+      // Signal any in-flight connect() to abort and self-cleanup
+      aborted = true;
+
       // Cleanup: unregister callbacks, destroy provider, destroy Y.Doc
       editorStore.getState().setCollabState({
         isCollaborating: false,
@@ -252,6 +277,10 @@ export function CollaborationProvider({
       undoManagerRef.current?.destroy();
       undoManagerRef.current = null;
 
+      // Clear awareness BEFORE destroying provider to immediately remove
+      // this tab's presence entry. Without this, React Strict Mode
+      // double-mount leaves stale awareness entries for ~30 seconds.
+      providerRef.current?.awareness?.setLocalState(null);
       providerRef.current?.destroy();
       providerRef.current = null;
 

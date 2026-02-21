@@ -70,6 +70,6 @@
 
 /* Remote change flash animation for inspector presence highlights */
 @keyframes remoteFlash {
-  0% { opacity: 0.15; }
+  0% { opacity: 0.12; }
   100% { opacity: 0; }
 }

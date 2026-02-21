@@ -105,10 +105,11 @@ export function InspectorPanel() {
       {/* Wrap content in a container that disables pointer events when locked by another user */}
       <div className={isLockedByOther ? "pointer-events-none opacity-70" : ""}>
         {/* Entity header: name, transform, add component */}
-        <EntityHeader entityId={entityId} />
-
-        {/* Remote change highlight for entity-level changes (transform, name, etc.) */}
-        <RemoteChangeIndicator changes={entityChanges} filter="transform" />
+        <div className="relative">
+          <EntityHeader entityId={entityId} />
+          {/* Remote change highlight for entity-level changes (transform, name, etc.) */}
+          <RemoteChangeIndicator changes={entityChanges} filter="transform" />
+        </div>
 
         {/* Component sections */}
         {entity.components.map((component, index) => (
@@ -139,6 +140,9 @@ export function InspectorPanel() {
 /**
  * Thin overlay that flashes a remote user's color when a matching
  * property was recently changed. Uses CSS transition for the fade.
+ *
+ * IMPORTANT: Must be inside a `position: relative` container so the
+ * `absolute inset-0` overlay is scoped to the correct section.
  */
 function RemoteChangeIndicator({
   changes,
@@ -147,25 +151,27 @@ function RemoteChangeIndicator({
   changes: RemoteChangeEntry[];
   filter: string;
 }) {
-  const match = changes.find((c) => c.property === filter || c.property === "entity");
+  const match = changes.find((c) => {
+    if (c.property === filter) return true;
+    // "entity" changes only match the transform section (top-level entity changes)
+    if (filter === "transform" && c.property === "entity") return true;
+    return false;
+  });
 
   if (!match) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-10 flex items-start">
-      {/* Colored dot indicator */}
+    <div className="pointer-events-none absolute inset-0 z-10">
+      {/* Persistent left accent bar */}
       <div
-        className="ml-1 mt-1 h-2 w-2 shrink-0 rounded-full"
+        className="absolute inset-y-0 left-0 w-0.5"
         style={{ backgroundColor: match.color }}
         title={`Changed by ${match.userName}`}
       />
-      {/* Flash overlay with fade transition */}
+      {/* Brief area flash scoped to the relative container */}
       <div
         className="absolute inset-0 animate-[remoteFlash_0.5s_ease-out_forwards]"
-        style={{
-          backgroundColor: match.color,
-          opacity: 0.15,
-        }}
+        style={{ backgroundColor: match.color }}
       />
     </div>
   );

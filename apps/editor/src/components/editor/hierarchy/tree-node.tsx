@@ -51,20 +51,38 @@ function PresenceChip({ user }: { user: Collaborator }) {
 }
 
 /**
- * Hook to get remote users who have a specific entity selected.
- * Reads from the collab-slice collaborators and presence state.
+ * Hook to get users who have a specific entity selected.
+ * Includes the local user (from store selection) and remote users
+ * (from collab-slice collaborators + presence state).
  */
 function useEntityPresence(entityId: string): Collaborator[] {
   const isCollaborating = useEditorStore((s) => s.isCollaborating);
   const collaborators = useEditorStore((s) => s.collaborators);
   const presenceStates = useEditorStore((s) => s.collaboratorPresence);
+  const selectedEntityIds = useEditorStore((s) => s.selectedEntityIds);
+  const userColor = useEditorStore((s) => s.userColor);
+  const userName = useEditorStore((s) => s.userName);
 
-  if (!isCollaborating || !presenceStates) return [];
+  if (!isCollaborating) return [];
 
-  return collaborators.filter((user) => {
-    const presence = presenceStates.get(user.id);
-    return presence?.selection?.includes(entityId);
-  });
+  const result: Collaborator[] = [];
+
+  // Include local user if they have this entity selected
+  if (userColor && selectedEntityIds.includes(entityId)) {
+    result.push({ id: "local", name: userName || "You", color: userColor });
+  }
+
+  // Include remote users
+  if (presenceStates) {
+    for (const user of collaborators) {
+      const presence = presenceStates.get(user.id);
+      if (presence?.selection?.includes(entityId)) {
+        result.push(user);
+      }
+    }
+  }
+
+  return result;
 }
 
 /**
