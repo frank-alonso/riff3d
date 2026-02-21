@@ -19,6 +19,7 @@ import { AssetBrowser } from "@/components/editor/assets/asset-browser";
 import { AssetStrip } from "@/components/editor/assets/asset-strip";
 import { ASSET_DRAG_MIME, getStarterAsset } from "@/lib/asset-manager";
 import { CollaborationProvider } from "@/collaboration/provider";
+import { OfflineBanner } from "@/components/editor/collaboration/offline-banner";
 import { generateOpId } from "@riff3d/ecson";
 import type { SceneDocument } from "@riff3d/ecson";
 import { CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
@@ -289,6 +290,8 @@ export function EditorShell({
           {/* Center: Viewport */}
           <Panel id={PANEL_IDS.center} minSize="30%">
             <div className="flex h-full flex-col">
+              {/* Offline banner -- shown above viewport when collab connection lost */}
+              <OfflineBanner />
               {/* PlayCanvas Viewport with drop handler for asset spawning */}
               <div
                 className="relative flex-1 bg-[#111111]"

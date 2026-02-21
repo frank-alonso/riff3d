@@ -8,6 +8,7 @@ import { useEditorStore } from "@/stores/hooks";
 import type { SaveStatus } from "@/stores/slices/save-slice";
 import { PlayControls } from "@/components/editor/playtest/play-controls";
 import { EngineSwitcher } from "./engine-switcher";
+import { CollaboratorBar } from "@/components/editor/collaboration/collaborator-bar";
 
 interface TopBarProps {
   projectId: string;
@@ -212,9 +213,10 @@ export function TopBar({
         <PlayControls />
       </div>
 
-      {/* Right: Save status + User avatar */}
+      {/* Right: Save status + Collaborator bar + User avatar */}
       <div className="flex items-center gap-3">
         <SaveIndicator status={saveStatus} />
+        <CollaboratorBar />
         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--muted)]">
           <User size={12} className="text-[var(--muted-foreground)]" />
         </div>
