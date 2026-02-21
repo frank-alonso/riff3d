@@ -59,7 +59,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Collaboration
 
 - [x] **COLLAB-01**: Shared operation log backed by Yjs CRDTs for real-time co-editing
-- [ ] **COLLAB-02**: Multiplayer cursors and presence (colored cursors with user names, both 2D overlay and 3D viewport)
+- [x] **COLLAB-02**: Multiplayer cursors and presence (colored cursors with user names, both 2D overlay and 3D viewport)
 - [ ] **COLLAB-03**: Object-level locking with hierarchical lock propagation (locking parent locks descendants)
 - [ ] **COLLAB-04**: Embodied avatar editing (walk around 3D scene as avatar while editing)
 - [x] **COLLAB-05**: Conflict resolution strategy (LWW per property initially, upgradeable to OT)
@@ -233,7 +233,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADPT-03 | Phase 4: Dual Adapter Validation | Complete |
 | ADPT-04 | Phase 4: Dual Adapter Validation | Complete |
 | COLLAB-01 | Phase 5: Collaboration | Complete |
-| COLLAB-02 | Phase 5: Collaboration | Pending |
+| COLLAB-02 | Phase 5: Collaboration | Complete |
 | COLLAB-03 | Phase 5: Collaboration | Pending |
 | COLLAB-04 | Phase 5: Collaboration | Pending |
 | COLLAB-05 | Phase 5: Collaboration | Complete |

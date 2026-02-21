@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 ## Current Position
 
 Phase: 5 of 11 (Collaboration)
-Plan: 2 of 6 in current phase
+Plan: 3 of 6 in current phase
 Status: Executing Phase 5
-Last activity: 2026-02-20 -- Completed 05-02 (Yjs CRDT document binding)
+Last activity: 2026-02-20 -- Completed 05-03 (presence and awareness UI)
 
-Progress: [####------] 2/6 plans in Phase 5
+Progress: [#####-----] 3/6 plans in Phase 5
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Progress: [####------] 2/6 plans in Phase 5
 | Phase 04 P05 | review | 1 task | 6 files |
 | Phase 05 P01 | 5 | 2 tasks | 7 files |
 | Phase 05 P02 | 7 | 2 tasks | 18 files |
+| Phase 05 P03 | 9 | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -163,6 +164,10 @@ Recent decisions affecting current work:
 - [Phase 05]: rAF+50ms timeout between adapter dispose/initialize for GPU context release during engine switch
 - [Phase 05]: ESLint no-restricted-imports on adapter packages enforces Architecture Rule #3 mechanically
 - [Phase 05]: switchEngine() added as third approved PatchOps bypass point in CLAUDE.md exception contract
+- [Phase 05]: [05-03]: DOM overlay for presence name labels (not 3D text) -- crisp text via camera.worldToScreen projection each frame
+- [Phase 05]: [05-03]: collaboratorPresence Map in collab-slice for per-user selection/camera state from Awareness
+- [Phase 05]: [05-03]: Camera awareness updates throttled to 100ms to avoid flooding Awareness protocol
+- [Phase 05]: [05-03]: Remote change flash entries auto-clear after 2 seconds via per-entry timers
 
 ### Pending Todos
 
@@ -204,6 +209,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 05-02-PLAN.md
-Resume file: .planning/phases/05-collaboration/05-02-SUMMARY.md
-Next: Execute 05-03-PLAN.md (presence UI)
+Stopped at: Completed 05-03-PLAN.md
+Resume file: .planning/phases/05-collaboration/05-03-SUMMARY.md
+Next: Execute 05-04-PLAN.md (entity locking)
