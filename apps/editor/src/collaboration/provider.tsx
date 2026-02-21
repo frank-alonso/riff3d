@@ -110,15 +110,20 @@ export function CollaborationProvider({
               initializeYDoc(yDoc, ecsonDoc);
             }
           } else {
-            // Y.Doc has content from server -- load it into the editor
+            // Y.Doc has content from server -- load it into the editor.
+            // Fail-closed: only load if validation passes.
             const ecson = yDocToEcson(yDoc);
-            editorStore.getState().loadProject(ecson);
+            if (ecson) {
+              editorStore.getState().loadProject(ecson);
+            } else {
+              console.error("[collab] Initial Y.Doc failed validation, keeping local state");
+            }
           }
 
           // Set up remote change observer
           const unobserve = observeRemoteChanges(yDoc, (ecson) => {
             // Remote changes: rebuild ECSON from Y.Doc and reload.
-            // This triggers IR recompilation and adapter scene rebuild.
+            // Only applies if validation passed (fail-closed).
             editorStore.getState().loadProject(ecson);
           });
           cleanupRef.current = unobserve;

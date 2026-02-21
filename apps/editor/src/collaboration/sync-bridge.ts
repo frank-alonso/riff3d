@@ -217,9 +217,10 @@ function syncWiring(
  *
  * Used when remote changes arrive to rebuild the ECSON from the
  * authoritative Y.Doc state. Validates the result against the
- * SceneDocumentSchema to prevent malformed state from propagating.
+ * SceneDocumentSchema. Returns null on validation failure (fail-closed)
+ * to prevent malformed state from propagating into the editor.
  */
-export function yDocToEcson(yDoc: Y.Doc): SceneDocument {
+export function yDocToEcson(yDoc: Y.Doc): SceneDocument | null {
   const yMeta = yDoc.getMap("meta");
   const yEntities = yDoc.getMap("entities");
   const yAssets = yDoc.getMap("assets");
@@ -250,20 +251,20 @@ export function yDocToEcson(yDoc: Y.Doc): SceneDocument {
     metadata: yMetadata.toJSON(),
   };
 
-  // Validate against ECSON schema to prevent malformed Y.Doc state
-  // from propagating. safeParse to fail closed without throwing.
+  // Validate against ECSON schema — fail-closed to prevent malformed
+  // Y.Doc state from propagating into the editor store.
   const result = SceneDocumentSchema.safeParse(raw);
   if (result.success) {
     return result.data;
   }
 
-  // Log validation error for diagnostics but return a best-effort cast.
-  // This allows the editor to keep functioning while flagging the issue.
+  // Fail closed: log the error and return null. Callers must preserve
+  // the last-known-good document when this returns null.
   console.error(
-    "[sync-bridge] Y.Doc→ECSON validation failed:",
+    "[sync-bridge] Y.Doc→ECSON validation failed (rejecting update):",
     result.error.issues,
   );
-  return raw as unknown as SceneDocument;
+  return null;
 }
 
 /**
@@ -297,7 +298,11 @@ export function observeRemoteChanges(
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
       const ecson = yDocToEcson(yDoc);
-      onRemoteChange(ecson);
+      // Fail-closed: only propagate valid ECSON. If validation fails,
+      // the editor preserves its last-known-good document.
+      if (ecson) {
+        onRemoteChange(ecson);
+      }
     }, 50);
   }
 
