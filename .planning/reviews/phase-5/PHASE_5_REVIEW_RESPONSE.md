@@ -2,83 +2,77 @@
 
 **Date:** 2026-02-21
 **Author:** Claude (Driver)
-**Responding to:** PHASE_5_REVIEW.md (Codex post-execution review, FAIL)
+**Responding to:** PHASE_5_REVIEW.md (initial), PHASE_5_FINAL_REVIEW.md (re-review)
 
-## Finding Resolutions
+## Finding Resolutions — Round 2
 
-### P5-001 (S0): Wiring field dropped during collab sync — FIXED
-
-**Root cause:** `initializeYDoc` did not sync wiring to Y.Doc, `yDocToEcson` hardcoded `wiring: []`, `syncToYDoc` omitted wiring in full-sync, persistence omitted wiring in ECSON reconstruction, and `observeRemoteChanges` did not observe wiring changes.
+### P5-001 (S0): Wiring field dropped during collab sync — FIXED (Round 1)
 
 **Fix (commit e18f2ce):**
-1. `initializeYDoc`: Added Y.Array("wiring") population from ECSON wiring array
-2. `syncToYDoc`: Added `syncWiring()` helper called during full-sync mode
-3. `yDocToEcson`: Reads from Y.Array("wiring") instead of hardcoding `[]`
-4. `persistence.ts:syncEcsonToProject`: Reads Y.Array("wiring") and Y.Map("metadata")
-5. `observeRemoteChanges`: Observes Y.Array("wiring") with proper event typing
-6. `provider.tsx`: Includes Y.Array("wiring") in UndoManager tracked scopes
+1. `initializeYDoc`: Added Y.Array("wiring") population
+2. `syncToYDoc`: Added `syncWiring()` helper for full-sync mode
+3. `yDocToEcson`: Reads from Y.Array("wiring")
+4. `persistence.ts`: Reads Y.Array("wiring") and Y.Map("metadata")
+5. `observeRemoteChanges`: Observes Y.Array("wiring")
+6. `provider.tsx`: Includes Y.Array("wiring") in UndoManager scopes
 
-**Test coverage:**
-- `preserves wiring through Y.Doc round-trip (P5-001)` — verifies all wire fields survive init→reconstruct
-- `syncs wiring changes in full-sync mode` — verifies wiring additions propagate
-- `triggers callback on remote wiring changes` — verifies remote wiring changes trigger rebuild
-
-### P5-002 (S1): Environment edits not synced — FIXED
-
-**Root cause:** `syncToYDoc` routed `__environment__` entityId into the entity map lookup instead of the environment Y.Map.
+### P5-002 (S1): Environment edits not synced — FIXED (Round 1)
 
 **Fix (commit e18f2ce):**
-- Added `entityId === "__environment__"` check as the first branch in `syncToYDoc`, before entity lookup. When matched, syncs `ecsonDoc.environment` properties to the `yEnvironment` Y.Map with JSON diff comparison.
+- `syncToYDoc`: Added `entityId === "__environment__"` branch to sync environment Y.Map
 
-**Test coverage:**
-- `syncs environment via __environment__ entityId (P5-002)` — modifies `ambientLight.intensity` via `__environment__`, verifies round-trip
+### P5-003 (S1): Unvalidated Y.Doc → ECSON — FIXED (Round 2: fail-closed)
 
-### P5-003 (S1): Unvalidated Y.Doc → ECSON cast — FIXED
+**Round 1 fix was fail-open.** Codex final review correctly identified this as insufficient.
 
-**Root cause:** `yDocToEcson` used `as unknown as SceneDocument` cast without validation.
+**Round 2 fix (commit 08fa294):**
+- `yDocToEcson` now returns `SceneDocument | null` (was `SceneDocument`)
+- On `safeParse` failure: logs error AND returns `null` (fail-closed)
+- Removed `raw as unknown as SceneDocument` fallback entirely
+- Callers updated:
+  - `provider.tsx:onSynced`: Guards `loadProject()` with null check, logs if initial Y.Doc fails validation
+  - `observeRemoteChanges:scheduleRebuild`: Guards `onRemoteChange()` with null check, preserves last-known-good doc on failure
 
-**Fix (commit e18f2ce):**
-- Imported `SceneDocumentSchema` from `@riff3d/ecson`
-- Runs `SceneDocumentSchema.safeParse(raw)` on reconstructed document
-- On success: returns validated data (Zod defaults fill any missing fields)
-- On failure: logs validation error for diagnostics, returns best-effort cast (fail-open to avoid crashing the editor, but logs the issue)
+### P5-004 (S1): No collaboration tests — FIXED (Round 2: multi-client)
 
-**Test coverage:**
-- `result passes schema validation (P5-003)` — verifies round-trip output passes Zod parse
-- `handles empty Y.Doc gracefully (returns fallback)` — verifies empty doc doesn't throw
+**Round 1 added 29 single-doc tests.** Codex final review requested multi-client and persistence tests.
 
-### P5-004 (S1): No collaboration tests — FIXED
+**Round 2 fix (commit 08fa294):** Added 9 more tests in 3 new describe blocks:
+1. **Two-Client Sync** (6 tests): Entity propagation A→B, concurrent edits to different entities, concurrent edits to same property (LWW), wiring propagation, environment propagation, reconnect/catch-up after offline edits
+2. **Persistence Round-Trip** (2 tests): Y.Doc encode/decode preserves full document, edits persist through encode/decode
+3. **Cross-Client Undo Isolation** (1 test): A's undo does not affect B's edits after sync
 
-**Fix (commit e18f2ce):**
-- Created `apps/editor/__tests__/collaboration.test.ts` with 29 tests across 4 describe blocks:
-  1. **Sync Bridge** (17 tests): initializeYDoc + yDocToEcson round-trip, syncToYDoc entity/environment/wiring/asset changes, observeRemoteChanges with remote/local/init origins
-  2. **Schema Validation** (2 tests): Well-formed validation, empty Y.Doc graceful handling
-  3. **Undo Isolation** (2 tests): Y.UndoManager only undoes local-origin changes, redo correctness
-  4. **Lock Manager** (8 tests): Acquisition, conflict blocking, hierarchical propagation, ancestor blocking, release, releaseAll, getLockedEntities, independent entity locking
+Two-client tests use `Y.encodeStateAsUpdate` / `Y.applyUpdate` for deterministic document sync without a Hocuspocus server.
 
-All tests use headless Y.Docs (no Hocuspocus server needed) for deterministic CI execution.
+### P5-005 (S2): Lint errors — FIXED (Round 1)
 
-### P5-005 (S2): Lint errors in collaboration paths — FIXED
-
-**Fix (commit e18f2ce):**
-- `use-awareness.ts`: Replaced `remoteUsersRef.current` in return with `useState` for render-safe access; updated `useCallback` deps from `collab?.awareness` to `collab` (React Compiler compatibility)
-- `use-entity-locks.ts`: Moved `awarenessRef.current = awareness` assignment into `useEffect` body
-- `use-remote-changes.ts`: Captured `timersRef.current` to local variable before cleanup closure
-- `provider.tsx`: Added `useState<CollabContextValue>` for context value instead of reading refs in render; `setContextValue` called in `onSynced` callback and cleanup
-- `editor-shell.tsx`: Replaced `useEffect` + `setState` with `useMemo` for synchronous project initialization; removed unused `hasLoadedProject` ref and `useEffect` import
-
-**Result:** 0 lint errors (down from 12), 2 pre-existing warnings (unused vars in test file and catch handler)
+0 lint errors across all packages.
 
 ## Updated Evidence
 
-| Metric | Before | After |
-|--------|--------|-------|
-| Tests | 690 | **719** |
-| Test failures | 0 | **0** |
-| Lint errors | 12 | **0** |
-| Lint warnings | 3 | **2** |
-| Collaboration tests | 0 | **29** |
+| Metric | Original | Round 1 | Round 2 |
+|--------|----------|---------|---------|
+| Tests | 690 | 719 | **728** |
+| Failures | 0 | 0 | **0** |
+| Lint errors | 12 | 0 | **0** |
+| Collab tests | 0 | 29 | **38** |
+| Multi-client tests | 0 | 0 | **9** |
+
+## Typecheck/Lint/Test Evidence
+
+```
+Typecheck: 13/13 packages pass (0 errors)
+Lint: 8/8 packages pass (0 errors, 2 pre-existing warnings)
+Tests: 728 passed, 0 failed, 10 skipped (nightly/benchmark)
+```
 
 ## Re-review Readiness
 
-All 5 findings addressed. Ready for Codex final-review.
+All findings from both initial review and final review are resolved:
+- P5-001: FIXED (wiring sync)
+- P5-002: FIXED (environment sync)
+- P5-003: FIXED + upgraded to fail-closed per final review
+- P5-004: FIXED + multi-client/persistence tests per final review
+- P5-005: FIXED (lint)
+
+Ready for final gate decision.
