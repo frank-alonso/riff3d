@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 
 ## Current Position
 
-Phase: 5 of 11 (Collaboration)
+Phase: 5 of 11 (Collaboration) -- COMPLETE
 Plan: 6 of 6 in current phase
-Status: Phase 5 evidence compiled -- awaiting Codex post-execution review and gate decision
-Last activity: 2026-02-21 -- Completed 05-06 (evidence packet)
+Status: Phase 5 PASSED Codex review gate. Ready for Phase 6.
+Last activity: 2026-02-21 -- Phase 5 gate PASS (2 follow-up recommendations, 0 blockers)
 
 Progress: [##########] 6/6 plans in Phase 5
 
@@ -216,9 +216,11 @@ Recent decisions affecting current work:
 - ~~[Phase 5 - CF-P4-05] Camera position/rotation not synced when swapping engines~~ DONE in 05-01
 - ~~[Phase 5 - CF-P4-06] Babylon-first load sometimes fails to render PlayCanvas on switch~~ DONE in 05-01
 - ~~[Phase 5 - CF-P4-07] Browser resize sometimes causes scene to stop rendering~~ DONE in 05-01
-- [Phase 6 - CF-P5-01] React 19 ref lint errors in use-awareness.ts and provider.tsx (11 errors, functional but violates strict mode)
+- ~~[Phase 6 - CF-P5-01] React 19 ref lint errors in use-awareness.ts and provider.tsx (11 errors, functional but violates strict mode)~~ RESOLVED in review fixes
 - [Phase 6 - CF-P5-02] Avatar yaw initialization resets to 0 instead of preserving camera orientation on mode entry
-- [Phase 6+ - CF-P5-03] editor-shell.tsx set-state-in-effect pre-existing lint error (from Phase 2)
+- ~~[Phase 6+ - CF-P5-03] editor-shell.tsx set-state-in-effect pre-existing lint error (from Phase 2)~~ RESOLVED in review fixes (useMemo pattern)
+- [Phase 6+ - CF-P5-04] Add collab-doc shape versioning/migration metadata (separate from ECSON schema version) — Codex recommendation
+- [Phase 6+ - CF-P5-05] Add server-side unit tests for collab persistence decode/re-encode — Codex recommendation
 
 ### Blockers/Concerns
 
@@ -227,6 +229,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 05-06-PLAN.md (evidence packet compiled)
-Resume file: .planning/phases/05-collaboration/05-06-SUMMARY.md
-Next: Codex post-execution review (./scripts/codex-review.sh post-review 5) then gate decision
+Stopped at: Phase 5 gate PASS
+Resume file: .planning/reviews/phase-5/PHASE_5_FINAL_REVIEW.md
+Next: Phase 6 planning (next milestone phase)
