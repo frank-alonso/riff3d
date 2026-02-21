@@ -24,6 +24,11 @@ const SAVE_DEBOUNCE_MS = 5000;
  * bypass the debounce and save immediately.
  *
  * Also saves on visibility change (tab blur) and listens for manual save events.
+ *
+ * **Collaboration integration (05-02):** When `isCollaborating` is true,
+ * auto-save is SKIPPED because persistence is handled server-side by
+ * the Hocuspocus Database extension. Only manual Ctrl+S is allowed as a
+ * safety-net save during collaboration.
  */
 export function useAutoSave(projectId: string): void {
   const lastSavedVersionRef = useRef(0);
@@ -85,6 +90,11 @@ export function useAutoSave(projectId: string): void {
       (docVersion) => {
         if (docVersion === 0) return; // Initial state, no changes
         if (docVersion === lastSavedVersionRef.current) return;
+
+        // Skip auto-save when collaborating -- Hocuspocus server handles persistence.
+        // Manual Ctrl+S still triggers via the riff3d:manual-save event below.
+        const { isCollaborating } = editorStore.getState();
+        if (isCollaborating) return;
 
         // Mark as unsaved immediately
         editorStore.getState().setSaveStatus("unsaved");

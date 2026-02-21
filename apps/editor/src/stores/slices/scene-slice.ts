@@ -19,6 +19,11 @@ import { applyOp } from "@riff3d/patchops";
  * Undo/redo: Every dispatchOp pushes the inverse onto undoStack and clears
  * redoStack. undo() pops from undoStack, applies the inverse, and pushes
  * the re-inverse onto redoStack. redo() does the reverse.
+ *
+ * Collaboration integration (05-02): After dispatchOp, the onAfterDispatch
+ * callback (if set by CollaborationProvider) syncs the change to the Y.Doc.
+ * When collaborating, undo/redo delegates to Y.UndoManager instead of
+ * the PatchOps inverse stack.
  */
 export interface SceneSlice {
   /** The current ECSON document (project file). Null before project loads. */
@@ -61,19 +66,20 @@ export interface SceneSlice {
    * Dispatch a PatchOp to mutate the ECSON document.
    * Applies the op, pushes the inverse onto undoStack, clears redoStack,
    * recompiles IR, increments docVersion.
+   * If collaboration is active, also syncs the change to Y.Doc.
    * Returns the inverse op.
    */
   dispatchOp: (op: PatchOp) => PatchOp;
 
   /**
-   * Undo the last edit. Pops from undoStack, applies the inverse,
-   * pushes the re-inverse onto redoStack.
+   * Undo the last edit. In solo mode, pops from undoStack and applies
+   * the inverse. In collaborative mode, delegates to Y.UndoManager.
    */
   undo: () => void;
 
   /**
-   * Redo a previously undone edit. Pops from redoStack, applies the op,
-   * pushes the inverse onto undoStack.
+   * Redo a previously undone edit. In solo mode, pops from redoStack.
+   * In collaborative mode, delegates to Y.UndoManager.
    */
   redo: () => void;
 
@@ -85,6 +91,14 @@ export interface SceneSlice {
 
 /** Maximum undo history depth to prevent unbounded memory growth. */
 const MAX_UNDO_DEPTH = 200;
+
+/** Structural ops that affect the full entity map (not single-entity sync). */
+const STRUCTURAL_OPS = new Set([
+  "CreateEntity",
+  "DeleteEntity",
+  "Reparent",
+  "BatchOp",
+]);
 
 export const createSceneSlice: StateCreator<
   SceneSlice,
@@ -119,7 +133,7 @@ export const createSceneSlice: StateCreator<
   },
 
   dispatchOp: (op: PatchOp): PatchOp => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cross-slice read for read-only guard
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cross-slice read for read-only guard and collab
     const fullState = get() as any;
     if (fullState.isReadOnly === true) {
       throw new Error("Cannot dispatch PatchOp: editor is in read-only mode");
@@ -162,10 +176,36 @@ export const createSceneSlice: StateCreator<
       lastOpType: op.type,
     }));
 
+    // Collaboration sync: propagate to Y.Doc if callback is registered.
+    // For structural ops (CreateEntity, DeleteEntity, Reparent, BatchOp),
+    // pass no entityId so the full entity map is synced.
+    // For property ops (SetProperty, etc.), extract the entityId from payload.
+    const onAfterDispatch = fullState.onAfterDispatch as
+      | ((entityId?: string) => void)
+      | null;
+    if (onAfterDispatch) {
+      if (STRUCTURAL_OPS.has(op.type)) {
+        onAfterDispatch();
+      } else {
+        const entityId = (op.payload as { entityId?: string }).entityId;
+        onAfterDispatch(entityId);
+      }
+    }
+
     return inverseOp;
   },
 
   undo: () => {
+    // Collaborative undo: delegate to Y.UndoManager
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cross-slice read for collab undo
+    const fullState = get() as any;
+    const collabUndoManager = fullState.collabUndoManager;
+    if (collabUndoManager) {
+      collabUndoManager.undo();
+      return;
+    }
+
+    // Solo undo: PatchOps inverse stack
     const { ecsonDoc, undoStack, redoStack } = get();
     if (!ecsonDoc || undoStack.length === 0) return;
 
@@ -192,6 +232,16 @@ export const createSceneSlice: StateCreator<
   },
 
   redo: () => {
+    // Collaborative redo: delegate to Y.UndoManager
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- cross-slice read for collab redo
+    const fullState = get() as any;
+    const collabRedoManager = fullState.collabUndoManager;
+    if (collabRedoManager) {
+      collabRedoManager.redo();
+      return;
+    }
+
+    // Solo redo: PatchOps stack
     const { ecsonDoc, undoStack, redoStack } = get();
     if (!ecsonDoc || redoStack.length === 0) return;
 

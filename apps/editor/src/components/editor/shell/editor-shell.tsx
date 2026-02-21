@@ -18,6 +18,7 @@ import { InspectorPanel } from "@/components/editor/inspector/inspector-panel";
 import { AssetBrowser } from "@/components/editor/assets/asset-browser";
 import { AssetStrip } from "@/components/editor/assets/asset-strip";
 import { ASSET_DRAG_MIME, getStarterAsset } from "@/lib/asset-manager";
+import { CollaborationProvider } from "@/collaboration/provider";
 import { generateOpId } from "@riff3d/ecson";
 import type { SceneDocument } from "@riff3d/ecson";
 import { CURRENT_PATCHOP_VERSION } from "@riff3d/patchops";
@@ -208,7 +209,15 @@ export function EditorShell({
     [],
   );
 
-  return (
+  /**
+   * Whether collaboration is available.
+   * When NEXT_PUBLIC_COLLAB_URL is set, the editor wraps content
+   * with CollaborationProvider for real-time co-editing.
+   * When not set, solo editing mode is preserved.
+   */
+  const collabEnabled = Boolean(process.env.NEXT_PUBLIC_COLLAB_URL);
+
+  const editorContent = (
     <div className="flex h-screen w-screen flex-col overflow-hidden">
       {/* Top Bar */}
       <TopBar
@@ -338,4 +347,15 @@ export function EditorShell({
       </div>
     </div>
   );
+
+  // Wrap with CollaborationProvider when collab server URL is configured
+  if (collabEnabled) {
+    return (
+      <CollaborationProvider projectId={projectId}>
+        {editorContent}
+      </CollaborationProvider>
+    );
+  }
+
+  return editorContent;
 }
