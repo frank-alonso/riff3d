@@ -15,6 +15,7 @@
     "yjs": "^13.6"
   },
   "devDependencies": {
+    "@types/node": "^22",
     "tsx": "^4.19.0",
     "typescript": "^5"
   }
